@@ -1,0 +1,250 @@
+// src/components/Tables/AddTableForm.tsx
+
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { AppState } from 'src/store/Store';
+import { Table as TableType, Company, Branch, TableSection } from 'src/types/TablesTable';
+import { useNotification } from '../../../context/NotificationContext';
+
+interface AddTableFormProps {
+  open: boolean;
+  handleClose: () => void;
+  onTableAdded: () => void; // Callback after adding/updating a table
+  tableToEdit?: TableType | null; // Optional prop for editing a table
+}
+
+const AddTableForm: React.FC<AddTableFormProps> = ({
+  open,
+  handleClose,
+  onTableAdded,
+  tableToEdit,
+}) => {
+  const [tableName, setTableName] = useState<string>('');
+  const [tableSectionId, setTableSectionId] = useState<string>('');
+  const [branchId, setBranchId] = useState<string>('');
+
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [allTableSections, setAllTableSections] = useState<TableSection[]>([]); // All sections
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { showNotification } = useNotification();
+
+  const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
+  const token =
+    useSelector((state: AppState) => state.auth.token) ||
+    localStorage.getItem('token');
+
+  // Fetch Companies and TableSections Data
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [companiesResponse, tableSectionsResponse] = await Promise.all([
+          axios.get(`${baseurl}/Company/GetCompanyData`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${baseurl}/PosTableSection/GetTableSections`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const companyData: Company[] = Array.isArray(companiesResponse.data)
+          ? companiesResponse.data
+          : [companiesResponse.data];
+        const sections: TableSection[] = tableSectionsResponse.data || [];
+
+        setCompanies(companyData);
+
+        // Assuming only one company
+        if (companyData.length > 0) {
+          setBranches(companyData[0].branches);
+          // Filter table sections based on companyId
+          const companyTableSections = sections.filter(
+            (ts) => ts.companyId === companyData[0].companyId
+          );
+          setAllTableSections(companyTableSections);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to fetch data.');
+        showNotification('Failed to fetch data.', 'error', 'Error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (open) {
+      fetchData();
+    }
+  }, [open, baseurl, token, showNotification]);
+
+  // Populate Form for Editing after branches are loaded
+  useEffect(() => {
+    if (tableToEdit && branches.length > 0) {
+      setTableName(tableToEdit.tableName);
+      setTableSectionId(tableToEdit.tableSectionId);
+      setBranchId(tableToEdit.branchId);
+    } else if (!tableToEdit) {
+      // Reset form fields if adding a new table
+      setTableName('');
+      setTableSectionId('');
+      setBranchId('');
+    }
+  }, [tableToEdit, branches]);
+
+  // Compute Filtered Table Sections based on branchId
+  const filteredTableSections = useMemo(() => {
+    if (branchId) {
+      return allTableSections.filter((ts) => ts.branchId === branchId);
+    }
+    return [];
+  }, [branchId, allTableSections]);
+
+  // Handle Form Submission
+  const handleSubmit = async () => {
+    if (!tableName || !branchId || !tableSectionId) {
+      showNotification('Please fill in all required fields.', 'warning', 'Incomplete Data');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      // Assuming only one company
+      const company = companies[0];
+      if (!company) {
+        showNotification('Company data is missing.', 'error', 'Error');
+        setLoading(false);
+        return;
+      }
+
+      const tableData: Partial<TableType> = {
+        tableName,
+        tableSectionId,
+        branchId,
+        companyId: company.companyId,
+      };
+
+      if (tableToEdit) {
+        // Update Table
+        await axios.post(
+          `${baseurl}/PosTable/UpdateTable`,
+          { ...tableData, tableId: tableToEdit.tableId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        showNotification('Table updated successfully.', 'success', 'Success');
+      } else {
+        // Create Table
+        await axios.post(`${baseurl}/PosTable/CreateTable`, tableData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        showNotification('Table created successfully.', 'success', 'Success');
+      }
+
+      onTableAdded(); // Refresh the table list
+      handleClose(); // Close the modal
+    } catch (err) {
+      console.error('Error submitting table data:', err);
+      setError('Failed to submit table data.');
+      showNotification('Failed to submit table data.', 'error', 'Error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle>{tableToEdit ? 'Edit Table' : 'Add Table'}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
+            {/* Table Name */}
+            <Grid item xs={12}>
+              <TextField
+                label="Table Name"
+                value={tableName}
+                onChange={(e) => setTableName(e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+
+            {/* Branch Selection */}
+            <Grid item xs={12}>
+              <FormControl fullWidth required disabled={branches.length === 0}>
+                <InputLabel id="branch-select-label">Branch</InputLabel>
+                <Select
+                  labelId="branch-select-label"
+                  value={branchId}
+                  label="Branch"
+                  onChange={(e) => setBranchId(e.target.value)}
+                >
+                  {branches.map((branch) => (
+                    <MenuItem key={branch.branchId} value={branch.branchId}>
+                      {branch.branchName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            {/* Table Section Selection */}
+            <Grid item xs={12}>
+              <FormControl fullWidth required disabled={!branchId}>
+                <InputLabel id="table-section-select-label">Table Section</InputLabel>
+                <Select
+                  labelId="table-section-select-label"
+                  value={tableSectionId}
+                  label="Table Section"
+                  onChange={(e) => setTableSectionId(e.target.value)}
+                >
+                  {filteredTableSections.map((section) => (
+                    <MenuItem key={section.tableSectionId} value={section.tableSectionId}>
+                      {section.sectionName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary" disabled={loading}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
+            {tableToEdit ? 'Update' : 'Create'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+};
+
+export default AddTableForm;
