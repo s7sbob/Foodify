@@ -1,9 +1,9 @@
 // vite.config.ts
-import { defineConfig } from "file:///D:/work/modernize-react-v4/packages/typescript/main/node_modules/vite/dist/node/index.js";
-import react from "file:///D:/work/modernize-react-v4/packages/typescript/main/node_modules/@vitejs/plugin-react/dist/index.mjs";
+import { defineConfig } from "file:///D:/work/Foodify/node_modules/vite/dist/node/index.js";
+import react from "file:///D:/work/Foodify/node_modules/@vitejs/plugin-react/dist/index.mjs";
 import { resolve } from "path";
 import fs from "fs/promises";
-import svgr from "file:///D:/work/modernize-react-v4/packages/typescript/main/node_modules/@svgr/rollup/dist/index.js";
+import svgr from "file:///D:/work/Foodify/node_modules/@svgr/rollup/dist/index.js";
 var __vite_injected_original_dirname = "D:\\work\\modernize-react-v4\\packages\\typescript\\main";
 var vite_config_default = defineConfig({
   resolve: {
