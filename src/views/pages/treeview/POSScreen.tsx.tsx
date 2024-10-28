@@ -23,6 +23,8 @@ import { TreeNode, POSScreenInfo } from './types';
 import tinycolor from 'tinycolor2';
 import { useNotification } from '../../../context/NotificationContext';
 import api from '../../../axiosConfig';
+import ImageWithFallback from './ImageWithFallback';
+import { normalizeImagePath } from './pathUtils';
 
 const POSScreen: React.FC = () => {
   const [data, setData] = useState<TreeNode<POSScreenInfo>[]>([]);
@@ -159,7 +161,7 @@ const POSScreen: React.FC = () => {
         parentScreenName: selectedNodeInfo.parentScreenName || '',
         parentScreenId: selectedNodeInfo.parentScreenId || '',
         color: selectedNodeInfo.color || '#000000',
-        img: selectedNodeInfo.img || '', // Image path for display
+        img: selectedNodeInfo.img || '', // Image path for display (not to be sent)
         imageFile: null, // Reset imageFile to null; only append if a new image is uploaded
       });
       setImagePreview(selectedNodeInfo.img || '');
@@ -244,8 +246,6 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  // Rest of your code remains the same...
-
   // Handle Image Change
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
@@ -288,7 +288,7 @@ const POSScreen: React.FC = () => {
       parentScreenId: null,
       parentScreenName: '',
       color: '#000000',
-      img: '', // Image path for display
+      img: '', // Image path for display (not to be sent)
       imageFile: null, // Image file for upload
     });
     setImagePreview('');
@@ -304,7 +304,7 @@ const POSScreen: React.FC = () => {
         parentScreenId: selectedNodeInfo.screenId, // Set parentScreenId to selected node's id
         parentScreenName: selectedNodeInfo.screenName,
         color: '#000000',
-        img: '', // Image path for display
+        img: '', // Image path for display (not to be sent)
         imageFile: null, // Image file for upload
       });
       setImagePreview('');
@@ -415,7 +415,7 @@ const POSScreen: React.FC = () => {
                 />
                 {imageError && <FormHelperText error>{imageError}</FormHelperText>}
                 {imagePreview && (
-                  <img
+                  <ImageWithFallback
                     src={imagePreview}
                     alt="Preview"
                     style={{ maxWidth: '25%', marginTop: '1em' }}
@@ -490,7 +490,7 @@ const POSScreen: React.FC = () => {
                 />
                 {imageError && <FormHelperText error>{imageError}</FormHelperText>}
                 {imagePreview && (
-                  <img
+                  <ImageWithFallback
                     src={imagePreview}
                     alt="Preview"
                     style={{ maxWidth: '25%', marginTop: '1em' }}

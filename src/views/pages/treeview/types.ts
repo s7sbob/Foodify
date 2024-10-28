@@ -12,6 +12,8 @@ export interface POSScreenInfo {
 }
 
 export interface ProductGroupInfo {
+  screenName: any;
+  screenId: any;
   groupId: string;
   groupName: string;
   groupParentID?: string;

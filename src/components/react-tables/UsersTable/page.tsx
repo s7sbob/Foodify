@@ -36,6 +36,7 @@ import { useCallback } from 'react';
 
 
 
+
 // Define the data type interface
 interface UserTableData {
   userCode: string;
@@ -150,8 +151,8 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
       {/* Add User button */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Button variant="contained" color="primary" onClick={handleOpen}>
-          Add User
-        </Button>
+          Add USer
+       </Button>
       </Box>
 
       {/* Column Visibility Toggles */}

@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Button, Typography } from '@mui/material';
+import ImageWithFallback from './ImageWithFallback';
+import { normalizeImagePath } from './pathUtils';
 
 interface InfoPreviewProps {
   selectedNodeInfo: any;
@@ -19,6 +21,18 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
       <Typography variant="body1">Select a node to see its details.</Typography>
     );
   }
+
+  // Normalize image path
+  const imagePath = selectedNodeInfo.img ? normalizeImagePath(selectedNodeInfo.img) : null;
+  const imageUrl = imagePath ? `https://erp.ts-egy.com${imagePath}` : null;
+
+  // Debugging: Log the image URL
+  console.log(
+    `Image URL for node ${
+      selectedNodeInfo.screenName || selectedNodeInfo.groupName
+    }:`,
+    imageUrl
+  );
 
   return (
     <div>
@@ -60,14 +74,14 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
         ></span>
         {` ${selectedNodeInfo.color}`}
       </Typography>
-      {selectedNodeInfo.img && (
+      {imageUrl && (
         <div>
           <Typography>
             <strong>Image:</strong>
           </Typography>
-          <img
-            src={selectedNodeInfo.img}
-            alt="Group"
+          <ImageWithFallback
+            src={imageUrl}
+            alt={selectedNodeInfo.screenName || selectedNodeInfo.groupName || "Group"}
             style={{ maxWidth: '25%', marginTop: '1em' }}
           />
         </div>

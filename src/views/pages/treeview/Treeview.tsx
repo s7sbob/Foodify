@@ -19,10 +19,12 @@ import ChildCard from 'src/components/shared/ChildCard';
 import { AppState, useSelector } from 'src/store/Store';
 import TreeViewComponent from './TreeViewComponent';
 import InfoPreviewComponent from './InfoPreviewComponent';
-import { TreeNode, ProductGroupInfo } from './types';
+import { TreeNode, ProductGroupInfo, POSScreenInfo } from './types';
 import tinycolor from 'tinycolor2';
 import { useNotification } from '../../../context/NotificationContext';
 import api from '../../../axiosConfig';
+import ImageWithFallback from './ImageWithFallback';
+import { normalizeImagePath } from './pathUtils';
 
 const Treeview: React.FC = () => {
   const [data, setData] = useState<TreeNode<ProductGroupInfo>[]>([]);
@@ -168,7 +170,7 @@ const Treeview: React.FC = () => {
         parentGroupName: selectedNodeInfo.parentGroupName || '',
         groupParentID: selectedNodeInfo.groupParentID || '',
         color: selectedNodeInfo.color || '#000000',
-        img: selectedNodeInfo.img || '', // Image path for display
+        img: selectedNodeInfo.img || '', // Image path for display (not to be sent)
         imageFile: null, // Reset imageFile to null; only append if a new image is uploaded
       });
       setImagePreview(selectedNodeInfo.img || '');
@@ -189,7 +191,7 @@ const Treeview: React.FC = () => {
         formDataToSend.append('groupParentID', group.groupParentID);
       }
       if (group.imageFile) {
-        formDataToSend.append('imageFile', group.imageFile);
+        formDataToSend.append('imageFile', group.imageFile); // Use 'imageFile' for consistency
       }
 
       await api.post('/ProductGroups/AddProductGroup', formDataToSend, {
@@ -236,7 +238,7 @@ const Treeview: React.FC = () => {
         formDataToSend.append('groupParentID', formData.groupParentID);
       }
       if (formData.imageFile) {
-        formDataToSend.append('imageFile', formData.imageFile);
+        formDataToSend.append('imageFile', formData.imageFile); // Use 'imageFile' for consistency
       }
 
       await api.post('/ProductGroups/UpdateProductGroup', formDataToSend, {
@@ -296,14 +298,14 @@ const Treeview: React.FC = () => {
     }
   };
 
-  // Handle Add Root Group
-  const handleAddRootGroup = () => {
+  // Handle Add Root Screen
+  const handleAddRootScreen = () => {
     setFormData({
-      groupName: '',
-      groupParentID: null,
-      parentGroupName: '',
+      screenName: '',
+      parentScreenId: null,
+      parentScreenName: '',
       color: '#000000',
-      img: '', // Image path for display
+      img: '', // Image path for display (not to be sent)
       imageFile: null, // Image file for upload
     });
     setImagePreview('');
@@ -311,22 +313,22 @@ const Treeview: React.FC = () => {
     setIsAddDialogOpen(true);
   };
 
-  // Handle Add Sub-Group
-  const handleAddSubGroup = () => {
+  // Handle Add Sub-Screen
+  const handleAddSubScreen = () => {
     if (selectedNodeInfo) {
       setFormData({
-        groupName: '',
-        groupParentID: selectedNodeInfo.groupId, // Set groupParentID to selected node's id
-        parentGroupName: selectedNodeInfo.groupName,
+        screenName: '',
+        parentScreenId: selectedNodeInfo.screenId, // Set parentScreenId to selected node's id
+        parentScreenName: selectedNodeInfo.screenName,
         color: '#000000',
-        img: '', // Image path for display
+        img: '', // Image path for display (not to be sent)
         imageFile: null, // Image file for upload
       });
       setImagePreview('');
       setImageError('');
       setIsAddDialogOpen(true);
     } else {
-      showNotification('Please select a group to add a sub-group.', 'warning', 'Warning');
+      showNotification('Please select a screen to add a sub-screen.', 'warning', 'Warning');
     }
   };
 
@@ -349,19 +351,19 @@ const Treeview: React.FC = () => {
   };
 
   return (
-    <PageContainer title="Product Group" description="This is Product Group page">
-      <ParentCard title="Product Group">
+    <PageContainer title="POS Screen" description="This is POS Screen page">
+      <ParentCard title="POS Screen">
         <ChildCard>
-          {/* Add New Group Button */}
+          {/* Add New Screen Button */}
           <div style={{ marginBottom: '1em' }}>
-            <Button variant="contained" color="primary" onClick={handleAddRootGroup}>
-              Add New Group
+            <Button variant="contained" color="primary" onClick={handleAddRootScreen}>
+              Add New Screen
             </Button>
           </div>
           <div style={{ display: 'flex', height: '400px' }}>
             {/* TreeView Side */}
             <div style={{ width: '40%', overflowY: 'auto' }}>
-              <TreeViewComponent<ProductGroupInfo> data={data} onNodeSelect={handleNodeSelect} />
+              <TreeViewComponent<POSScreenInfo> data={data} onNodeSelect={handleNodeSelect} />
             </div>
             {/* Info Preview Side */}
             <div
@@ -375,7 +377,7 @@ const Treeview: React.FC = () => {
               <InfoPreviewComponent
                 selectedNodeInfo={selectedNodeInfo}
                 onEdit={handleEdit}
-                onAdd={handleAddSubGroup}
+                onAdd={handleAddSubScreen}
               />
             </div>
           </div>
@@ -387,22 +389,22 @@ const Treeview: React.FC = () => {
             fullWidth
             maxWidth="sm"
           >
-            <DialogTitle>Edit Product Group</DialogTitle>
+            <DialogTitle>Edit POS Screen</DialogTitle>
             <DialogContent>
-              {formData.parentGroupName && (
+              {formData.parentScreenName && (
                 <TextField
-                  label="Parent Group"
-                  value={formData.parentGroupName}
+                  label="Parent Screen"
+                  value={formData.parentScreenName}
                   disabled
                   fullWidth
                   margin="normal"
                 />
               )}
               <TextField
-                label="Group Name"
-                value={formData.groupName || ''}
+                label="Screen Name"
+                value={formData.screenName || ''}
                 onChange={(e) =>
-                  setFormData({ ...formData, groupName: e.target.value })
+                  setFormData({ ...formData, screenName: e.target.value })
                 }
                 fullWidth
                 margin="normal"
@@ -430,7 +432,7 @@ const Treeview: React.FC = () => {
                 />
                 {imageError && <FormHelperText error>{imageError}</FormHelperText>}
                 {imagePreview && (
-                  <img
+                  <ImageWithFallback
                     src={imagePreview}
                     alt="Preview"
                     style={{ maxWidth: '25%', marginTop: '1em' }}
@@ -461,23 +463,23 @@ const Treeview: React.FC = () => {
             maxWidth="sm"
           >
             <DialogTitle>
-              {formData.groupParentID ? 'Add New Sub-Group' : 'Add New Group'}
+              {formData.parentScreenId ? 'Add New Sub-Screen' : 'Add New Screen'}
             </DialogTitle>
             <DialogContent>
-              {formData.parentGroupName && (
+              {formData.parentScreenName && (
                 <TextField
-                  label="Parent Group"
-                  value={formData.parentGroupName}
+                  label="Parent Screen"
+                  value={formData.parentScreenName}
                   disabled
                   fullWidth
                   margin="normal"
                 />
               )}
               <TextField
-                label="Group Name"
-                value={formData.groupName || ''}
+                label="Screen Name"
+                value={formData.screenName || ''}
                 onChange={(e) =>
-                  setFormData({ ...formData, groupName: e.target.value })
+                  setFormData({ ...formData, screenName: e.target.value })
                 }
                 fullWidth
                 margin="normal"
@@ -505,7 +507,7 @@ const Treeview: React.FC = () => {
                 />
                 {imageError && <FormHelperText error>{imageError}</FormHelperText>}
                 {imagePreview && (
-                  <img
+                  <ImageWithFallback
                     src={imagePreview}
                     alt="Preview"
                     style={{ maxWidth: '25%', marginTop: '1em' }}

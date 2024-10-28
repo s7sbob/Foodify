@@ -5,13 +5,15 @@ import { TreeView } from '@mui/lab';
 import { Typography } from '@mui/material';
 import { StyledTreeItem, MinusSquare, PlusSquare, CloseSquare } from './StyledComponents';
 import { TreeNode } from './types';
+import ImageWithFallback from './ImageWithFallback';
+import { normalizeImagePath } from './pathUtils';
 
 type TreeViewComponentProps<T> = {
   data: TreeNode<T>[];
   onNodeSelect: (nodeId: string) => void;
 };
 
-function TreeViewComponent<T extends { color?: string }>({
+function TreeViewComponent<T extends { color?: string; img?: string }>({
   data,
   onNodeSelect,
 }: TreeViewComponentProps<T>) {
@@ -21,15 +23,30 @@ function TreeViewComponent<T extends { color?: string }>({
         key={node.nodeId}
         nodeId={node.nodeId}
         label={
-          <Typography
-            style={{
-              color: node.info.color || 'inherit',
-              fontSize: '1.2em',
-              fontWeight: 'bold',
-            }}
-          >
-            {node.label}
-          </Typography>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {/* Image in Tree Node (Optional) */}
+            {node.info.img && (
+              <ImageWithFallback
+                src={`https://erp.ts-egy.com${normalizeImagePath(node.info.img)}`}
+                alt={node.label}
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  marginRight: '8px',
+                  borderRadius: '50%',
+                }}
+              />
+            )}
+            <Typography
+              style={{
+                color: node.info.color || 'inherit',
+                fontSize: '1.2em',
+                fontWeight: 'bold',
+              }}
+            >
+              {node.label}
+            </Typography>
+          </div>
         }
       >
         {node.children && node.children.length > 0 && renderTree(node.children)}

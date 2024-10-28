@@ -50,7 +50,7 @@ export const CustomizerSlice = createSlice({
     setDir: (state, action: PayloadAction<string>) => {
       state.activeDir = action.payload;
     },
-    setLanguage: (state, action: PayloadAction<string>) => {
+    setLanguage: (state: StateType, action) => {
       state.isLanguage = action.payload;
     },
     setCardShadow: (state, action: PayloadAction<boolean>) => {
