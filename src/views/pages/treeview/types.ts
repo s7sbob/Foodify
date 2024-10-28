@@ -12,6 +12,7 @@ export interface POSScreenInfo {
 }
 
 export interface ProductGroupInfo {
+  order: number;
   screenName: any;
   screenId: any;
   groupId: string;
@@ -30,4 +31,13 @@ export interface TreeNode<T> {
   label: string;
   info: T;
   children: TreeNode<T>[];
+}
+
+// Update the ProductGroupFormData interface to include 'order'
+interface ProductGroupFormData {
+  groupName: string;
+  groupParentID?: string | null;
+  color: string;
+  order: number; // Added order
+  file?: File | null; // Changed from imageFile to file
 }

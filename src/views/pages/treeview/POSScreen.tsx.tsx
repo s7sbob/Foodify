@@ -171,6 +171,14 @@ const POSScreen: React.FC = () => {
 
   // Handle Add Submit
   const handleAddSubmit = async (screen: Partial<any>) => {
+    // Validation: Ensure screenName is provided
+    if (!screen.screenName || screen.screenName.trim() === '') {
+      showNotification('Screen name is required.', 'warning', 'Warning');
+      return;
+    }
+
+    console.log("Submitting screen data:", screen);
+
     try {
       setIsAddLoading(true);
 
@@ -183,6 +191,11 @@ const POSScreen: React.FC = () => {
       }
       if (screen.imageFile) {
         formDataToSend.append('imageFile', screen.imageFile);
+      }
+
+      // Debug: Log FormData entries
+      for (let pair of formDataToSend.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
 
       await api.post('/PosScreen/CreatePosScreen', formDataToSend, {
@@ -211,7 +224,7 @@ const POSScreen: React.FC = () => {
   const handleEditSubmit = async () => {
     try {
       setIsEditLoading(true);
-      const hexColor = tinycolor(formData.color).toHexString(); // Ensure color is in HEX format
+      const hexColor = tinycolor(formData.color).toHexString();
 
       const formDataToSend = new FormData();
       formDataToSend.append('screenId', formData.screenId);
@@ -223,6 +236,11 @@ const POSScreen: React.FC = () => {
       }
       if (formData.imageFile) {
         formDataToSend.append('imageFile', formData.imageFile);
+      }
+
+      // Debug: Log FormData entries
+      for (let pair of formDataToSend.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
 
       await api.post('/PosScreen/UpdatePosScreen', formDataToSend, {
@@ -278,6 +296,9 @@ const POSScreen: React.FC = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Debug: Log the selected file
+      console.log("Selected image file:", file);
     }
   };
 
@@ -386,9 +407,10 @@ const POSScreen: React.FC = () => {
               <TextField
                 label="Screen Name"
                 value={formData.screenName || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, screenName: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, screenName: e.target.value });
+                  console.log("Updated formData.screenName:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
@@ -397,7 +419,10 @@ const POSScreen: React.FC = () => {
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, color: e.target.value });
+                  console.log("Updated formData.color:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
@@ -461,9 +486,10 @@ const POSScreen: React.FC = () => {
               <TextField
                 label="Screen Name"
                 value={formData.screenName || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, screenName: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, screenName: e.target.value });
+                  console.log("Updated formData.screenName:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
@@ -472,7 +498,10 @@ const POSScreen: React.FC = () => {
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, color: e.target.value });
+                  console.log("Updated formData.color:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />

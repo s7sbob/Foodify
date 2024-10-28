@@ -19,19 +19,32 @@ import ChildCard from 'src/components/shared/ChildCard';
 import { AppState, useSelector } from 'src/store/Store';
 import TreeViewComponent from './TreeViewComponent';
 import InfoPreviewComponent from './InfoPreviewComponent';
-import { TreeNode, ProductGroupInfo, POSScreenInfo } from './types';
+import { TreeNode, ProductGroupInfo } from './types';
 import tinycolor from 'tinycolor2';
 import { useNotification } from '../../../context/NotificationContext';
 import api from '../../../axiosConfig';
 import ImageWithFallback from './ImageWithFallback';
 import { normalizeImagePath } from './pathUtils';
 
+// Updated interface
+interface ProductGroupFormData {
+  groupName: string;
+  groupParentID?: string | null;
+  color: string;
+  file?: File | null; // Changed from imageFile to file
+}
+
 const Treeview: React.FC = () => {
   const [data, setData] = useState<TreeNode<ProductGroupInfo>[]>([]);
   const [selectedNodeInfo, setSelectedNodeInfo] = useState<ProductGroupInfo | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<ProductGroupFormData>({
+    groupName: '',
+    groupParentID: null,
+    color: '#000000',
+    file: null, // Changed from imageFile to file
+  });
   const [imageError, setImageError] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [companyData, setCompanyData] = useState<any>(null);
@@ -165,33 +178,47 @@ const Treeview: React.FC = () => {
   const handleEdit = () => {
     if (selectedNodeInfo) {
       setFormData({
-        groupId: selectedNodeInfo.groupId,
         groupName: selectedNodeInfo.groupName,
-        parentGroupName: selectedNodeInfo.parentGroupName || '',
-        groupParentID: selectedNodeInfo.groupParentID || '',
+        groupParentID: selectedNodeInfo.groupParentID || null,
         color: selectedNodeInfo.color || '#000000',
-        img: selectedNodeInfo.img || '', // Image path for display (not to be sent)
-        imageFile: null, // Reset imageFile to null; only append if a new image is uploaded
+        file: null, // Changed from imageFile to file
       });
       setImagePreview(selectedNodeInfo.img || '');
+      setImageError('');
       setIsEditDialogOpen(true);
     }
   };
 
   // Handle Add Submit
-  const handleAddSubmit = async (group: Partial<any>) => {
+  const handleAddSubmit = async (group: Partial<ProductGroupFormData>) => {
+    // Validation: Ensure groupName is provided
+    if (!group.groupName || group.groupName.trim() === '') {
+      showNotification('Group name is required.', 'warning', 'Warning');
+      return;
+    }
+
+    // Ensure color is defined, else set to default
+    const color = group.color ?? '#000000';
+
+    console.log("Submitting group data:", group); // Debug log
+
     try {
       setIsAddLoading(true);
 
       const formDataToSend = new FormData();
       formDataToSend.append('groupName', group.groupName);
-      formDataToSend.append('color', group.color);
+      formDataToSend.append('color', color); // Use the ensured color
 
       if (group.groupParentID) {
         formDataToSend.append('groupParentID', group.groupParentID);
       }
-      if (group.imageFile) {
-        formDataToSend.append('imageFile', group.imageFile); // Use 'imageFile' for consistency
+      if (group.file) { // Changed from imageFile to file
+        formDataToSend.append('file', group.file);
+      }
+
+      // Debug: Log FormData entries
+      for (let pair of formDataToSend.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
 
       await api.post('/ProductGroups/AddProductGroup', formDataToSend, {
@@ -230,15 +257,20 @@ const Treeview: React.FC = () => {
       const hexColor = tinycolor(formData.color).toHexString();
 
       const formDataToSend = new FormData();
-      formDataToSend.append('groupId', formData.groupId);
+      formDataToSend.append('groupId', selectedNodeInfo?.groupId || '');
       formDataToSend.append('groupName', formData.groupName);
       formDataToSend.append('color', hexColor);
 
       if (formData.groupParentID) {
         formDataToSend.append('groupParentID', formData.groupParentID);
       }
-      if (formData.imageFile) {
-        formDataToSend.append('imageFile', formData.imageFile); // Use 'imageFile' for consistency
+      if (formData.file) { // Changed from imageFile to file
+        formDataToSend.append('file', formData.file);
+      }
+
+      // Debug: Log FormData entries
+      for (let pair of formDataToSend.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
 
       await api.post('/ProductGroups/UpdateProductGroup', formDataToSend, {
@@ -267,6 +299,8 @@ const Treeview: React.FC = () => {
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
     if (file) {
+      console.log("File selected:", file); // Debug log
+
       // Validate file type (optional)
       if (!file.type.startsWith('image/')) {
         setImageError('Only image files are allowed.');
@@ -284,9 +318,9 @@ const Treeview: React.FC = () => {
       setImageError('');
 
       // Update formData with the new image file
-      setFormData((prev: any) => ({
+      setFormData((prev: ProductGroupFormData) => ({
         ...prev,
-        imageFile: file, // Store the File object
+        file: file, // Changed from imageFile to file
       }));
 
       // Generate a preview URL
@@ -295,47 +329,51 @@ const Treeview: React.FC = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Debug: Log the selected file
+      console.log("Selected image file:", file);
     }
   };
 
-  // Handle Add Root Screen
-  const handleAddRootScreen = () => {
+  // Handle Add Root Group
+  const handleAddRootGroup = () => {
     setFormData({
-      screenName: '',
-      parentScreenId: null,
-      parentScreenName: '',
+      groupName: '',
+      groupParentID: null,
       color: '#000000',
-      img: '', // Image path for display (not to be sent)
-      imageFile: null, // Image file for upload
+      file: null, // Changed from imageFile to file
     });
     setImagePreview('');
     setImageError('');
     setIsAddDialogOpen(true);
   };
 
-  // Handle Add Sub-Screen
-  const handleAddSubScreen = () => {
+  // Handle Add Sub-Group
+  const handleAddSubGroup = () => {
     if (selectedNodeInfo) {
       setFormData({
-        screenName: '',
-        parentScreenId: selectedNodeInfo.screenId, // Set parentScreenId to selected node's id
-        parentScreenName: selectedNodeInfo.screenName,
+        groupName: '',
+        groupParentID: selectedNodeInfo.groupId, // Set groupParentID to selected node's id
         color: '#000000',
-        img: '', // Image path for display (not to be sent)
-        imageFile: null, // Image file for upload
+        file: null, // Changed from imageFile to file
       });
       setImagePreview('');
       setImageError('');
       setIsAddDialogOpen(true);
     } else {
-      showNotification('Please select a screen to add a sub-screen.', 'warning', 'Warning');
+      showNotification('Please select a group to add a sub-group.', 'warning', 'Warning');
     }
   };
 
   // Handle Add Dialog Close
   const handleAddDialogClose = () => {
     setIsAddDialogOpen(false);
-    setFormData({});
+    setFormData({
+      groupName: '',
+      groupParentID: null,
+      color: '#000000',
+      file: null, // Changed from imageFile to file
+    });
     setImagePreview('');
     setImageError('');
   };
@@ -351,19 +389,19 @@ const Treeview: React.FC = () => {
   };
 
   return (
-    <PageContainer title="POS Screen" description="This is POS Screen page">
-      <ParentCard title="POS Screen">
+    <PageContainer title="Product Groups" description="Manage Product Groups">
+      <ParentCard title="Product Groups">
         <ChildCard>
-          {/* Add New Screen Button */}
+          {/* Add New Group Button */}
           <div style={{ marginBottom: '1em' }}>
-            <Button variant="contained" color="primary" onClick={handleAddRootScreen}>
-              Add New Screen
+            <Button variant="contained" color="primary" onClick={handleAddRootGroup}>
+              Add New Group
             </Button>
           </div>
           <div style={{ display: 'flex', height: '400px' }}>
             {/* TreeView Side */}
             <div style={{ width: '40%', overflowY: 'auto' }}>
-              <TreeViewComponent<POSScreenInfo> data={data} onNodeSelect={handleNodeSelect} />
+              <TreeViewComponent<ProductGroupInfo> data={data} onNodeSelect={handleNodeSelect} />
             </div>
             {/* Info Preview Side */}
             <div
@@ -377,7 +415,7 @@ const Treeview: React.FC = () => {
               <InfoPreviewComponent
                 selectedNodeInfo={selectedNodeInfo}
                 onEdit={handleEdit}
-                onAdd={handleAddSubScreen}
+                onAdd={handleAddSubGroup}
               />
             </div>
           </div>
@@ -389,23 +427,24 @@ const Treeview: React.FC = () => {
             fullWidth
             maxWidth="sm"
           >
-            <DialogTitle>Edit POS Screen</DialogTitle>
+            <DialogTitle>Edit Product Group</DialogTitle>
             <DialogContent>
-              {formData.parentScreenName && (
+              {selectedNodeInfo?.groupParentID && (
                 <TextField
-                  label="Parent Screen"
-                  value={formData.parentScreenName}
+                  label="Parent Group"
+                  value={selectedNodeInfo.parentGroupName || ''}
                   disabled
                   fullWidth
                   margin="normal"
                 />
               )}
               <TextField
-                label="Screen Name"
-                value={formData.screenName || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, screenName: e.target.value })
-                }
+                label="Group Name"
+                value={formData.groupName || ''}
+                onChange={(e) => {
+                  setFormData({ ...formData, groupName: e.target.value });
+                  console.log("Updated formData.groupName:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
@@ -414,7 +453,10 @@ const Treeview: React.FC = () => {
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, color: e.target.value });
+                  console.log("Updated formData.color:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
@@ -463,24 +505,25 @@ const Treeview: React.FC = () => {
             maxWidth="sm"
           >
             <DialogTitle>
-              {formData.parentScreenId ? 'Add New Sub-Screen' : 'Add New Screen'}
+              {formData.groupParentID ? 'Add New Sub-Group' : 'Add New Group'}
             </DialogTitle>
             <DialogContent>
-              {formData.parentScreenName && (
+              {formData.groupParentID && (
                 <TextField
-                  label="Parent Screen"
-                  value={formData.parentScreenName}
+                  label="Parent Group"
+                  value={selectedNodeInfo?.groupName || ''}
                   disabled
                   fullWidth
                   margin="normal"
                 />
               )}
               <TextField
-                label="Screen Name"
-                value={formData.screenName || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, screenName: e.target.value })
-                }
+                label="Group Name"
+                value={formData.groupName || ''}
+                onChange={(e) => {
+                  setFormData({ ...formData, groupName: e.target.value });
+                  console.log("Updated formData.groupName:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
@@ -489,7 +532,10 @@ const Treeview: React.FC = () => {
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, color: e.target.value });
+                  console.log("Updated formData.color:", e.target.value);
+                }}
                 fullWidth
                 margin="normal"
               />
