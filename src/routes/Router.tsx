@@ -1,17 +1,16 @@
 // routes/Router.tsx
-import  { lazy } from 'react';
+
+import { lazy } from 'react';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import PrivateRoute from './PrivateRoute';
 import HomePage from '../views/pages/frontend-pages/Homepage';
 import { Navigate } from 'react-router';
-import FullLayout from 'src/layouts/full/FullLayout.tsx';
-import BlankLayout from 'src/layouts/blank/BlankLayout.tsx';
+import FullLayout from 'src/layouts/full/FullLayout';
+import BlankLayout from 'src/layouts/blank/BlankLayout';
 
 // Lazy load pages
-
 const Treeview = Loadable(lazy(() => import('../views/pages/treeview/Treeview')));
 const POSScreen = Loadable(lazy(() => import('../views/pages/treeview/POSScreen.tsx')));
-
 const Company = Loadable(lazy(() => import('../views/pages/Company/CompanyManagementPage')));
 const ReactColumnVisibilityTable = Loadable(
   lazy(() => import('../views/react-tables/columnvisibility/page')),
@@ -32,12 +31,9 @@ const TablesSectionTable = Loadable(
   lazy(() => import('../components/react-tables/TablesSectionTable/TableSectionListTable')),
 );
 
-// authentication
+// Authentication
 const Login = Loadable(lazy(() => import('../views/authentication/auth1/Login')));
-
 const Error = Loadable(lazy(() => import('../views/authentication/Error')));
-
-
 
 // Define the router with PrivateRoute wrapping protected routes
 const Router = [
@@ -45,71 +41,114 @@ const Router = [
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <Navigate to="/HomePage" /> },
+      // Since we're using MemoryRouter and want the URL to remain constant,
+      // we'll use relative paths and ensure that all navigation happens within the app.
+      { index: true, element: <Navigate to="/HomePage" replace /> },
       {
-        path: '/HomePage',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <HomePage /> }],
-      },
-      
-      {
-        path: '/pages/treeview',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <Treeview /> }],
-      },
-      {
-      path: '/pages/POSScreen',
-      element: <PrivateRoute />,
-      children: [{ path: '', element: <POSScreen /> }],
-      },
-      
-      {
-        path: '/pages/Company',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <Company /> }],
-      },
-      
-      {
-        path: '/react-tables/column-visiblity',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <ReactColumnVisibilityTable /> }],
+        path: 'HomePage',
+        element: (
+          <PrivateRoute>
+            <HomePage />
+          </PrivateRoute>
+        ),
       },
       {
-        path: '/react-tables/PilotListTable',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <PilotListTable /> }],
+        path: 'pages',
+        children: [
+          {
+            path: 'treeview',
+            element: (
+              <PrivateRoute>
+                <Treeview />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'POSScreen',
+            element: (
+              <PrivateRoute>
+                <POSScreen />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'Company',
+            element: (
+              <PrivateRoute>
+                <Company />
+              </PrivateRoute>
+            ),
+          },
+        ],
       },
       {
-      path: '/react-tables/WaitersPage',
-      element: <PrivateRoute />,
-      children: [{ path: '', element: <WaitersTable /> }],
+        path: 'react-tables',
+        children: [
+          {
+            path: 'column-visiblity',
+            element: (
+              <PrivateRoute>
+                <ReactColumnVisibilityTable />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'PilotListTable',
+            element: (
+              <PrivateRoute>
+                <PilotListTable />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'WaitersPage',
+            element: (
+              <PrivateRoute>
+                <WaitersTable />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'ZoneListTable',
+            element: (
+              <PrivateRoute>
+                <ZoneListTable />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'TableListTable',
+            element: (
+              <PrivateRoute>
+                <TablesListTable />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'TableSectionListTable',
+            element: (
+              <PrivateRoute>
+                <TablesSectionTable />
+              </PrivateRoute>
+            ),
+          },
+        ],
       },
-      {
-        path: '/react-tables/ZoneListTable',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <ZoneListTable /> }],
-      },
-      {
-        path: '/react-tables/TableListTable',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <TablesListTable /> }],
-      },
-      {
-        path: '/react-tables/TableSectionListTable',
-        element: <PrivateRoute />,
-        children: [{ path: '', element: <TablesSectionTable /> }],
-      },
-     //
-      { path: '*', element: <Navigate to="/auth/404" /> },
+      { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
   {
     path: '/',
     element: <BlankLayout />,
     children: [
-      { path: '/auth/404', element: <Error /> },
-      { path: '/auth/login', element: <Login /> },
-            { path: '*', element: <Navigate to="/auth/404" /> },
+      {
+        path: 'auth',
+        children: [
+          { path: '404', element: <Error /> },
+          { path: 'login', element: <Login /> },
+          { path: '*', element: <Navigate to="/auth/404" replace /> },
+        ],
+      },
     ],
   },
 ];

@@ -117,7 +117,7 @@ const TableSectionListTable: React.FC = () => {
       header: 'Service',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
-          ${info.getValue().toFixed(2)}
+          {info.getValue().toFixed(2)}%
         </Typography>
       ),
       enableColumnFilter: true,
@@ -125,7 +125,7 @@ const TableSectionListTable: React.FC = () => {
     // Company Name Column - Auto-assigned
     columnHelper.accessor('companyId', {
       header: 'Company Name',
-      cell: info => {
+      cell: () => {
         const company = companyData[0]; // Assuming only one company
         return (
           <Typography variant="h6" fontWeight="400">

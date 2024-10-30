@@ -103,6 +103,17 @@ const ZoneListTable: React.FC = () => {
   // Define Columns
   const columnHelper = createColumnHelper<ZoneData>();
 
+  // Create a mapping from branchId to currency
+  const branchCurrencyMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    companyData.forEach(company => {
+      company.branches.forEach(branch => {
+        map[branch.branchId] = branch.currency;
+      });
+    });
+    return map;
+  }, [companyData]);
+
   const columns = useMemo(() => [
     columnHelper.accessor('name', {
       header: 'Zone Name',
@@ -115,20 +126,26 @@ const ZoneListTable: React.FC = () => {
     }),
     columnHelper.accessor('deliveryFee', {
       header: 'Delivery Fee',
-      cell: info => (
-        <Typography variant="h6" fontWeight="400">
-          ${info.getValue().toFixed(2)}
-        </Typography>
-      ),
+      cell: info => {
+        const currency = branchCurrencyMap[info.row.original.branchId] || 'LE';
+        return (
+          <Typography variant="h6" fontWeight="400">
+            {info.getValue().toFixed(2)} {currency}
+          </Typography>
+        );
+      },
       enableColumnFilter: true,
     }),
     columnHelper.accessor('deliveryBonus', {
       header: 'Delivery Bonus',
-      cell: info => (
-        <Typography variant="h6" fontWeight="400">
-          ${info.getValue().toFixed(2)}
-        </Typography>
-      ),
+      cell: info => {
+        const currency = branchCurrencyMap[info.row.original.branchId] || 'LE';
+        return (
+          <Typography variant="h6" fontWeight="400">
+            {info.getValue().toFixed(2)} {currency}
+          </Typography>
+        );
+      },
       enableColumnFilter: true,
     }),
     // Company Name Column
@@ -178,7 +195,7 @@ const ZoneListTable: React.FC = () => {
         </Stack>
       ),
     }),
-  ], [columnHelper, companyData, handleEdit]);
+  ], [columnHelper, companyData, branchCurrencyMap, handleEdit]);
 
   // Initialize the table
   const table = useReactTable<ZoneData>({
@@ -202,10 +219,11 @@ const ZoneListTable: React.FC = () => {
     const rows = data.map((zone: ZoneData) => {
       const company = companyData.find(c => c.companyId === zone.companyId);
       const branch = company?.branches.find(b => b.branchId === zone.branchId);
+      const currency = branchCurrencyMap[zone.branchId] || 'LE';
       return [
         zone.name,
-        zone.deliveryFee.toFixed(2),
-        zone.deliveryBonus.toFixed(2),
+        `${zone.deliveryFee.toFixed(2)} ${currency}`,
+        `${zone.deliveryBonus.toFixed(2)} ${currency}`,
         company ? company.companyName : 'Unknown',
         branch ? branch.branchName : 'Unknown',
       ];
@@ -222,7 +240,7 @@ const ZoneListTable: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [data, companyData]);
+  }, [data, companyData, branchCurrencyMap]);
 
   // Modal Control Functions
   const handleOpen = useCallback(() => {

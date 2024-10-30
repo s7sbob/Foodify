@@ -15,6 +15,7 @@ export interface Company {
   companyName: string;
   country: string;
   branches: Branch[];
+  currency: string;
   // Add other relevant fields as necessary
 }
 

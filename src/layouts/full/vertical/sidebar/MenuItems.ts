@@ -106,7 +106,7 @@ const Menuitems: MenuitemsType[] = [
           },
           {
             id: 'pos-data-tables-list',
-            title: 'tables List',
+            title: 'Tables List',
             icon: IconPlaceholder,
             href: '/react-tables/TableListTable',
           },

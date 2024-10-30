@@ -1,3 +1,5 @@
+//auth.ts
+
 export interface registerType {
   title?: string;
   subtitle?: JSX.Element | JSX.Element[];

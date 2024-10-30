@@ -41,7 +41,7 @@ const AddTableSectionForm: React.FC<AddTableSectionFormProps> = ({
   const [branches, setBranches] = useState<Branch[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const { showNotification } = useNotification();
 
@@ -183,13 +183,13 @@ const AddTableSectionForm: React.FC<AddTableSectionFormProps> = ({
             {/* Service */}
             <Grid item xs={12}>
               <TextField
-                label="Service"
+                label="Service (%)"
                 type="number"
                 value={service}
                 onChange={(e) => setService(parseFloat(e.target.value))}
                 fullWidth
                 required
-                inputProps={{ step: '0.01' }}
+                inputProps={{ step: '0.1' }}
               />
             </Grid>
 

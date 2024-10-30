@@ -1,7 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// src/components/Profile/Profile.tsx
+
+import React, { useState, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Menu,
@@ -10,57 +10,72 @@ import {
   Divider,
   Button,
   IconButton,
-  Stack
+  Stack,
+  Tooltip,
 } from '@mui/material';
-import * as dropdownData from './data';
-
-import { IconMail } from '@tabler/icons-react';
+import { IconMail, IconPower } from '@tabler/icons-react';
+import { useDispatch } from 'react-redux';
+import { clearToken } from 'src/store/apps/auth/AuthSlice'; // Adjust the import path as necessary
 
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 import unlimitedImg from 'src/assets/images/backgrounds/unlimited-bg.png';
 
-const Profile = () => {
-  const [anchorEl2, setAnchorEl2] = useState(null);
-  const handleClick2 = (event: any) => {
-    setAnchorEl2(event.currentTarget);
+import * as dropdownData from './data'; // Ensure this path is correct
+
+const ProfileComponent: React.FC = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   };
-  const handleClose2 = () => {
-    setAnchorEl2(null);
-  };
+
+  const handleMenuClose = useCallback(() => {
+    setAnchorEl(null);
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    dispatch(clearToken());
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
 
   return (
     <Box>
-      <IconButton
-        size="large"
-        aria-label="show 11 new notifications"
-        color="inherit"
-        aria-controls="msgs-menu"
-        aria-haspopup="true"
-        sx={{
-          ...(typeof anchorEl2 === 'object' && {
-            color: 'primary.main',
-          }),
-        }}
-        onClick={handleClick2}
-      >
-        <Avatar
-          src={ProfileImg}
-          alt={ProfileImg}
+      <Tooltip title="User Profile" placement="top">
+        <IconButton
+          size="large"
+          aria-label="user profile"
+          color="inherit"
+          aria-controls="profile-menu"
+          aria-haspopup="true"
+          onClick={handleMenuOpen}
           sx={{
-            width: 35,
-            height: 35,
+            ...(anchorEl && {
+              color: 'primary.main',
+            }),
           }}
-        />
-      </IconButton>
+        >
+          <Avatar
+            src={ProfileImg}
+            alt="User Profile"
+            sx={{
+              width: 35,
+              height: 35,
+            }}
+          />
+        </IconButton>
+      </Tooltip>
+
       {/* ------------------------------------------- */}
-      {/* Message Dropdown */}
+      {/* Profile Dropdown Menu */}
       {/* ------------------------------------------- */}
       <Menu
-        id="msgs-menu"
-        anchorEl={anchorEl2}
+        id="profile-menu"
+        anchorEl={anchorEl}
         keepMounted
-        open={Boolean(anchorEl2)}
-        onClose={handleClose2}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         sx={{
@@ -70,15 +85,17 @@ const Profile = () => {
           },
         }}
       >
-        <Typography variant="h5">User Profile</Typography>
+        <Typography variant="h5" gutterBottom>
+          User Profile
+        </Typography>
         <Stack direction="row" py={3} spacing={2} alignItems="center">
-          <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
+          <Avatar src={ProfileImg} alt="User Avatar" sx={{ width: 95, height: 95 }} />
           <Box>
             <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
               Mathew Anderson
             </Typography>
             <Typography variant="subtitle2" color="textSecondary">
-            Designer
+              Designer
             </Typography>
             <Typography
               variant="subtitle2"
@@ -93,61 +110,63 @@ const Profile = () => {
           </Box>
         </Stack>
         <Divider />
-        {dropdownData.profile.map((profile) => (
-          <Box key={profile.title}>
-            <Box sx={{ py: 2, px: 0 }} className="hover-text-primary">
-              <Link to={profile.href}>
-                <Stack direction="row" spacing={2}>
-                  <Box
-                    width="45px"
-                    height="45px"
-                    bgcolor="primary.light"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
+
+        {/* Profile Links */}
+        {dropdownData.profile.map((profileItem) => (
+          <Box key={profileItem.title} sx={{ py: 2 }}>
+            <Link to={profileItem.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Box
+                  width="45px"
+                  height="45px"
+                  bgcolor="primary.light"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  borderRadius={1}
+                >
+                  <Avatar
+                    src={profileItem.icon}
+                    alt={profileItem.title}
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 0,
+                    }}
+                  />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight={600}
+                    color="textPrimary"
+                    noWrap
+                    sx={{
+                      width: '240px',
+                    }}
                   >
-                    <Avatar
-                      src={profile.icon}
-                      alt={profile.icon}
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 0,
-                      }}
-                    />
-                  </Box>
-                  <Box>
-                    <Typography
-                      variant="subtitle2"
-                      fontWeight={600}
-                      color="textPrimary"
-                      className="text-hover"
-                      noWrap
-                      sx={{
-                        width: '240px',
-                      }}
-                    >
-                      {profile.title}
-                    </Typography>
-                    <Typography
-                      color="textSecondary"
-                      variant="subtitle2"
-                      sx={{
-                        width: '240px',
-                      }}
-                      noWrap
-                    >
-                      {profile.subtitle}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Link>
-            </Box>
+                    {profileItem.title}
+                  </Typography>
+                  <Typography
+                    color="textSecondary"
+                    variant="subtitle2"
+                    sx={{
+                      width: '240px',
+                    }}
+                    noWrap
+                  >
+                    {profileItem.subtitle}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Link>
           </Box>
         ))}
+
+        {/* Upgrade Section */}
         <Box mt={2}>
-          <Box bgcolor="primary.light" p={3} mb={3} overflow="hidden" position="relative">
-            <Box display="flex" justifyContent="space-between">
+          <Box bgcolor="primary.light" p={3} mb={3} overflow="hidden" position="relative" borderRadius={2}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box>
                 <Typography variant="h5" mb={2}>
                   Unlimited <br />
@@ -157,10 +176,25 @@ const Profile = () => {
                   Upgrade
                 </Button>
               </Box>
-              <img src={unlimitedImg} alt="unlimited" className="signup-bg"></img>
+              <Box
+                component="img"
+                src={unlimitedImg}
+                alt="Unlimited Access"
+                className="signup-bg"
+                sx={{
+                  width: '100px',
+                  height: 'auto',
+                }}
+              />
             </Box>
           </Box>
-          <Button to="/auth/login" variant="outlined" color="primary" component={Link} fullWidth>
+          <Button
+            variant="outlined"
+            color="primary"
+            fullWidth
+            onClick={handleLogout}
+            startIcon={<IconPower size={20} />}
+          >
             Logout
           </Button>
         </Box>
@@ -169,4 +203,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default React.memo(ProfileComponent);

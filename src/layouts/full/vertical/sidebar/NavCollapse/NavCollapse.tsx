@@ -15,7 +15,6 @@ import {
 } from '@mui/icons-material';
 import { MenuitemsType } from '../MenuItems'; // Ensure correct import path
 import NavItem from '../NavItem/NavItem';
-import { useNavigate } from 'react-router-dom';
 
 interface NavCollapseProps {
   menu: MenuitemsType;
@@ -35,7 +34,6 @@ const NavCollapse: FC<NavCollapseProps> = ({
   onClick,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const navigate = useNavigate();
 
   const handleClick = () => {
     setOpen(!open);

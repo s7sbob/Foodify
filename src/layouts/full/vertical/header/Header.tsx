@@ -1,3 +1,5 @@
+// src\layouts\full\vertical\header\Header.tsx
+
 import { IconButton, Box, AppBar, useMediaQuery, Toolbar, styled, Stack } from '@mui/material';
 
 import { useSelector, useDispatch } from 'src/store/Store';
@@ -9,7 +11,6 @@ import {
 import { IconMenu2, IconMoon, IconSun } from '@tabler/icons-react';
 import Notifications from './Notification';
 import Profile from './Profile';
-import Cart from './Cart';
 import Search from './Search';
 import Language from './Language';
 import { AppState } from 'src/store/Store';
@@ -68,7 +69,6 @@ const Header = () => {
           {/* ------------------------------------------- */}
           {/* Ecommerce Dropdown */}
           {/* ------------------------------------------- */}
-          <Cart />
           {/* ------------------------------------------- */}
           {/* End Ecommerce Dropdown */}
           {/* ------------------------------------------- */}

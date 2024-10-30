@@ -4,7 +4,6 @@ import Logo from '../../shared/logo/Logo';
 import { useSelector, useDispatch } from 'src/store/Store';
 import { hoverSidebar, toggleMobileSidebar } from 'src/store/customizer/CustomizerSlice';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
-import { Profile } from './SidebarProfile/Profile';
 import { AppState } from 'src/store/Store';
 import  { memo } from 'react';
 
@@ -72,13 +71,12 @@ const Sidebar = memo(() => {
             <Box px={3}>
               <Logo />
             </Box>
-            <Scrollbar sx={{ height: 'calc(100% - 190px)' }}>
+            <Scrollbar sx={{ height: 'calc(100% - 100px)' }}>
               {/* ------------------------------------------- */}
               {/* Sidebar Items */}
               {/* ------------------------------------------- */}
               <SidebarItems />
             </Scrollbar>
-            <Profile />
           </Box>
         </Drawer>
       </Box>

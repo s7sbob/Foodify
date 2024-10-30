@@ -1,17 +1,19 @@
-import { Navigate, Outlet } from 'react-router-dom';
+// routes/PrivateRoute.tsx
+
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AppState } from '../store/Store'; 
+import { selectAuthToken } from '../selectors/authSelectors';
 
-const PrivateRoute = () => {
-  // Try to get token from localStorage or sessionStorage
-  const token = useSelector((state: AppState) => state.auth.token) || localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const token = useSelector(selectAuthToken);
+  const location = useLocation();
 
-  // If no token, redirect to login page
   if (!token) {
-    return <Navigate to="/auth/login" replace />;
+    // Redirect to login page
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
-  return <Outlet />;
+  return children;
 };
 
 export default PrivateRoute;

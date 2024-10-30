@@ -17,13 +17,12 @@ function App() {
   const activeDir = useSelector(selectActiveDir);
 
   return (
+
     <ThemeProvider theme={theme}>
       <RTL direction={activeDir}>
         <CssBaseline />
         <ScrollToTop>
-          <Suspense fallback={<Spinner />}>
-            {routing}
-          </Suspense>
+          <Suspense fallback={<Spinner />}>{routing}</Suspense>
         </ScrollToTop>
       </RTL>
     </ThemeProvider>

@@ -1,4 +1,5 @@
 // src/customizer/CustomizerSlice.ts
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface StateType {
@@ -17,6 +18,7 @@ interface StateType {
   isCardShadow: boolean;
   borderRadius: number;
   baseurl: string;
+  currentPage: string; // New state property
 }
 
 const initialState: StateType = {
@@ -35,6 +37,7 @@ const initialState: StateType = {
   isCardShadow: true,
   borderRadius: 7,
   baseurl: 'https://erp.ts-egy.com/api',
+  currentPage: 'HomePage', // Initialize currentPage
 };
 
 export const CustomizerSlice = createSlice({
@@ -77,6 +80,9 @@ export const CustomizerSlice = createSlice({
     setbaseurl: (state, action: PayloadAction<string>) => {
       state.baseurl = action.payload;
     },
+    setCurrentPage: (state, action: PayloadAction<string>) => { // New action
+      state.currentPage = action.payload;
+    },
   },
 });
 
@@ -93,6 +99,7 @@ export const {
   setLanguage,
   setCardShadow,
   setbaseurl,
+  setCurrentPage, // Export new action
 } = CustomizerSlice.actions;
 
 export default CustomizerSlice.reducer;
