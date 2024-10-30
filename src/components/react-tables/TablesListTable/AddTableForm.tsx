@@ -42,7 +42,7 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
   const [allTableSections, setAllTableSections] = useState<TableSection[]>([]); // All sections
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const { showNotification } = useNotification();
 
@@ -96,19 +96,29 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
     }
   }, [open, baseurl, token, showNotification]);
 
-  // Populate Form for Editing after branches are loaded
+  // Populate Form Fields When Form Opens
   useEffect(() => {
-    if (tableToEdit && branches.length > 0) {
-      setTableName(tableToEdit.tableName);
-      setTableSectionId(tableToEdit.tableSectionId);
-      setBranchId(tableToEdit.branchId);
-    } else if (!tableToEdit) {
-      // Reset form fields if adding a new table
-      setTableName('');
-      setTableSectionId('');
-      setBranchId('');
+    if (open) {
+      if (tableToEdit && branches.length > 0) {
+        // Editing a table
+        setTableName(tableToEdit.tableName);
+        setBranchId(tableToEdit.branchId);
+        setTableSectionId(tableToEdit.tableSectionId);
+      } else if (!tableToEdit) {
+        // Adding a new table
+        setTableName('');
+        setBranchId('');
+        setTableSectionId('');
+      }
     }
-  }, [tableToEdit, branches]);
+  }, [open, tableToEdit, branches]);
+
+  // Set default branchId when branches are loaded and branchId is empty
+  useEffect(() => {
+    if (!tableToEdit && branches.length > 0 && !branchId) {
+      setBranchId(branches[0].branchId);
+    }
+  }, [branches, branchId, tableToEdit]);
 
   // Compute Filtered Table Sections based on branchId
   const filteredTableSections = useMemo(() => {
@@ -117,6 +127,23 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
     }
     return [];
   }, [branchId, allTableSections]);
+
+  // Set default tableSectionId when filteredTableSections are loaded and tableSectionId is empty
+  useEffect(() => {
+    if (!tableToEdit) {
+      if (filteredTableSections.length > 0) {
+        // Check if current tableSectionId is in filteredTableSections
+        const currentSectionExists = filteredTableSections.some(
+          (section) => section.tableSectionId === tableSectionId
+        );
+        if (!currentSectionExists) {
+          setTableSectionId(filteredTableSections[0].tableSectionId);
+        }
+      } else {
+        setTableSectionId('');
+      }
+    }
+  }, [filteredTableSections, tableSectionId, tableToEdit]);
 
   // Handle Form Submission
   const handleSubmit = async () => {
@@ -216,7 +243,11 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
 
             {/* Table Section Selection */}
             <Grid item xs={12}>
-              <FormControl fullWidth required disabled={!branchId}>
+              <FormControl
+                fullWidth
+                required
+                disabled={!branchId || filteredTableSections.length === 0}
+              >
                 <InputLabel id="table-section-select-label">Table Section</InputLabel>
                 <Select
                   labelId="table-section-select-label"

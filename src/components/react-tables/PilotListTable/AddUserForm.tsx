@@ -30,7 +30,13 @@ interface AddUserFormProps {
   companyId: string; // Added prop for auto-assigned companyId
 }
 
-const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdded, pilotToEdit, companyId }) => {
+const AddUserForm: React.FC<AddUserFormProps> = ({
+  open,
+  handleClose,
+  onUserAdded,
+  pilotToEdit,
+  companyId,
+}) => {
   const [name, setName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [branchId, setBranchId] = useState<string>('');
@@ -44,8 +50,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
 
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
   const token =
-    useSelector((state: AppState) => state.auth.token) ||
-    localStorage.getItem('token');
+    useSelector((state: AppState) => state.auth.token) || localStorage.getItem('token');
 
   // Fetch Branches Based on companyId
   useEffect(() => {
@@ -59,7 +64,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
           headers: { Authorization: `Bearer ${token}` },
         });
         const companyData = Array.isArray(response.data) ? response.data : [response.data];
-        const selectedCompany = companyData.find(c => c.companyId === companyId);
+        const selectedCompany = companyData.find((c) => c.companyId === companyId);
         setBranches(selectedCompany?.branches || []);
       } catch (err: any) {
         console.error('Error fetching branches:', err);
@@ -74,21 +79,30 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
     }
   }, [open, baseurl, companyId, token]);
 
+  // Set default branchId when branches are loaded and branchId is empty
+  useEffect(() => {
+    if (!pilotToEdit && branches.length > 0 && !branchId) {
+      setBranchId(branches[0].branchId);
+    }
+  }, [branches, branchId, pilotToEdit]);
+
   // Populate Form for Editing
   useEffect(() => {
-    if (pilotToEdit) {
-      setName(pilotToEdit.name);
-      setPhone(pilotToEdit.phone);
-      setBranchId(pilotToEdit.branchId);
-      setIsActive(pilotToEdit.isActive);
-    } else {
-      // Reset form fields if adding a new pilot
-      setName('');
-      setPhone('');
-      setBranchId('');
-      setIsActive(true);
+    if (open) {
+      if (pilotToEdit) {
+        setName(pilotToEdit.name);
+        setPhone(pilotToEdit.phone);
+        setBranchId(pilotToEdit.branchId);
+        setIsActive(pilotToEdit.isActive);
+      } else {
+        // Reset form fields if adding a new pilot
+        setName('');
+        setPhone('');
+        setBranchId('');
+        setIsActive(true);
+      }
     }
-  }, [pilotToEdit]);
+  }, [open, pilotToEdit]);
 
   // Handle Form Submission
   const handleSubmit = async () => {
@@ -111,12 +125,16 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
 
       if (pilotToEdit) {
         // Update Pilot
-        await axios.post(`${baseurl}/PosPilot/UpdatePilot`, { ...pilotData, pilotId: pilotToEdit.pilotId }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        await axios.post(
+          `${baseurl}/PosPilot/UpdatePilot`,
+          { ...pilotData, pilotId: pilotToEdit.pilotId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
       } else {
         // Create Pilot
         await axios.post(`${baseurl}/PosPilot/CreatePilot`, pilotData, {
@@ -150,7 +168,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
               <TextField
                 label="Name"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 fullWidth
                 required
               />
@@ -161,7 +179,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
               <TextField
                 label="Phone"
                 value={phone}
-                onChange={e => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value)}
                 fullWidth
                 required
                 inputProps={{ maxLength: 15 }}
@@ -170,15 +188,19 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
 
             {/* Branch Selection */}
             <Grid item xs={12}>
-              <FormControl fullWidth required disabled={!companyId || branches.length === 0 || loading}>
+              <FormControl
+                fullWidth
+                required
+                disabled={!companyId || branches.length === 0 || loading}
+              >
                 <InputLabel id="branch-select-label">Branch</InputLabel>
                 <Select
                   labelId="branch-select-label"
                   value={branchId}
                   label="Branch"
-                  onChange={e => setBranchId(e.target.value)}
+                  onChange={(e) => setBranchId(e.target.value)}
                 >
-                  {branches.map(branch => (
+                  {branches.map((branch) => (
                     <MenuItem key={branch.branchId} value={branch.branchId}>
                       {branch.branchName}
                     </MenuItem>
@@ -193,7 +215,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
                 control={
                   <Checkbox
                     checked={isActive}
-                    onChange={e => setIsActive(e.target.checked)}
+                    onChange={(e) => setIsActive(e.target.checked)}
                   />
                 }
                 label="Is Active"

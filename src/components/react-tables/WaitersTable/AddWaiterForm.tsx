@@ -14,7 +14,6 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  Typography,
 } from '@mui/material';
 import CustomFormLabel from '../../forms/theme-elements/CustomFormLabel';
 import { IconUser } from '@tabler/icons-react';
@@ -46,7 +45,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
 
   // State for form fields
   const [waiterName, setWaiterName] = useState('');
-  const [companyId, setCompanyId] = useState(currentCompany.companyId);
+  const [companyId] = useState(currentCompany.companyId);
   const [branchId, setBranchId] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -54,19 +53,14 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
   // Derived state for branches based on selected company
   const branches = currentCompany ? currentCompany.branches : [];
 
-  // Auto-select the company when form opens
+  // Auto-select the branch when form opens
   useEffect(() => {
-    if (open && companies.length > 0) {
-      setCompanyId(currentCompany.companyId);
+    if (open && branches.length > 0) {
+      setBranchId(branches[0].branchId);
     }
-  }, [open, companies, currentCompany]);
+  }, [open, branches]);
 
-  // Reset branch selection when company changes (not necessary here since company is fixed)
-  // But keeping it in case of future scalability
-  useEffect(() => {
-    setBranchId(''); // Set branchId to empty when company changes
-  }, [companyId]);
-
+  // Remove unnecessary useEffect for companyId change
   // Reset functions
   const resetFieldsExceptCompany = useCallback(() => {
     setWaiterName('');
@@ -85,7 +79,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
   const handleSubmit = useCallback(
     async (closeForm: boolean) => {
       // Validate input
-      if (!waiterName || !companyId || !branchId) {
+      if (!waiterName || !branchId) {
         setError('Waiter Name and Branch are required.');
         setSuccessMessage('');
         return;
@@ -101,7 +95,6 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
         waiterName,
         branchId,
         companyId,
-        // status: true, // Removed status
       };
 
       try {
@@ -172,11 +165,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
             />
           </FormControl>
 
-          {/* Company is auto-assigned, display it as read-only */}
-          <FormControl fullWidth margin="normal">
-            <CustomFormLabel>Company</CustomFormLabel>
-            <Typography variant="body1">{currentCompany.companyName}</Typography>
-          </FormControl>
+          {/* Removed Company Display */}
 
           <FormControl fullWidth margin="normal">
             <InputLabel id="branch-label">Branch</InputLabel>
@@ -188,9 +177,6 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
               onChange={(e) => setBranchId(e.target.value)}
               required
             >
-              <MenuItem value="">
-                <em>Select a branch</em>
-              </MenuItem>
               {branches.map((branch) => (
                 <MenuItem key={branch.branchId} value={branch.branchId}>
                   {branch.branchName}

@@ -87,6 +87,7 @@ const AddTableSectionForm: React.FC<AddTableSectionFormProps> = ({
   // Populate Form for Editing after branches are loaded
   useEffect(() => {
     if (sectionToEdit && branches.length > 0) {
+      // Editing a section
       setSectionName(sectionToEdit.sectionName);
       setService(sectionToEdit.service);
       // Ensure that the branchId exists in the branches
@@ -96,12 +97,19 @@ const AddTableSectionForm: React.FC<AddTableSectionFormProps> = ({
         showNotification('Associated branch not found.', 'warning', 'Warning');
       }
     } else if (!sectionToEdit) {
-      // Reset form fields if adding a new section
+      // Adding a new section
       setSectionName('');
       setService(0);
-      setBranchId('');
+      // Do not reset branchId here
     }
   }, [sectionToEdit, branches, showNotification]);
+
+  // Set default branchId when branches are loaded and branchId is empty
+  useEffect(() => {
+    if (!sectionToEdit && branches.length > 0 && !branchId) {
+      setBranchId(branches[0].branchId);
+    }
+  }, [branches, branchId, sectionToEdit]);
 
   // Handle Form Submission
   const handleSubmit = async () => {
