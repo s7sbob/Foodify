@@ -62,57 +62,57 @@ const PilotListTable: React.FC<TableProps> = () => {
     useSelector((state: AppState) => state.auth.token) ||
     localStorage.getItem('token');
 
-  const fetchPilotData = useCallback(async () => {
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-    setLoading(true);
-    setError(null);
-    try {
-      const [pilotResponse, companyResponse] = await Promise.all([
-        axios.get(`${baseurl}/PosPilot/GetPilots`, { headers }),
-        axios.get(`${baseurl}/Company/GetCompanyData`, { headers }),
-      ]);
-
-      const companies: Company[] = Array.isArray(companyResponse.data)
-        ? companyResponse.data
-        : [companyResponse.data];
-
-      setCompanyData(companies);
-
-      const company = companies.length === 1 ? companies[0] : null;
-
-      if (!company) {
-        throw new Error('Multiple companies found or no company associated with the user.');
+    const fetchPilotData = useCallback(async () => {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+      setLoading(true);
+      setError(null);
+      try {
+        const [pilotResponse, companyResponse] = await Promise.all([
+          axios.get<PilotTableData[]>(`${baseurl}/PosPilot/GetPilots`, { headers }),
+          axios.get<Company[]>(`${baseurl}/Company/GetCompanyData`, { headers }),
+        ]);
+    
+        const companies: Company[] = Array.isArray(companyResponse.data)
+          ? companyResponse.data
+          : [companyResponse.data];
+    
+        setCompanyData(companies);
+    
+        const company = companies.length === 1 ? companies[0] : null;
+    
+        if (!company) {
+          throw new Error('Multiple companies found or no company associated with the user.');
+        }
+    
+        const updatedData: PilotTableData[] = pilotResponse.data.map((pilot: PilotTableData) => {
+          // Find the branch within the companyData
+          const branch = company.branches.find(b => b.branchId === pilot.branchId);
+    
+          return {
+            pilotId: pilot.pilotId,
+            name: pilot.name,
+            phone: pilot.phone,
+            isActive: pilot.isActive,
+            companyName: company.companyName || 'Unknown',
+            companyId: company.companyId || '',
+            branchName: branch?.branchName || 'Unknown',
+            branchId: branch?.branchId || '',
+          };
+        });
+    
+        setData(updatedData);
+      } catch (error: any) {
+        console.error('Error fetching pilot data:', error);
+        setError('Failed to fetch pilots. Please try again later.');
+        showNotification('Failed to fetch pilots.', 'error', 'Error');
+      } finally {
+        setLoading(false);
       }
-
-      const updatedData = pilotResponse.data.map((pilot: any) => {
-        // Find the branch within the companyData
-        const branch = company.branches.find((b: any) => b.branchId === pilot.branchId) || {};
-
-        return {
-          pilotId: pilot.pilotId,
-          name: pilot.name,
-          phone: pilot.phone,
-          isActive: pilot.isActive,
-          companyName: company.companyName || 'Unknown',
-          companyId: company.companyId || '',
-          branchName: branch.branchName || 'Unknown',
-          branchId: branch.branchId || '',
-        };
-      });
-
-      setData(updatedData);
-    } catch (error: any) {
-      console.error('Error fetching pilot data:', error);
-      setError('Failed to fetch pilots. Please try again later.');
-      showNotification('Failed to fetch pilots.', 'error', 'Error');
-    } finally {
-      setLoading(false);
-    }
-  }, [baseurl, token, showNotification]);
-
+    }, [baseurl, token, showNotification]);
+    
   // Fetch data on component mount
   useEffect(() => {
     fetchPilotData();

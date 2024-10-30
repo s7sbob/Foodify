@@ -68,6 +68,7 @@
     "react-window": "^1.8.10",
     "redirect": "^0.2.0",
     "redux": "4.2.1",
+    "redux-persist": "^6.0.0",
     "reselect": "^5.1.1",
     "simplebar": "6.2.5",
     "simplebar-react": "3.2.4",

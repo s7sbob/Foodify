@@ -1,39 +1,37 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import React, { useEffect } from 'react';
+// src/layouts/full/shared/customizer/RTL.tsx
 
+import React, { useEffect, useMemo } from 'react';
 import createCache from '@emotion/cache';
 import { CacheProvider } from '@emotion/react';
 import rtlPlugin from 'stylis-plugin-rtl';
 
-interface RTLType {
+interface RTLProps {
   children: React.ReactNode;
-  direction: string;
+  direction: 'rtl' | 'ltr'; // Restrict to valid directions for type safety
 }
 
-const styleCache = () =>
-  createCache({
-    key: 'rtl',
-    prepend: true,
+// Create caches outside the component to prevent recreation
+const rtlCache = createCache({
+  key: 'rtl',
+  prepend: true,
+  stylisPlugins: [rtlPlugin],
+});
 
-    // We have to temporary ignore this due to incorrect definitions
-    // in the stylis-plugin-rtl module
-    // @see https://github.com/styled-components/stylis-plugin-rtl/issues/23
-    stylisPlugins: [rtlPlugin],
-  });
+const ltrCache = createCache({
+  key: 'ltr',
+  prepend: true,
+  // No RTL plugin for LTR direction
+});
 
-const RTL = (props: RTLType) => {
-  const { children, direction } = props;
-
+const RTL: React.FC<RTLProps> = ({ children, direction }) => {
   useEffect(() => {
     document.dir = direction;
   }, [direction]);
 
-  if (direction === 'rtl') {
-    return <CacheProvider value={styleCache()}>{children}</CacheProvider>;
-  }
+  // Memoize the cache based on direction to avoid unnecessary re-renders
+  const cache = useMemo(() => (direction === 'rtl' ? rtlCache : ltrCache), [direction]);
 
-  return <>{children}</>;
+  return <CacheProvider value={cache}>{children}</CacheProvider>;
 };
 
 export default RTL;

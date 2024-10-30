@@ -20,5 +20,41 @@
     "Email": "بريد إلكتروني",
     "Tickets": "تذاكر",
     "Company": "شركات",
-    "Add_USer": "إضافة زائر"
+    "Add_USer": "إضافة زائر",
+    
+        "menu": {
+          "mainData": "البيانات الرئيسية",
+          "account": "الحساب",
+          "accountUsers": "المستخدمون",
+          "company": "الشركات",
+          "pos": "نقطة البيع",
+          "posData": "بيانات نقطة البيع",
+          "posDataProductGroup": "مجموعة المنتجات",
+          "posDataPOSScreens": "شاشات نقطة البيع",
+          "posDataPilotList": "قائمة الطيارين",
+          "posDataZoneList": "قائمة المناطق",
+          "posDataWaitersList": "قائمة النوادل",
+          "posDataTablesSectionList": "قائمة أقسام الطاولات",
+          "posDataTablesList": "قائمة الطاولات"
+        },
+        "table": {
+          "userCode": "رمز المستخدم",
+          "userName": "اسم المستخدم",
+          "actions": "الإجراءات",
+          "usersTable": "جدول المستخدمين"
+        },
+        "actions": {
+          "edit": "تعديل",
+          "windows": "نوافذ",
+          "permissions": "أذونات"
+        },
+        "buttons": {
+          "addUser": "إضافة مستخدم"
+        },
+        "search": {
+          "global": "بحث شامل",
+          "column": "بحث..."
+        }
+      
+      
 }

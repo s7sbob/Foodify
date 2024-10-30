@@ -13,8 +13,8 @@ import {
 export interface MenuitemsType {
   id: string; // Make id required for better handling
   navlabel?: boolean;
-  subheader?: string;
-  title?: string;
+  subheader?: string; // Use translation keys
+  title?: string; // Use translation keys
   icon?: any;
   href?: string;
   children?: MenuitemsType[];
@@ -24,23 +24,24 @@ export interface MenuitemsType {
   external?: boolean;
 }
 
+// Function to generate menu items with translation keys
 const Menuitems: MenuitemsType[] = [
   {
     id: 'main-data',
     navlabel: true,
-    subheader: 'Main data',
+    subheader: 'menu.mainData', // Translation key
   },
 
   // Menu group: Account
   {
     id: 'account',
-    title: 'Account',
+    title: 'menu.account', // Translation key
     icon: IconUserCircle,
     href: '#',
     children: [
       {
         id: 'account-users',
-        title: 'Users',
+        title: 'menu.accountUsers', // Translation key
         icon: IconUser,
         href: '/react-tables/column-visiblity',
       },
@@ -50,7 +51,7 @@ const Menuitems: MenuitemsType[] = [
   // Menu item: Company
   {
     id: 'company',
-    title: 'Company',
+    title: 'menu.company', // Translation key
     icon: IconApps,
     href: '/pages/Company',
   },
@@ -58,55 +59,55 @@ const Menuitems: MenuitemsType[] = [
   // Menu group: POS
   {
     id: 'pos',
-    title: 'POS',
+    title: 'menu.pos', // Translation key
     icon: IconApps,
     href: '#',
     children: [
       {
         id: 'pos-data',
-        title: 'Data',
+        title: 'menu.posData', // Translation key
         icon: IconDatabase,
         href: '#',
         children: [
           {
             id: 'pos-data-product-group',
-            title: 'Product Group',
+            title: 'menu.posDataProductGroup', // Translation key
             icon: IconSquare,
             href: '/pages/treeview',
           },
           {
             id: 'pos-data-pos-screens',
-            title: 'POS Screens',
+            title: 'menu.posDataPOSScreens', // Translation key
             icon: IconSquare,
             href: '/pages/POSScreen',
           },
           {
             id: 'pos-data-pilot-list',
-            title: 'Pilot List',
+            title: 'menu.posDataPilotList', // Translation key
             icon: IconTruckDelivery,
             href: '/react-tables/PilotListTable',
           },
           {
             id: 'pos-data-zone-list',
-            title: 'Zone List',
+            title: 'menu.posDataZoneList', // Translation key
             icon: IconPlaceholder,
             href: '/react-tables/ZoneListTable',
           },
           {
             id: 'pos-data-waiters-list',
-            title: 'Waiters List',
+            title: 'menu.posDataWaitersList', // Translation key
             icon: IconPlaceholder,
             href: '/react-tables/WaitersPage',
           },
           {
             id: 'pos-data-tables-section-list',
-            title: 'Tables Section List',
+            title: 'menu.posDataTablesSectionList', // Translation key
             icon: IconPlaceholder,
             href: '/react-tables/TableSectionListTable',
           },
           {
             id: 'pos-data-tables-list',
-            title: 'Tables List',
+            title: 'menu.posDataTablesList', // Translation key
             icon: IconPlaceholder,
             href: '/react-tables/TableListTable',
           },

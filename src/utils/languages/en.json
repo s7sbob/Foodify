@@ -19,5 +19,38 @@
     "Calendar": "Calendar",
     "Email": "Email",
     "Tickets": "Tickets",
-    "Add_USer": "Add User"
+    "Add_USer": "Add User",
+    "menu": {
+        "mainData": "Main Data",
+        "account": "Account",
+        "accountUsers": "Users",
+        "company": "Company",
+        "pos": "POS",
+        "posData": "POS Data",
+        "posDataProductGroup": "Product Group",
+        "posDataPOSScreens": "POS Screens",
+        "posDataPilotList": "Pilot List",
+        "posDataZoneList": "Zone List",
+        "posDataWaitersList": "Waiters List",
+        "posDataTablesSectionList": "Tables Section List",
+        "posDataTablesList": "Tables List"
+      },
+"table": {
+    "userCode": "User Code",
+    "userName": "Username",
+    "actions": "Actions",
+    "usersTable": "Users Table"
+  },
+  "actions": {
+    "edit": "Edit",
+    "windows": "Windows",
+    "permissions": "Permissions"
+  },
+  "buttons": {
+    "addUser": "Add User"
+  },
+  "search": {
+    "global": "Global Search",
+    "column": "Search..."
+  }
 }
