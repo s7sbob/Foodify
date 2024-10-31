@@ -6,7 +6,6 @@ import english from 'src/utils/languages/en.json';
 import french from 'src/utils/languages/fr.json';
 import arabic from 'src/utils/languages/ar.json';
 import chinese from 'src/utils/languages/ch.json';
-import { TranslationKeys } from './types';
 
 const resources = {
   en: {

@@ -61,8 +61,9 @@ const Header: React.FC = () => {
 
   // Handler to toggle theme mode
   const handleThemeToggle = React.useCallback(() => {
-    const newMode = customizer.activeMode === 'light' ? 'dark' : 'light';
+    const newMode: 'light' | 'dark' = customizer.activeMode === 'light' ? 'dark' : 'light';
     dispatch(setDarkMode(newMode));
+    localStorage.setItem('themeMode', newMode); // Persist theme mode
   }, [dispatch, customizer.activeMode]);
 
   return (

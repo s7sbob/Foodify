@@ -38,6 +38,7 @@ import { CompanyData } from 'src/types/companyTypes';
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { useNotification } from '../../../context/NotificationContext'; // Import the hook
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 interface TableProps {
   data: EnhancedWaiter[];
@@ -49,6 +50,7 @@ interface TableProps {
 const columnHelper = createColumnHelper<EnhancedWaiter>();
 
 const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, onWaiterUpdated }) => {
+  const { t } = useTranslation(); // Initialize translation hook
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -67,7 +69,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
   // Define columns
   const columns = useMemo(() => [
     columnHelper.accessor('waiterName', {
-      header: 'Waiter Name',
+      header: t('waitersTable.waiterName') || 'Waiter Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -76,7 +78,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
       enableColumnFilter: true,
     }),
     columnHelper.accessor('branchName', {
-      header: 'Branch Name',
+      header: t('waitersTable.branchName') || 'Branch Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -85,7 +87,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
       enableColumnFilter: true,
     }),
     columnHelper.accessor('companyName', {
-      header: 'Company Name',
+      header: t('waitersTable.companyName') || 'Company Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -95,13 +97,13 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
     }),
     columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('waitersTable.actions') || 'Actions',
       cell: info => (
         <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit">
+          <Tooltip title={t('actions.edit') || 'Edit'}>
             <IconButton
               color="primary"
-              aria-label="edit"
+              aria-label={t('actions.edit') || 'Edit'}
               onClick={() => handleEdit(info.row.original)}
             >
               <EditIcon />
@@ -111,7 +113,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
         </Stack>
       ),
     }),
-  ], []);
+  ], [t]);
 
   // Initialize the table
   const table = useReactTable<EnhancedWaiter>({
@@ -137,7 +139,11 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
 
   // Handle Download CSV
   const handleDownload = useCallback(() => {
-    const headers = ['Waiter Name', 'Branch Name', 'Company Name'];
+    const headers = [
+      t('waitersTable.waiterName') || 'Waiter Name',
+      t('waitersTable.branchName') || 'Branch Name',
+      t('waitersTable.companyName') || 'Company Name',
+    ];
     const rows = data.map((item: EnhancedWaiter) => [
       item.waiterName,
       item.branchName,
@@ -155,7 +161,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [data]);
+  }, [data, t]);
 
   // Modal Control Functions
   const handleOpenAdd = useCallback(() => {
@@ -176,7 +182,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
       {/* Add Waiter button */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
         <Button variant="contained" color="primary" onClick={handleOpenAdd}>
-          Add Waiter
+          {t('buttons.addWaiter') || 'Add Waiter'}
         </Button>
       </Box>
 
@@ -195,7 +201,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
                     onChange={e => column.toggleVisibility(e.target.checked)}
                   />
                 }
-                label={column.columnDef.header as string}
+                label={column.columnDef.header as string || column.id} // Provide fallback
               />
             ))}
         </FormGroup>
@@ -204,7 +210,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('waitersTable.globalSearch') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
@@ -213,7 +219,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
       </Box>
 
       {/* Display Table */}
-      <DownloadCard title="Waiters Table" onDownload={handleDownload}>
+      <DownloadCard title={t('waitersTable.waitersTable') || 'Waiters Table'} onDownload={handleDownload}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TableContainer>
@@ -236,7 +242,7 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
                                 size="small"
                                 value={(header.column.getFilterValue() ?? '') as string}
                                 onChange={e => header.column.setFilterValue(e.target.value)}
-                                placeholder={`Search...`}
+                                placeholder={t('waitersTable.searchPlaceholder') || 'Search...'}
                                 style={{ marginLeft: '8px' }}
                               />
                             ) : null}

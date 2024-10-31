@@ -85,32 +85,6 @@
             "status": "الحالة"
           }
         },
-        "buttons": {
-          "addUser":"إضافة مستخدمين",
-          "addPilot": "إضافة طيار",
-          "cancel": "إلغاء",
-          "update": "تحديث",
-          "create": "إنشاء",
-          "addZone": "إضافة منطقة",
-          "loading": "جارٍ التحميل...",
-          "saveAndStartNew": "حفظ وبدء جديد",
-          "saveAndViewAll": "حفظ وعرض الكل"
-        },
-        "errors": {
-          "fillAllFields": "يرجى ملء جميع الحقول المطلوبة.",
-          "fetchBranchesFailed": "فشل في جلب الفروع.",
-          "submitFailed": "فشل في إرسال بيانات الطيار.",
-          "fetchPilotsFailed": "فشل في جلب الطيارين.",
-          "fetchZonesFailed": "فشل في جلب المناطق."
-        },
-        "alerts": {
-          "fetchPilotsFailed": "فشل في جلب الطيارين.",
-          "createPilotSuccess": "تم إنشاء الطيار بنجاح.",
-          "updatePilotSuccess": "تم تحديث الطيار بنجاح.",
-          "fetchZonesFailed": "فشل في جلب المناطق.",
-          "addZoneSuccess": "تمت إضافة المنطقة بنجاح.",
-          "updateZoneSuccess": "تم تحديث المنطقة بنجاح."
-        },
         "search": {
           "global": "بحث شامل",
           "column": "بحث..."
@@ -127,5 +101,72 @@
           "deliveryFee": "رسوم التوصيل",
           "deliveryBonus": "مكافأة التوصيل",
           "branch": "الفرع"
+        },
+        "waitersPage": {
+          "title": "إدارة النوادل"
+        },
+        "waitersTable": {
+          "waiterName": "اسم النادل",
+          "branchName": "اسم الفرع",
+          "companyName": "اسم الشركة",
+          "actions": "الإجراءات",
+          "waitersTable": "جدول النوادل",
+          "globalSearch": "بحث شامل",
+          "searchPlaceholder": "بحث..."
+        },
+        "buttons": {
+          "addWaiter": "إضافة نادل",
+          "addUser":"إضافة مستخدمين",
+          "addPilot": "إضافة طيار",
+          "cancel": "إلغاء",
+          "update": "تحديث",
+          "create": "إنشاء",
+          "addZone": "إضافة منطقة",
+          "loading": "جارٍ التحميل...",
+          "saveAndStartNew": "حفظ وبدء جديد",
+          "saveAndViewAll": "حفظ وعرض الكل"
+        },
+        "alerts": {
+          "fetchWaitersFailed": "فشل في جلب النوادل.",
+          "waiterAddedSuccess": "تم إضافة النادل بنجاح!",
+          "waiterUpdatedSuccess": "تم تحديث النادل بنجاح!",
+          "fetchPilotsFailed": "فشل في جلب الطيارين.",
+          "createPilotSuccess": "تم إنشاء الطيار بنجاح.",
+          "updatePilotSuccess": "تم تحديث الطيار بنجاح.",
+          "fetchZonesFailed": "فشل في جلب المناطق.",
+          "addZoneSuccess": "تمت إضافة المنطقة بنجاح.",
+          "updateZoneSuccess": "تم تحديث المنطقة بنجاح.",
+          "zoneAddedSuccess": "تمت إضافة المنطقة بنجاح.",
+          "zoneUpdatedSuccess": "تم تحديث المنطقة بنجاح.",
+          "fetchBranchesFailed": "فشل في جلب الفروع.",
+          "submitZoneFailed": "فشل في إرسال بيانات المنطقة."
+        },
+        "errors": {
+          "waiterNameRequired": "اسم النادل مطلوب.",
+          "branchRequired": "الفرع مطلوب.",
+          "fillAllFields": "يرجى ملء جميع الحقول المطلوبة.",
+          "fetchBranchesFailed": "فشل في جلب الفروع.",
+          "submitFailed": "فشل في إرسال بيانات الطيار.",
+          "fetchPilotsFailed": "فشل في جلب الطيارين.",
+          "fetchZonesFailed": "فشل في جلب المناطق."
+        },
+        "addWaiterForm":{
+          "waiterName":"اسم النادل",
+          "branch":"الفرع",
+          "waiterNamePlaceholder":"اسم النادل"
+        },
+        "zones": {
+          "addZoneForm": {
+            "titleAdd": "إضافة منطقة",
+            "titleEdit": "تعديل منطقة",
+            "zoneName": "اسم المنطقة",
+            "deliveryFee": "رسوم التوصيل",
+            "deliveryBonus": "مكافأة التوصيل",
+            "branch": "الفرع",
+            "zoneNamePlaceholder": "أدخل اسم المنطقة",
+            "deliveryFeePlaceholder": "أدخل رسوم التوصيل",
+            "deliveryBonusPlaceholder": "أدخل مكافأة التوصيل",
+            "branchPlaceholder": "اختر الفرع"
+          }
         }
 }

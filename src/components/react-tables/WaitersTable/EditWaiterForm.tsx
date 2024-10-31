@@ -22,6 +22,8 @@ import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { EnhancedWaiter } from 'src/types/Waiter';
 import { CompanyData } from 'src/types/companyTypes';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useNotification } from '../../../context/NotificationContext'; // Import the hook
 
 interface EditWaiterFormProps {
   open: boolean;
@@ -38,6 +40,9 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
   onWaiterUpdated,
   companies,
 }) => {
+  const { t } = useTranslation(); // Initialize translation hook
+  const { showNotification } = useNotification(); // Use the notification hook
+
   const token =
     useSelector((state: AppState) => state.auth.token) ||
     localStorage.getItem('authToken') ||
@@ -60,15 +65,9 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
   // Update form fields when waiter changes
   useEffect(() => {
     if (open) {
-      console.log("Opening EditWaiterForm with waiter:", waiter);
-      console.log("Current Company:", currentCompany);
-      const branchExists = currentCompany.branches.some(
-        (branch) => branch.branchId === waiter.branchId
-      );
-      console.log("Branch Exists:", branchExists);
       setWaiterName(waiter.waiterName);
       setCompanyId(currentCompany.companyId);
-      setBranchId(branchExists ? waiter.branchId : '');
+      setBranchId(waiter.branchId);
       setError('');
       setSuccessMessage('');
     }
@@ -99,8 +98,8 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
   const handleSubmit = useCallback(
     async (closeForm: boolean) => {
       // Validate input
-      if (!waiterName || !companyId || !branchId) {
-        setError('Waiter Name and Branch are required.');
+      if (!waiterName || !branchId) {
+        setError(t('errors.waiterNameRequired') || 'Waiter Name and Branch are required.');
         setSuccessMessage('');
         return;
       }
@@ -133,7 +132,7 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
 
         // Handle success
         onWaiterUpdated(); // Refresh the table
-        setSuccessMessage('Waiter updated successfully.');
+        setSuccessMessage(t('alerts.waiterUpdatedSuccess') || 'Waiter updated successfully.');
         setError('');
 
         if (closeForm) {
@@ -144,7 +143,7 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
         }
       } catch (error: any) {
         console.error('Failed to update waiter:', error);
-        setError(error.message || 'Failed to update waiter. Please try again.');
+        setError(error.message || t('errors.submitFailed') || 'Failed to update waiter. Please try again.');
         setSuccessMessage('');
       }
     },
@@ -159,12 +158,13 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
       resetAllFields,
       resetFieldsExceptCompany,
       handleClose,
+      t,
     ]
   );
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Edit Waiter</DialogTitle>
+      <DialogTitle>{t('buttons.update') || 'Edit Waiter'}</DialogTitle>
       <DialogContent>
         <form
           onSubmit={(e) => {
@@ -173,7 +173,7 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
           }}
         >
           <FormControl fullWidth margin="normal">
-            <CustomFormLabel htmlFor="waiterName">Waiter Name</CustomFormLabel>
+            <CustomFormLabel htmlFor="waiterName">{t('addWaiterForm.waiterName') || 'Waiter Name'}</CustomFormLabel>
             <OutlinedInput
               startAdornment={
                 <InputAdornment position="start">
@@ -181,7 +181,7 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
                 </InputAdornment>
               }
               id="waiterName"
-              placeholder="Waiter Name"
+              placeholder={t('addWaiterForm.waiterNamePlaceholder') || 'Waiter Name'}
               value={waiterName}
               onChange={(e) => setWaiterName(e.target.value)}
               required
@@ -190,22 +190,22 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
 
           {/* Company is auto-assigned, display it as read-only */}
           <FormControl fullWidth margin="normal">
-            <CustomFormLabel>Company</CustomFormLabel>
+            <CustomFormLabel>{t('addWaiterForm.company') || 'Company'}</CustomFormLabel>
             <Typography variant="body1">{currentCompany.companyName}</Typography>
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel id="branch-label">Branch</InputLabel>
+            <InputLabel id="branch-label">{t('addWaiterForm.branch') || 'Branch'}</InputLabel>
             <Select
               labelId="branch-label"
               id="branchId"
               value={branchId}
-              label="Branch"
+              label={t('addWaiterForm.branch') || 'Branch'}
               onChange={(e) => setBranchId(e.target.value)}
               required
             >
               <MenuItem value="">
-                <em>Select a branch</em>
+                <em>{t('waitersTable.selectBranch') || 'Select a branch'}</em>
               </MenuItem>
               {branches.map((branch) => (
                 <MenuItem key={branch.branchId} value={branch.branchId}>
@@ -231,10 +231,10 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="error">
-          Cancel
+          {t('buttons.cancel') || 'Cancel'}
         </Button>
         <Button onClick={() => handleSubmit(false)} color="primary">
-          Save
+          {t('buttons.update') || 'Save'}
         </Button>
       </DialogActions>
     </Dialog>

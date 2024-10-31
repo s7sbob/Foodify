@@ -84,33 +84,8 @@
         "status": "Status"
       }
     },
-    "buttons": {
-      "addUser":"add Users",
-      "addPilot": "Add Pilot",
-      "cancel": "Cancel",
-      "update": "Update",
-      "create": "Create",
-      "addZone": "Add Zone",
-      "loading": "Loading...",
-      "saveAndStartNew": "Save & Start New",
-      "saveAndViewAll": "Save & View All"
 
-    },
-    "errors": {
-      "fillAllFields": "Please fill in all required fields.",
-      "fetchBranchesFailed": "Failed to fetch branches.",
-      "submitFailed": "Failed to submit pilot data.",
-      "fetchPilotsFailed": "Failed to fetch pilots.",
-      "fetchZonesFailed": "Failed to fetch zones."
-    },
-    "alerts": {
-      "fetchPilotsFailed": "Failed to fetch pilots.",
-      "createPilotSuccess": "Pilot created successfully.",
-      "updatePilotSuccess": "Pilot updated successfully.",
-      "fetchZonesFailed": "Failed to fetch zones.",
-      "addZoneSuccess": "Zone added successfully.",
-      "updateZoneSuccess": "Zone updated successfully."
-    },
+
     "search": {
       "global": "Global Search",
       "column": "Search..."
@@ -127,6 +102,68 @@
       "deliveryFee": "Delivery Fee",
       "deliveryBonus": "Delivery Bonus",
       "branch": "Branch"
+    },
+    "waitersPage": {
+      "title": "Waiters Management"
+    },
+    "waitersTable": {
+      "waiterName": "Waiter Name",
+      "branchName": "Branch Name",
+      "companyName": "Company Name",
+      "actions": "Actions",
+      "waitersTable": "Waiters Table",
+      "globalSearch": "Global Search",
+      "searchPlaceholder": "Search..."
+    },
+    "buttons": {
+      "addWaiter": "Add Waiter",
+      "cancel": "Cancel",
+      "update": "Update",
+      "create": "Create",
+      "addUser":"add Users",
+      "addPilot": "Add Pilot",
+      "addZone": "Add Zone",
+      "loading": "Loading...",
+      "saveAndStartNew": "Save & Start New",
+      "saveAndViewAll": "Save & View All"
+    },
+    "alerts": {
+      "fetchWaitersFailed": "Failed to fetch waiters.",
+      "waiterAddedSuccess": "Waiter added successfully!",
+      "waiterUpdatedSuccess": "Waiter updated successfully!",
+      "fetchPilotsFailed": "Failed to fetch pilots.",
+      "createPilotSuccess": "Pilot created successfully.",
+      "updatePilotSuccess": "Pilot updated successfully.",
+      "fetchZonesFailed": "Failed to fetch zones.",
+      "addZoneSuccess": "Zone added successfully.",
+      "updateZoneSuccess": "Zone updated successfully.",
+      "zoneAddedSuccess": "Zone added successfully.",
+      "zoneUpdatedSuccess": "Zone updated successfully.",
+      "fetchBranchesFailed": "Failed to fetch branches.",
+      "submitZoneFailed": "Failed to submit zone data."
+    },
+    "errors": {
+      "waiterNameRequired": "Waiter name is required.",
+      "branchRequired": "Branch is required.",
+      "fillAllFields": "Please fill in all required fields.",
+      "fetchBranchesFailed": "Failed to fetch branches.",
+      "submitFailed": "Failed to submit pilot data.",
+      "fetchPilotsFailed": "Failed to fetch pilots.",
+      "fetchZonesFailed": "Failed to fetch zones."
+    },
+    "zones": {
+      "addZoneForm": {
+        "titleAdd": "Add Zone",
+        "titleEdit": "Edit Zone",
+        "zoneName": "Zone Name",
+        "deliveryFee": "Delivery Fee",
+        "deliveryBonus": "Delivery Bonus",
+        "branch": "Branch",
+        "zoneNamePlaceholder": "Enter zone name",
+        "deliveryFeePlaceholder": "Enter delivery fee",
+        "deliveryBonusPlaceholder": "Enter delivery bonus",
+        "branchPlaceholder": "Select branch"
+      }
     }
   
 }

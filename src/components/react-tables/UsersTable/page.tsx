@@ -1,6 +1,6 @@
 // src/components/ReactColumnVisibilityTable.tsx
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   TableContainer,
   Table,

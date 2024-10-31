@@ -27,7 +27,7 @@ interface AddZoneFormProps {
   handleClose: () => void;
   onZoneAdded: () => void; // Callback after adding/updating a zone
   zoneToEdit?: ZoneData | null; // Optional prop for editing a zone
-  companyId: string; // Added prop for auto-assigned companyId
+  companyId: string; // Auto-assigned companyId
 }
 
 const AddZoneForm: React.FC<AddZoneFormProps> = ({
@@ -37,7 +37,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
   zoneToEdit = null,
   companyId,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // Initialize translation hook
 
   const [name, setName] = useState<string>('');
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
@@ -71,8 +71,8 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
         setBranches(selectedCompany?.branches || []);
       } catch (err: any) {
         console.error('Error fetching branches:', err);
-        setError('Failed to fetch branches.');
-        showNotification('Failed to fetch branches.', 'error', 'Error');
+        setError(t('alerts.fetchBranchesFailed') || 'Failed to fetch branches.');
+        showNotification(t('alerts.fetchBranchesFailed') || 'Failed to fetch branches.', 'error', 'Error');
       } finally {
         setLoading(false);
       }
@@ -81,7 +81,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
     if (open) {
       fetchBranches();
     }
-  }, [open, baseurl, companyId, token, showNotification]);
+  }, [open, baseurl, companyId, token, showNotification, t]);
 
   // Set default branchId when branches are loaded and branchId is empty
   useEffect(() => {
@@ -112,8 +112,8 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
   const handleSubmit = async () => {
     // Basic Validation
     if (!name.trim() || !branchId) {
-      setError('Please fill in all required fields.');
-      showNotification('Please fill in all required fields.', 'warning', 'Incomplete Data');
+      setError(t('errors.fillAllFields') || 'Please fill in all required fields.');
+      showNotification(t('errors.fillAllFields') || 'Please fill in all required fields.', 'warning', 'Incomplete Data');
       return;
     }
 
@@ -140,7 +140,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
             },
           }
         );
-        showNotification('Zone updated successfully.', 'success', 'Success');
+        showNotification(t('alerts.zoneUpdatedSuccess') || 'Zone updated successfully.', 'success', 'Success');
       } else {
         // Add Zone
         await axios.post(`${baseurl}/PosZone/AddZone`, zoneData, {
@@ -149,102 +149,104 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
             'Content-Type': 'application/json',
           },
         });
-        showNotification('Zone added successfully.', 'success', 'Success');
+        showNotification(t('alerts.zoneAddedSuccess') || 'Zone added successfully.', 'success', 'Success');
       }
 
       onZoneAdded(); // Refresh the zone list
       handleClose(); // Close the modal
     } catch (err: any) {
       console.error('Error submitting zone data:', err);
-      setError('Failed to submit zone data.');
-      showNotification('Failed to submit zone data.', 'error', 'Error');
+      setError(t('alerts.submitZoneFailed') || 'Failed to submit zone data.');
+      showNotification(t('alerts.submitZoneFailed') || 'Failed to submit zone data.', 'error', 'Error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>{zoneToEdit ? 'Edit Zone' : 'Add Zone'}</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
-            {/* Zone Name */}
-            <Grid item xs={12}>
-              <TextField
-                label="Zone Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                fullWidth
-                required
-              />
-            </Grid>
-
-            {/* Delivery Fee */}
-            <Grid item xs={12}>
-              <TextField
-                label="Delivery Fee"
-                type="number"
-                value={deliveryFee}
-                onChange={(e) => setDeliveryFee(parseFloat(e.target.value))}
-                fullWidth
-                required
-                inputProps={{ step: '0.01' }}
-              />
-            </Grid>
-
-            {/* Delivery Bonus */}
-            <Grid item xs={12}>
-              <TextField
-                label="Delivery Bonus"
-                type="number"
-                value={deliveryBonus}
-                onChange={(e) => setDeliveryBonus(parseFloat(e.target.value))}
-                fullWidth
-                required
-                inputProps={{ step: '0.01' }}
-              />
-            </Grid>
-
-            {/* Branch Selection */}
-            <Grid item xs={12}>
-              <FormControl fullWidth required disabled={!companyId || branches.length === 0 || loading}>
-                <InputLabel id="branch-select-label">Branch</InputLabel>
-                <Select
-                  labelId="branch-select-label"
-                  value={branchId}
-                  label="Branch"
-                  onChange={(e) => setBranchId(e.target.value)}
-                >
-                  {branches.map((branch) => (
-                    <MenuItem key={branch.branchId} value={branch.branchId}>
-                      {branch.branchName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* Display Error if Any */}
-            {error && (
-              <Grid item xs={12}>
-                <Typography color="error" variant="body2">
-                  {error}
-                </Typography>
-              </Grid>
-            )}
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogTitle>{zoneToEdit ? t('zones.addZoneForm.titleEdit') || 'Edit Zone' : t('zones.addZoneForm.titleAdd') || 'Add Zone'}</DialogTitle>
+      <DialogContent>
+        <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
+          {/* Zone Name */}
+          <Grid item xs={12}>
+            <TextField
+              label={t('zones.addZoneForm.zoneName') || 'Zone Name'}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              fullWidth
+              required
+              placeholder={t('zones.addZoneForm.zoneNamePlaceholder') || 'Enter zone name'}
+            />
           </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary" disabled={loading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
-            {zoneToEdit ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+
+          {/* Delivery Fee */}
+          <Grid item xs={12}>
+            <TextField
+              label={t('zones.addZoneForm.deliveryFee') || 'Delivery Fee'}
+              type="number"
+              value={deliveryFee}
+              onChange={(e) => setDeliveryFee(parseFloat(e.target.value))}
+              fullWidth
+              required
+              inputProps={{ step: '0.01' }}
+              placeholder={t('zones.addZoneForm.deliveryFeePlaceholder') || 'Enter delivery fee'}
+            />
+          </Grid>
+
+          {/* Delivery Bonus */}
+          <Grid item xs={12}>
+            <TextField
+              label={t('zones.addZoneForm.deliveryBonus') || 'Delivery Bonus'}
+              type="number"
+              value={deliveryBonus}
+              onChange={(e) => setDeliveryBonus(parseFloat(e.target.value))}
+              fullWidth
+              required
+              inputProps={{ step: '0.01' }}
+              placeholder={t('zones.addZoneForm.deliveryBonusPlaceholder') || 'Enter delivery bonus'}
+            />
+          </Grid>
+
+          {/* Branch Selection */}
+          <Grid item xs={12}>
+            <FormControl fullWidth required disabled={!companyId || branches.length === 0 || loading}>
+              <InputLabel id="branch-select-label">{t('zones.addZoneForm.branch') || 'Branch'}</InputLabel>
+              <Select
+                labelId="branch-select-label"
+                value={branchId}
+                label={t('zones.addZoneForm.branch') || 'Branch'}
+                onChange={(e) => setBranchId(e.target.value)}
+                placeholder={t('zones.addZoneForm.branchPlaceholder') || 'Select branch'}
+              >
+                {branches.map((branch) => (
+                  <MenuItem key={branch.branchId} value={branch.branchId}>
+                    {branch.branchName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          {/* Display Error if Any */}
+          {error && (
+            <Grid item xs={12}>
+              <Typography color="error" variant="body2">
+                {error}
+              </Typography>
+            </Grid>
+          )}
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="secondary" disabled={loading}>
+          {t('buttons.cancel') || 'Cancel'}
+        </Button>
+        <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
+          {zoneToEdit ? t('buttons.update') || 'Update' : t('buttons.create') || 'Create'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

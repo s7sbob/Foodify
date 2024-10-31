@@ -20,6 +20,8 @@ import { IconUser } from '@tabler/icons-react';
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { CompanyData } from 'src/types/companyTypes';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useNotification } from '../../../context/NotificationContext'; // Import the hook
 
 interface AddWaiterFormProps {
   open: boolean;
@@ -34,6 +36,9 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
   onWaiterAdded,
   companies,
 }) => {
+  const { t } = useTranslation(); // Initialize translation hook
+  const { showNotification } = useNotification(); // Use the notification hook
+
   const token =
     useSelector((state: AppState) => state.auth.token) ||
     localStorage.getItem('authToken') ||
@@ -60,7 +65,6 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
     }
   }, [open, branches]);
 
-  // Remove unnecessary useEffect for companyId change
   // Reset functions
   const resetFieldsExceptCompany = useCallback(() => {
     setWaiterName('');
@@ -80,7 +84,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
     async (closeForm: boolean) => {
       // Validate input
       if (!waiterName || !branchId) {
-        setError('Waiter Name and Branch are required.');
+        setError(t('errors.waiterNameRequired') || 'Waiter Name and Branch are required.');
         setSuccessMessage('');
         return;
       }
@@ -111,7 +115,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
 
         // Handle success
         onWaiterAdded(); // Refresh the table
-        setSuccessMessage('Waiter added successfully.');
+        setSuccessMessage(t('alerts.waiterAddedSuccess') || 'Waiter added successfully.');
         setError('');
 
         if (closeForm) {
@@ -122,7 +126,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
         }
       } catch (error: any) {
         console.error('Failed to add waiter:', error);
-        setError(error.message || 'Failed to add waiter. Please try again.');
+        setError(error.message || t('errors.submitFailed') || 'Failed to add waiter. Please try again.');
         setSuccessMessage('');
       }
     },
@@ -136,12 +140,13 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
       resetAllFields,
       resetFieldsExceptCompany,
       handleClose,
+      t,
     ]
   );
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add New Waiter</DialogTitle>
+      <DialogTitle>{t('buttons.addWaiter') || 'Add Waiter'}</DialogTitle>
       <DialogContent>
         <form
           onSubmit={(e) => {
@@ -150,7 +155,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
           }}
         >
           <FormControl fullWidth margin="normal">
-            <CustomFormLabel htmlFor="waiterName">Waiter Name</CustomFormLabel>
+            <CustomFormLabel htmlFor="waiterName">{t('addWaiterForm.waiterName') || 'Waiter Name'}</CustomFormLabel>
             <OutlinedInput
               startAdornment={
                 <InputAdornment position="start">
@@ -158,22 +163,20 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
                 </InputAdornment>
               }
               id="waiterName"
-              placeholder="Waiter Name"
+              placeholder={t('addWaiterForm.waiterNamePlaceholder') || 'Waiter Name'}
               value={waiterName}
               onChange={(e) => setWaiterName(e.target.value)}
               required
             />
           </FormControl>
 
-          {/* Removed Company Display */}
-
           <FormControl fullWidth margin="normal">
-            <InputLabel id="branch-label">Branch</InputLabel>
+            <InputLabel id="branch-label">{t('addWaiterForm.branch') || 'Branch'}</InputLabel>
             <Select
               labelId="branch-label"
               id="branchId"
               value={branchId}
-              label="Branch"
+              label={t('addWaiterForm.branch') || 'Branch'}
               onChange={(e) => setBranchId(e.target.value)}
               required
             >
@@ -201,11 +204,11 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="error">
-          Cancel
+          {t('buttons.cancel') || 'Cancel'}
         </Button>
 
         <Button onClick={() => handleSubmit(true)} color="primary">
-          Create
+          {t('buttons.create') || 'Create'}
         </Button>
       </DialogActions>
     </Dialog>
