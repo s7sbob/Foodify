@@ -47,7 +47,7 @@ const Languages: LanguageOption[] = [
   },
 ];
 
-const Language: React.FC = () => {
+const Language: React.FC = () => { // Renamed component for clarity
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const dispatch = useDispatch();
   const open = Boolean(anchorEl);
@@ -68,13 +68,13 @@ const Language: React.FC = () => {
     dispatch(setLanguage(lng));
     i18n.changeLanguage(lng);
     localStorage.setItem('language', lng); // Persist language preference
-    // Direction is handled within the slice's setLanguage reducer
+    // Direction is handled within the slice's setLanguage reducer if needed
   };
 
   useEffect(() => {
     // Initialize language on mount based on Redux state
     if (customizer.isLanguage) {
-      changeLanguage(customizer.isLanguage);
+      i18n.changeLanguage(customizer.isLanguage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

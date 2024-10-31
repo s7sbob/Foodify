@@ -21,7 +21,6 @@
     "Tickets": "تذاكر",
     "Company": "شركات",
     "Add_USer": "إضافة زائر",
-    
         "menu": {
           "mainData": "البيانات الرئيسية",
           "account": "الحساب",
@@ -41,20 +40,92 @@
           "userCode": "رمز المستخدم",
           "userName": "اسم المستخدم",
           "actions": "الإجراءات",
-          "usersTable": "جدول المستخدمين"
+          "usersTable": "جدول المستخدمين",
+          "pilotName": "اسم الطيار",
+          "phoneNumber": "رقم الهاتف",
+          "companyName": "اسم الشركة",
+          "branchName": "اسم الفرع",
+          "pilotList": "قائمة الطيارين",
+          "zoneName": "اسم المنطقة",
+          "deliveryFee": "رسوم التوصيل",
+          "deliveryBonus": "مكافأة التوصيل",
+          "zoneList": "قائمة المناطق",
+          "unknown": "غير معروف"
         },
         "actions": {
           "edit": "تعديل",
           "windows": "نوافذ",
           "permissions": "أذونات"
         },
+        "addUserForm": {
+          "userCodePlaceholder": "رمز المستخدم",
+          "usernamePlaceholder": "اسم المستخدم",
+          "passwordPlaceholder": "كلمة المرور",
+          "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
+          "username": "اسم المستخدم" ,
+          "userCode":"رمز المستخدم",
+          "password": "كلمة المرور",
+          "confirmPassword": "تأكيد كلمة المرور",
+          "title": "إضافة مستخدمين جدد",
+          "addPilot": "إضافة طيار",
+          "editPilot": "تعديل طيار",
+          "name": "الاسم",
+          "phone": "الهاتف",
+          "branch": "الفرع",
+          "isActive": "نشط",
+          "pilotName": "اسم الطيار",
+          "phoneNumber": "رقم الهاتف",
+          "companyName": "اسم الشركة",
+          "branchName": "اسم الفرع",
+          "actions": "الإجراءات",
+          "pilotList": "قائمة الطيارين",
+          "status": {
+            "active": "نشط",
+            "inactive": "غير نشط",
+            "status": "الحالة"
+          }
+        },
         "buttons": {
-          "addUser": "إضافة مستخدم"
+          "addUser":"إضافة مستخدمين",
+          "addPilot": "إضافة طيار",
+          "cancel": "إلغاء",
+          "update": "تحديث",
+          "create": "إنشاء",
+          "addZone": "إضافة منطقة",
+          "loading": "جارٍ التحميل...",
+          "saveAndStartNew": "حفظ وبدء جديد",
+          "saveAndViewAll": "حفظ وعرض الكل"
+        },
+        "errors": {
+          "fillAllFields": "يرجى ملء جميع الحقول المطلوبة.",
+          "fetchBranchesFailed": "فشل في جلب الفروع.",
+          "submitFailed": "فشل في إرسال بيانات الطيار.",
+          "fetchPilotsFailed": "فشل في جلب الطيارين.",
+          "fetchZonesFailed": "فشل في جلب المناطق."
+        },
+        "alerts": {
+          "fetchPilotsFailed": "فشل في جلب الطيارين.",
+          "createPilotSuccess": "تم إنشاء الطيار بنجاح.",
+          "updatePilotSuccess": "تم تحديث الطيار بنجاح.",
+          "fetchZonesFailed": "فشل في جلب المناطق.",
+          "addZoneSuccess": "تمت إضافة المنطقة بنجاح.",
+          "updateZoneSuccess": "تم تحديث المنطقة بنجاح."
         },
         "search": {
           "global": "بحث شامل",
           "column": "بحث..."
+        },
+        "status": {
+          "active": "نشط",
+          "inactive": "غير نشط",
+          "status": "الحالة"
+        },
+        "addZoneForm": {
+          "addZone": "إضافة منطقة",
+          "editZone": "تعديل منطقة",
+          "zoneName": "اسم المنطقة",
+          "deliveryFee": "رسوم التوصيل",
+          "deliveryBonus": "مكافأة التوصيل",
+          "branch": "الفرع"
         }
-      
-      
 }

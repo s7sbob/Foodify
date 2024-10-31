@@ -35,22 +35,98 @@
         "posDataTablesSectionList": "Tables Section List",
         "posDataTablesList": "Tables List"
       },
-"table": {
-    "userCode": "User Code",
-    "userName": "Username",
-    "actions": "Actions",
-    "usersTable": "Users Table"
-  },
-  "actions": {
-    "edit": "Edit",
-    "windows": "Windows",
-    "permissions": "Permissions"
-  },
-  "buttons": {
-    "addUser": "Add User"
-  },
-  "search": {
-    "global": "Global Search",
-    "column": "Search..."
-  }
+    "table": {
+      "userCode": "User Code",
+      "userName": "Username",
+      "actions": "Actions",
+      "usersTable": "Users Table",
+      "pilotName": "Pilot Name",
+      "phoneNumber": "Phone Number",
+      "pilotList": "Pilot List",
+      "zoneName": "Zone Name",
+    "deliveryFee": "Delivery Fee",
+    "deliveryBonus": "Delivery Bonus",
+    "companyName": "Company Name",
+    "branchName": "Branch Name",
+    "zoneList": "Zone List",
+    "unknown": "Unknown"
+    },
+    "actions": {
+      "edit": "Edit",
+      "windows": "Windows",
+      "permissions": "Permissions"
+    },
+    "addUserForm": {
+      "userCodePlaceholder": "User Code",
+      "usernamePlaceholder": "Username",
+      "passwordPlaceholder": "Password",
+      "confirmPasswordPlaceholder": "Confirm Password",
+      "username":  "username" ,
+      "userCode":"userCode",
+      "password": "password",
+      "confirmPassword":  "confirmPassword",
+      "title": "Adding New Users",
+      "addPilot": "Add Pilot",
+      "editPilot": "Edit Pilot",
+      "name": "Name",
+      "phone": "Phone",
+      "branch": "Branch",
+      "isActive": "Is Active",
+      "pilotName": "Pilot Name",
+      "phoneNumber": "Phone Number",
+      "companyName": "Company Name",
+      "branchName": "Branch Name",
+      "actions": "Actions",
+      "pilotList": "Pilot List",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "status": "Status"
+      }
+    },
+    "buttons": {
+      "addUser":"add Users",
+      "addPilot": "Add Pilot",
+      "cancel": "Cancel",
+      "update": "Update",
+      "create": "Create",
+      "addZone": "Add Zone",
+      "loading": "Loading...",
+      "saveAndStartNew": "Save & Start New",
+      "saveAndViewAll": "Save & View All"
+
+    },
+    "errors": {
+      "fillAllFields": "Please fill in all required fields.",
+      "fetchBranchesFailed": "Failed to fetch branches.",
+      "submitFailed": "Failed to submit pilot data.",
+      "fetchPilotsFailed": "Failed to fetch pilots.",
+      "fetchZonesFailed": "Failed to fetch zones."
+    },
+    "alerts": {
+      "fetchPilotsFailed": "Failed to fetch pilots.",
+      "createPilotSuccess": "Pilot created successfully.",
+      "updatePilotSuccess": "Pilot updated successfully.",
+      "fetchZonesFailed": "Failed to fetch zones.",
+      "addZoneSuccess": "Zone added successfully.",
+      "updateZoneSuccess": "Zone updated successfully."
+    },
+    "search": {
+      "global": "Global Search",
+      "column": "Search..."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "status": "Status"
+    },
+    "addZoneForm": {
+      "addZone": "Add Zone",
+      "editZone": "Edit Zone",
+      "zoneName": "Zone Name",
+      "deliveryFee": "Delivery Fee",
+      "deliveryBonus": "Delivery Bonus",
+      "branch": "Branch"
+    }
+  
 }

@@ -2,7 +2,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-
 interface StateType {
   activeDir: string;
   activeMode: string;
@@ -34,7 +33,7 @@ const initialState: StateType = {
   isSidebarHover: false,
   isMobileSidebar: false,
   isHorizontal: false,
-  isLanguage: 'en',
+  isLanguage: localStorage.getItem('language') || 'en', // Initialize from localStorage
   isCardShadow: true,
   borderRadius: 7,
   baseurl: 'https://erp.ts-egy.com/api',
@@ -54,7 +53,7 @@ export const CustomizerSlice = createSlice({
     setDir: (state, action: PayloadAction<string>) => {
       state.activeDir = action.payload;
     },
-    setLanguage: (state: StateType, action) => {
+    setLanguage: (state: StateType, action: PayloadAction<string>) => { // Specify PayloadAction type
       state.isLanguage = action.payload;
     },
     setCardShadow: (state, action: PayloadAction<boolean>) => {

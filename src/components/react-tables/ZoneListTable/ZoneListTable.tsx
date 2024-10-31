@@ -29,24 +29,28 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   VisibilityState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import DownloadCard from 'src/components/shared/DownloadCard';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import AddZoneForm from './AddZoneForm';
+import AddZoneForm from './AddZoneForm'; // Import the AddZoneForm component
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { ZoneData, Company } from './types';
 import { useNotification } from '../../../context/NotificationContext'; // Import the hook
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const ZoneListTable: React.FC = () => {
+  const { t } = useTranslation();
+
   const [data, setData] = useState<ZoneData[]>([]);
   const [companyData, setCompanyData] = useState<Company[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [open, setOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [zoneToEdit, setZoneToEdit] = useState<ZoneData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +63,7 @@ const ZoneListTable: React.FC = () => {
     useSelector((state: AppState) => state.auth.token) ||
     localStorage.getItem('token');
 
+  // Fetch Zones and Company Data
   const fetchZonesData = useCallback(async () => {
     const headers = {
       Authorization: `Bearer ${token}`,
@@ -68,8 +73,8 @@ const ZoneListTable: React.FC = () => {
     setError(null);
     try {
       const [zonesResponse, companyResponse] = await Promise.all([
-        axios.get(`${baseurl}/PosZone/GetZones`, { headers }),
-        axios.get(`${baseurl}/Company/GetCompanyData`, { headers }),
+        axios.get<ZoneData[]>(`${baseurl}/PosZone/GetZones`, { headers }),
+        axios.get<Company[]>(`${baseurl}/Company/GetCompanyData`, { headers }),
       ]);
 
       const zones: ZoneData[] = zonesResponse.data || [];
@@ -79,7 +84,6 @@ const ZoneListTable: React.FC = () => {
 
       setData(zones);
       setCompanyData(companies);
-
     } catch (err: any) {
       console.error('Error fetching zones:', err);
       setError('Failed to fetch zones. Please try again later.');
@@ -97,7 +101,13 @@ const ZoneListTable: React.FC = () => {
   // Handle Edit Action
   const handleEdit = (zone: ZoneData) => {
     setZoneToEdit(zone);
-    handleOpen();
+    setIsModalOpen(true);
+  };
+
+  // Handle Add Zone Action
+  const handleAddZone = () => {
+    setZoneToEdit(null); // Ensure no zone is set for adding
+    setIsModalOpen(true);
   };
 
   // Define Columns
@@ -114,9 +124,9 @@ const ZoneListTable: React.FC = () => {
     return map;
   }, [companyData]);
 
-  const columns = useMemo(() => [
+  const columns = useMemo<ColumnDef<ZoneData, any>[]>(() => [
     columnHelper.accessor('name', {
-      header: 'Zone Name',
+      header: t('table.zoneName') || 'Zone Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -125,7 +135,7 @@ const ZoneListTable: React.FC = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('deliveryFee', {
-      header: 'Delivery Fee',
+      header: t('table.deliveryFee') || 'Delivery Fee',
       cell: info => {
         const currency = branchCurrencyMap[info.row.original.branchId] || 'LE';
         return (
@@ -137,7 +147,7 @@ const ZoneListTable: React.FC = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('deliveryBonus', {
-      header: 'Delivery Bonus',
+      header: t('table.deliveryBonus') || 'Delivery Bonus',
       cell: info => {
         const currency = branchCurrencyMap[info.row.original.branchId] || 'LE';
         return (
@@ -150,12 +160,12 @@ const ZoneListTable: React.FC = () => {
     }),
     // Company Name Column
     columnHelper.accessor('companyId', {
-      header: 'Company Name',
+      header: t('table.companyName') || 'Company Name',
       cell: info => {
         const company = companyData.find(c => c.companyId === info.getValue());
         return (
           <Typography variant="h6" fontWeight="400">
-            {company ? company.companyName : 'Unknown'}
+            {company ? company.companyName : t('table.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -163,14 +173,14 @@ const ZoneListTable: React.FC = () => {
     }),
     // Branch Name Column
     columnHelper.accessor('branchId', {
-      header: 'Branch Name',
+      header: t('table.branchName') || 'Branch Name',
       cell: info => {
         // Find the company first
         const company = companyData.find(c => c.companyId === (info.row.original as ZoneData).companyId);
         const branch = company?.branches.find(b => b.branchId === info.getValue());
         return (
           <Typography variant="h6" fontWeight="400">
-            {branch ? branch.branchName : 'Unknown'}
+            {branch ? branch.branchName : t('table.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -179,7 +189,7 @@ const ZoneListTable: React.FC = () => {
     // Actions Column
     columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('table.actions') || 'Actions',
       cell: info => (
         <Stack direction="row" spacing={1}>
           <Tooltip title="Edit">
@@ -195,7 +205,7 @@ const ZoneListTable: React.FC = () => {
         </Stack>
       ),
     }),
-  ], [columnHelper, companyData, branchCurrencyMap, handleEdit]);
+  ], [columnHelper, companyData, branchCurrencyMap, handleEdit, t]);
 
   // Initialize the table
   const table = useReactTable<ZoneData>({
@@ -215,7 +225,13 @@ const ZoneListTable: React.FC = () => {
 
   // Handle Download CSV
   const handleDownload = useCallback(() => {
-    const headers = ['Zone Name', 'Delivery Fee', 'Delivery Bonus', 'Company Name', 'Branch Name'];
+    const headers = [
+      t('table.zoneName') || 'Zone Name',
+      t('table.deliveryFee') || 'Delivery Fee',
+      t('table.deliveryBonus') || 'Delivery Bonus',
+      t('table.companyName') || 'Company Name',
+      t('table.branchName') || 'Branch Name'
+    ];
     const rows = data.map((zone: ZoneData) => {
       const company = companyData.find(c => c.companyId === zone.companyId);
       const branch = company?.branches.find(b => b.branchId === zone.branchId);
@@ -224,8 +240,8 @@ const ZoneListTable: React.FC = () => {
         zone.name,
         `${zone.deliveryFee.toFixed(2)} ${currency}`,
         `${zone.deliveryBonus.toFixed(2)} ${currency}`,
-        company ? company.companyName : 'Unknown',
-        branch ? branch.branchName : 'Unknown',
+        company ? company.companyName : t('table.unknown') || 'Unknown',
+        branch ? branch.branchName : t('table.unknown') || 'Unknown',
       ];
     });
 
@@ -240,17 +256,18 @@ const ZoneListTable: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [data, companyData, branchCurrencyMap]);
+  }, [data, companyData, branchCurrencyMap, t]);
 
-  // Modal Control Functions
-  const handleOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setOpen(false);
+  // Handle Modal Close
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
     setZoneToEdit(null);
   }, []);
+
+  // Handle Zone Added or Updated
+  const handleZoneAdded = useCallback(() => {
+    fetchZonesData();
+  }, [fetchZonesData]);
 
   // Extract the single companyId (assuming only one company)
   const singleCompanyId = companyData.length === 1 ? companyData[0].companyId : '';
@@ -263,10 +280,10 @@ const ZoneListTable: React.FC = () => {
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
-          onClick={handleOpen}
+          onClick={handleAddZone}
           disabled={companyData.length !== 1} // Disable if not exactly one company
         >
-          Add Zone
+          {t('buttons.addZone') || 'Add Zone'}
         </Button>
       </Box>
 
@@ -285,7 +302,7 @@ const ZoneListTable: React.FC = () => {
                     onChange={e => column.toggleVisibility(e.target.checked)}
                   />
                 }
-                label={column.columnDef.header as string}
+                label={column.columnDef.header as string || column.id} // Provide fallback
               />
             ))}
         </FormGroup>
@@ -294,7 +311,7 @@ const ZoneListTable: React.FC = () => {
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('search.global') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
@@ -312,7 +329,7 @@ const ZoneListTable: React.FC = () => {
           {error}
         </Typography>
       ) : (
-        <DownloadCard title="Zone List" onDownload={handleDownload}>
+        <DownloadCard title={t('table.zoneList') || 'Zone List'} onDownload={handleDownload}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TableContainer>
@@ -335,7 +352,7 @@ const ZoneListTable: React.FC = () => {
                                   size="small"
                                   value={(header.column.getFilterValue() ?? '') as string}
                                   onChange={e => header.column.setFilterValue(e.target.value)}
-                                  placeholder={`Search...`}
+                                  placeholder={t('search.column') || 'Search...'}
                                   style={{ marginLeft: '8px' }}
                                 />
                               ) : null}
@@ -366,9 +383,9 @@ const ZoneListTable: React.FC = () => {
       {/* AddZoneForm Modal */}
       {singleCompanyId && (
         <AddZoneForm
-          open={open}
-          handleClose={handleClose}
-          onZoneAdded={fetchZonesData} // Refresh the table after adding/editing
+          open={isModalOpen}
+          handleClose={handleModalClose}
+          onZoneAdded={handleZoneAdded} // Refresh the table after adding/editing
           zoneToEdit={zoneToEdit}
           companyId={singleCompanyId} // Pass the single companyId
         />

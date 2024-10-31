@@ -30,106 +30,123 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   VisibilityState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DownloadCard from 'src/components/shared/DownloadCard';
-import AddUserForm from './AddUserForm';
+import AddUserForm from './AddUserForm'; // Import the AddUserForm component
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { PilotTableData, Company } from './types';
 import { useNotification } from '../../../context/NotificationContext'; // Import the hook
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 interface TableProps {
   // Define any props if necessary
 }
 
 const PilotListTable: React.FC<TableProps> = () => {
+  const { t } = useTranslation();
+  
   const [data, setData] = useState<PilotTableData[]>([]);
   const [companyData, setCompanyData] = useState<Company[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [open, setOpen] = useState(false);
-  const [pilotToEdit, setPilotToEdit] = useState<PilotTableData | null>(null); // Corrected state
-
+  
+  // States for Add/Edit User Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pilotToEdit, setPilotToEdit] = useState<PilotTableData | null>(null);
+  
   // Use the Notification Context
   const { showNotification } = useNotification();
-
+  
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
   const token =
     useSelector((state: AppState) => state.auth.token) ||
     localStorage.getItem('token');
-
-    const fetchPilotData = useCallback(async () => {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      };
-      setLoading(true);
-      setError(null);
-      try {
-        const [pilotResponse, companyResponse] = await Promise.all([
-          axios.get<PilotTableData[]>(`${baseurl}/PosPilot/GetPilots`, { headers }),
-          axios.get<Company[]>(`${baseurl}/Company/GetCompanyData`, { headers }),
-        ]);
-    
-        const companies: Company[] = Array.isArray(companyResponse.data)
-          ? companyResponse.data
-          : [companyResponse.data];
-    
-        setCompanyData(companies);
-    
-        const company = companies.length === 1 ? companies[0] : null;
-    
-        if (!company) {
-          throw new Error('Multiple companies found or no company associated with the user.');
-        }
-    
-        const updatedData: PilotTableData[] = pilotResponse.data.map((pilot: PilotTableData) => {
-          // Find the branch within the companyData
-          const branch = company.branches.find(b => b.branchId === pilot.branchId);
-    
-          return {
-            pilotId: pilot.pilotId,
-            name: pilot.name,
-            phone: pilot.phone,
-            isActive: pilot.isActive,
-            companyName: company.companyName || 'Unknown',
-            companyId: company.companyId || '',
-            branchName: branch?.branchName || 'Unknown',
-            branchId: branch?.branchId || '',
-          };
-        });
-    
-        setData(updatedData);
-      } catch (error: any) {
-        console.error('Error fetching pilot data:', error);
-        setError('Failed to fetch pilots. Please try again later.');
-        showNotification('Failed to fetch pilots.', 'error', 'Error');
-      } finally {
-        setLoading(false);
+  
+  // Loading and error states
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Fetch Pilot and Company Data
+  const fetchPilotData = useCallback(async () => {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+    setLoading(true);
+    setError(null);
+    try {
+      const [pilotResponse, companyResponse] = await Promise.all([
+        axios.get<PilotTableData[]>(`${baseurl}/PosPilot/GetPilots`, { headers }),
+        axios.get<Company[]>(`${baseurl}/Company/GetCompanyData`, { headers }),
+      ]);
+  
+      const companies: Company[] = Array.isArray(companyResponse.data)
+        ? companyResponse.data
+        : [companyResponse.data];
+  
+      setCompanyData(companies);
+  
+      if (companies.length !== 1) {
+        throw new Error('Multiple companies found or no company associated with the user.');
       }
-    }, [baseurl, token, showNotification]);
-    
+  
+      const company = companies[0];
+  
+      const updatedData: PilotTableData[] = pilotResponse.data.map((pilot: PilotTableData) => {
+        // Find the branch within the companyData
+        const branch = company.branches.find(b => b.branchId === pilot.branchId);
+  
+        return {
+          pilotId: pilot.pilotId,
+          name: pilot.name,
+          phone: pilot.phone,
+          isActive: pilot.isActive,
+          companyName: company.companyName || 'Unknown',
+          companyId: company.companyId || '',
+          branchName: branch?.branchName || 'Unknown',
+          branchId: branch?.branchId || '',
+        };
+      });
+  
+      setData(updatedData);
+    } catch (error: any) {
+      console.error('Error fetching pilot data:', error);
+      setError('Failed to fetch pilots. Please try again later.');
+      showNotification(t('alerts.fetchPilotsFailed') || 'Failed to fetch pilots.', 'error', 'Error');
+    } finally {
+      setLoading(false);
+    }
+  }, [baseurl, token, showNotification, t]);
+  
   // Fetch data on component mount
   useEffect(() => {
     fetchPilotData();
   }, [fetchPilotData]);
-
+  
   // Handle Edit Action
   const handleEdit = (pilot: PilotTableData) => {
     setPilotToEdit(pilot);
-    handleOpen();
+    setIsModalOpen(true);
   };
-
+  
+  // Handle Add Pilot Action
+  const handleAddPilot = () => {
+    setPilotToEdit(null); // Ensure no pilot is set for adding
+    setIsModalOpen(true);
+  };
+  
   // Define Columns
   const columnHelper = createColumnHelper<PilotTableData>();
-
-  const columns = useMemo(() => [
+  
+  const columns = useMemo<ColumnDef<PilotTableData, any>[]>(() => [
     columnHelper.accessor('name', {
-      header: 'Pilot Name',
+      header: t('table.pilotName') || 'Pilot Name',
       cell: info => {
         const isActive = info.row.original.isActive;
         return (
@@ -138,7 +155,7 @@ const PilotListTable: React.FC<TableProps> = () => {
               {info.getValue()}
             </Typography>
             <Chip
-              label={isActive ? 'Active' : 'Inactive'}
+              label={isActive ? (t('status.active') || 'Active') : (t('status.inactive') || 'Inactive')}
               color={isActive ? 'success' : 'error'}
               size="small"
               sx={{ ml: 1 }}
@@ -149,7 +166,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('phone', {
-      header: 'Phone Number',
+      header: t('table.phoneNumber') || 'Phone Number',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -158,7 +175,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('companyName', {
-      header: 'Company Name',
+      header: t('table.companyName') || 'Company Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -167,7 +184,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('branchName', {
-      header: 'Branch Name',
+      header: t('table.branchName') || 'Branch Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -177,13 +194,13 @@ const PilotListTable: React.FC<TableProps> = () => {
     }),
     columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('table.actions') || 'Actions',
       cell: info => (
         <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit">
+          <Tooltip title={t('actions.edit') || 'Edit'}>
             <IconButton
               color="primary"
-              aria-label="edit"
+              aria-label={t('actions.edit') || 'Edit'}
               onClick={() => handleEdit(info.row.original)}
             >
               <EditIcon />
@@ -193,8 +210,8 @@ const PilotListTable: React.FC<TableProps> = () => {
         </Stack>
       ),
     }),
-  ], [columnHelper, handleEdit]);
-
+  ], [columnHelper, handleEdit, t]);
+  
   // Initialize the table
   const table = useReactTable<PilotTableData>({
     data,
@@ -210,50 +227,53 @@ const PilotListTable: React.FC<TableProps> = () => {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
   });
-
+  
   // Handle Download CSV
   const handleDownload = useCallback(() => {
-    const headers = ['Pilot Name', 'Phone Number', 'Company Name', 'Branch Name', 'Status'];
+    const headers = [
+      t('table.pilotName') || 'Pilot Name',
+      t('table.phoneNumber') || 'Phone Number',
+      t('table.companyName') || 'Company Name',
+      t('table.branchName') || 'Branch Name',
+      t('status.status') || 'Status',
+    ];
     const rows = data.map((item: PilotTableData) => [
       item.name,
       item.phone,
       item.companyName,
       item.branchName,
-      item.isActive ? 'Active' : 'Inactive',
+      item.isActive ? (t('status.active') || 'Active') : (t('status.inactive') || 'Inactive'),
     ]);
-
+  
     const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-
+  
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-
+  
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', 'pilot-data.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [data]);
-
-  // Modal Control Functions
-  const handleOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setOpen(false);
+  }, [data, t]);
+  
+  // Handle Modal Close
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
     setPilotToEdit(null);
   }, []);
-
-  // Loading and error states
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
+  
   // Handle Pilot Added or Updated
   const handlePilotAdded = useCallback(() => {
     fetchPilotData();
-  }, [fetchPilotData]);
-
+    showNotification(
+      pilotToEdit ? 'Pilot updated successfully.' : 'Pilot added successfully.',
+      'success',
+      'Success'
+    );
+  }, [fetchPilotData, pilotToEdit, showNotification]);
+  
   return (
     <>
       {/* Add Pilot button */}
@@ -261,16 +281,13 @@ const PilotListTable: React.FC<TableProps> = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => {
-            setPilotToEdit(null); // Ensure no pilot is set for adding
-            handleOpen();
-          }}
+          onClick={handleAddPilot}
           startIcon={<AddIcon />}
         >
-          Add Pilot
+          {t('buttons.addPilot') || 'Add Pilot'}
         </Button>
       </Box>
-
+  
       {/* Column Visibility Toggles */}
       <Box mb={2}>
         <FormGroup row>
@@ -286,34 +303,35 @@ const PilotListTable: React.FC<TableProps> = () => {
                     onChange={e => column.toggleVisibility(e.target.checked)}
                   />
                 }
-                label={column.columnDef.header as string}
+                label={column.columnDef.header as string || column.id} // Provide fallback
               />
             ))}
         </FormGroup>
       </Box>
-
+  
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('search.global') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
           sx={{ width: '300px' }}
         />
       </Box>
-
+  
       {/* Display Loading, Error, or Table */}
       {loading ? (
         <Box display="flex" justifyContent="center" my={4}>
           <CircularProgress />
         </Box>
       ) : error ? (
+        // Optionally, you can still show a fallback UI if needed
         <Typography color="error" align="center">
           {error}
         </Typography>
       ) : (
-        <DownloadCard title="Pilot List" onDownload={handleDownload}>
+        <DownloadCard title={t('table.pilotList') || 'Pilot List'} onDownload={handleDownload}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TableContainer>
@@ -336,7 +354,7 @@ const PilotListTable: React.FC<TableProps> = () => {
                                   size="small"
                                   value={(header.column.getFilterValue() ?? '') as string}
                                   onChange={e => header.column.setFilterValue(e.target.value)}
-                                  placeholder={`Search...`}
+                                  placeholder={t('search.column') || 'Search...'}
                                   style={{ marginLeft: '8px' }}
                                 />
                               ) : null}
@@ -363,12 +381,12 @@ const PilotListTable: React.FC<TableProps> = () => {
           </Grid>
         </DownloadCard>
       )}
-
-      {/* AddUserForm Modal */}
+  
+      {/* AddUserForm Modal for Adding/Editing Pilots */}
       {companyData.length === 1 && (
         <AddUserForm
-          open={open}
-          handleClose={handleClose}
+          open={isModalOpen}
+          handleClose={handleModalClose}
           onUserAdded={handlePilotAdded}
           pilotToEdit={pilotToEdit}
           companyId={companyData[0].companyId} // Pass the single companyId

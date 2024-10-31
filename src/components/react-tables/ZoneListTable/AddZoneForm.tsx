@@ -2,23 +2,25 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  TextField,
-  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  TextField,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { ZoneData, Branch } from './types';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface AddZoneFormProps {
   open: boolean;
@@ -32,9 +34,11 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
   open,
   handleClose,
   onZoneAdded,
-  zoneToEdit,
+  zoneToEdit = null,
   companyId,
 }) => {
+  const { t } = useTranslation();
+
   const [name, setName] = useState<string>('');
   const [deliveryFee, setDeliveryFee] = useState<number>(0);
   const [deliveryBonus, setDeliveryBonus] = useState<number>(0);
@@ -45,14 +49,17 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { showNotification } = useNotification();
+
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
+  const token =
+    useSelector((state: AppState) => state.auth.token) || localStorage.getItem('token');
 
   // Fetch Branches Based on companyId
   useEffect(() => {
     const fetchBranches = async () => {
       if (!companyId) return;
 
-      const token = localStorage.getItem('token');
       setLoading(true);
       setError(null);
       try {
@@ -62,9 +69,10 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
         const companyData = Array.isArray(response.data) ? response.data : [response.data];
         const selectedCompany = companyData.find((c) => c.companyId === companyId);
         setBranches(selectedCompany?.branches || []);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching branches:', err);
         setError('Failed to fetch branches.');
+        showNotification('Failed to fetch branches.', 'error', 'Error');
       } finally {
         setLoading(false);
       }
@@ -73,7 +81,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
     if (open) {
       fetchBranches();
     }
-  }, [open, baseurl, companyId]);
+  }, [open, baseurl, companyId, token, showNotification]);
 
   // Set default branchId when branches are loaded and branchId is empty
   useEffect(() => {
@@ -95,18 +103,17 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
         setName('');
         setDeliveryFee(0);
         setDeliveryBonus(0);
-        setBranchId('');
+        setBranchId(branches.length === 1 ? branches[0].branchId : '');
       }
     }
-  }, [open, zoneToEdit]);
+  }, [open, zoneToEdit, branches]);
 
   // Handle Form Submission
   const handleSubmit = async () => {
-    const token = localStorage.getItem('token');
-
     // Basic Validation
     if (!name.trim() || !branchId) {
       setError('Please fill in all required fields.');
+      showNotification('Please fill in all required fields.', 'warning', 'Incomplete Data');
       return;
     }
 
@@ -133,6 +140,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
             },
           }
         );
+        showNotification('Zone updated successfully.', 'success', 'Success');
       } else {
         // Add Zone
         await axios.post(`${baseurl}/PosZone/AddZone`, zoneData, {
@@ -141,13 +149,15 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
             'Content-Type': 'application/json',
           },
         });
+        showNotification('Zone added successfully.', 'success', 'Success');
       }
 
       onZoneAdded(); // Refresh the zone list
       handleClose(); // Close the modal
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error submitting zone data:', err);
       setError('Failed to submit zone data.');
+      showNotification('Failed to submit zone data.', 'error', 'Error');
     } finally {
       setLoading(false);
     }
@@ -198,7 +208,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
 
             {/* Branch Selection */}
             <Grid item xs={12}>
-              <FormControl fullWidth required disabled={!companyId || branches.length === 0}>
+              <FormControl fullWidth required disabled={!companyId || branches.length === 0 || loading}>
                 <InputLabel id="branch-select-label">Branch</InputLabel>
                 <Select
                   labelId="branch-select-label"

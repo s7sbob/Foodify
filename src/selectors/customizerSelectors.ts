@@ -29,6 +29,9 @@ interface StateType {
 
 const selectCustomizer = (state: AppState) => state.customizer;
 
+
+export const selectLanguage = (state: AppState) => state.customizer.isLanguage;
+
 export const selectActiveDir = createSelector(
   [selectCustomizer],
   (customizer) => customizer.activeDir

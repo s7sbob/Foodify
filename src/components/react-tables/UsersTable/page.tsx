@@ -1,4 +1,6 @@
-import * as React from 'react';
+// src/components/ReactColumnVisibilityTable.tsx
+
+import React, { useCallback } from 'react';
 import {
   TableContainer,
   Table,
@@ -26,16 +28,14 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   VisibilityState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import DownloadCard from 'src/components/shared/DownloadCard';
 import EditIcon from '@mui/icons-material/Edit';
 import WindowIcon from '@mui/icons-material/Window';
 import SecurityIcon from '@mui/icons-material/Security';
 import AddUserForm from './AddUserForm'; // Import the AddUserForm component
-import { useCallback } from 'react';
-
-
-
+import { useTranslation } from 'react-i18next';
 
 // Define the data type interface
 interface UserTableData {
@@ -46,67 +46,107 @@ interface UserTableData {
 // Define the props for the component
 interface TableProps {
   data: UserTableData[];
-  onUserAdded: () => void; // Function called when a user is added
+  onUserAdded: () => void; // Function called when a user is added or edited
 }
 
-// Define the columns for UserCode and Username with action buttons on the right
+// Initialize column helper
 const columnHelper = createColumnHelper<UserTableData>();
 
-const defaultColumns = [
-  columnHelper.accessor('userCode', {
-    header: 'User Code',
-    cell: info => (
-      <Typography variant="h6" fontWeight="400">
-        {info.getValue()}
-      </Typography>
-    ),
-    enableColumnFilter: true,
-  }),
-  columnHelper.accessor('userName', {
-    header: 'Username',
-    cell: info => (
-      <Typography variant="h6" fontWeight="400">
-        {info.getValue()}
-      </Typography>
-    ),
-    enableColumnFilter: true,
-  }),
-  columnHelper.display({
-    id: 'actions',
-    header: 'Actions',
-    cell: () => (
-      <Stack direction="row" spacing={1}>
-        <Tooltip title="Edit">
-          <IconButton color="primary" aria-label="edit">
-            <EditIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Windows">
-          <IconButton color="primary" aria-label="windows">
-            <WindowIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Permissions">
-          <IconButton color="primary" aria-label="permissions">
-            <SecurityIcon />
-          </IconButton>
-        </Tooltip>
-      </Stack>
-    ),
-  }),
-];
-
 const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded }) => {
+  const { t } = useTranslation();
+
+  // State for table filtering and visibility
   const [globalFilter, setGlobalFilter] = React.useState(''); // State for global search input
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [open, setOpen] = React.useState(false); // State for modal
 
-  const [columns] = React.useState(() => [...defaultColumns]);
+  // States for Add User Modal
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
+
+  // States for Edit User Modal
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [editUser, setEditUser] = React.useState<UserTableData | null>(null);
+
+  // Handlers for Add User Modal
+  const handleAddOpen = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddClose = () => {
+    setIsAddModalOpen(false);
+  };
+
+  // Handlers for Edit User Modal
+  const handleEditOpen = (user: UserTableData) => {
+    setEditUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditUser(null);
+    setIsEditModalOpen(false);
+  };
+
+  // Define the columns with translated headers
+  const defaultColumns: ColumnDef<UserTableData, any>[] = [
+    columnHelper.accessor('userCode', {
+      header: () => t('table.userCode') || 'User Code', // Provide fallback
+      cell: info => (
+        <Typography variant="h6" fontWeight="400">
+          {info.getValue()}
+        </Typography>
+      ),
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor('userName', {
+      header: () => t('table.userName') || 'Username', // Provide fallback
+      cell: info => (
+        <Typography variant="h6" fontWeight="400">
+          {info.getValue()}
+        </Typography>
+      ),
+      enableColumnFilter: true,
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: () => t('table.actions') || 'Actions', // Provide fallback
+      cell: ({ row }) => (
+        <Stack direction="row" spacing={1}>
+          <Tooltip title={t('actions.edit') || 'Edit'}>
+            <IconButton
+              color="primary"
+              aria-label={t('actions.edit') || 'Edit'}
+              onClick={() => handleEditOpen(row.original)}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('actions.windows') || 'Windows'}>
+            <IconButton
+              color="primary"
+              aria-label={t('actions.windows') || 'Windows'}
+              // Add onClick handler if needed
+            >
+              <WindowIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('actions.permissions') || 'Permissions'}>
+            <IconButton
+              color="primary"
+              aria-label={t('actions.permissions') || 'Permissions'}
+              // Add onClick handler if needed
+            >
+              <SecurityIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      ),
+    }),
+  ];
 
   const table = useReactTable({
     data,
-    columns,
+    columns: defaultColumns,
     state: {
       globalFilter,
       columnFilters,
@@ -120,7 +160,7 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
   });
 
   const handleDownload = () => {
-    const headers = ['User Code', 'User Name'];
+    const headers = [t('table.userCode') || 'User Code', t('table.userName') || 'Username'];
     const rows = data.map((item: UserTableData) => [item.userCode, item.userName]);
 
     const csvContent = [headers.join(','), ...rows.map((e: any[]) => e.join(','))].join('\n');
@@ -136,23 +176,13 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
     document.body.removeChild(link);
   };
 
-  // Callback functions for opening and closing the AddUserForm modal
-  const handleOpen = useCallback(() => {
-    setOpen(true);
-  }, [setOpen]);
-
-  const handleClose = useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
-
   return (
     <>
-
       {/* Add User button */}
       <Box display="flex" justifyContent="flex-end" mb={2}>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
-          Add USer
-       </Button>
+        <Button variant="contained" color="primary" onClick={handleAddOpen}>
+          {t('buttons.addUser') || 'Add User'}
+        </Button>
       </Box>
 
       {/* Column Visibility Toggles */}
@@ -170,7 +200,7 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
                     onChange={e => column.toggleVisibility(e.target.checked)}
                   />
                 }
-                label={column.columnDef.header as string}
+                label={t(`table.${column.id}`) || column.id} // Provide fallback
               />
             ))}
         </FormGroup>
@@ -179,7 +209,7 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('search.global') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
@@ -188,7 +218,7 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
       </Box>
 
       {/* Table with per-column search inputs */}
-      <DownloadCard title="Users Table" onDownload={handleDownload}>
+      <DownloadCard title={t('table.usersTable') || 'Users Table'} onDownload={handleDownload}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TableContainer>
@@ -211,7 +241,7 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
                                 size="small"
                                 value={(header.column.getFilterValue() ?? '') as string}
                                 onChange={e => header.column.setFilterValue(e.target.value)}
-                                placeholder={`Search...`}
+                                placeholder={t('search.column') || 'Search...'}
                                 style={{ marginLeft: '8px' }}
                               />
                             ) : null}
@@ -238,8 +268,22 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
         </Grid>
       </DownloadCard>
 
-      {/* AddUserForm Modal */}
-      <AddUserForm open={open} handleClose={handleClose} onUserAdded={onUserAdded} />
+      {/* AddUserForm Modal for Adding Users */}
+      <AddUserForm
+        open={isAddModalOpen}
+        handleClose={handleAddClose}
+        onUserAdded={onUserAdded}
+      />
+
+      {/* AddUserForm Modal for Editing Users */}
+      {editUser && (
+        <AddUserForm
+          open={isEditModalOpen}
+          handleClose={handleEditClose}
+          onUserAdded={onUserAdded}
+          userToEdit={editUser}
+        />
+      )}
     </>
   );
 };

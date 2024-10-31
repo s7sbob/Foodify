@@ -2,30 +2,31 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  TextField,
+  FormControl,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
-  FormControlLabel,
   Checkbox,
+  FormControlLabel,
   Select,
   MenuItem,
   InputLabel,
-  FormControl,
-  Typography,
+  TextField,
 } from '@mui/material';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { PilotTableData, Branch } from './types';
+import { useTranslation } from 'react-i18next';
+import { useNotification } from '../../../context/NotificationContext'; // Import the hook
 
 interface AddUserFormProps {
   open: boolean;
   handleClose: () => void;
-  onUserAdded: () => void; // Callback after adding/updating a user
+  onUserAdded: () => void; // Callback after adding/updating a pilot
   pilotToEdit?: PilotTableData | null; // Optional prop for editing a pilot
   companyId: string; // Added prop for auto-assigned companyId
 }
@@ -34,9 +35,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   open,
   handleClose,
   onUserAdded,
-  pilotToEdit,
+  pilotToEdit = null,
   companyId,
 }) => {
+  const { t } = useTranslation();
+  const { showNotification } = useNotification(); // Use the notification hook
+
   const [name, setName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [branchId, setBranchId] = useState<string>('');
@@ -46,7 +50,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
   // Loading and error states
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
   const token =
@@ -58,7 +61,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       if (!companyId) return;
 
       setLoading(true);
-      setError(null);
       try {
         const response = await axios.get(`${baseurl}/Company/GetCompanyData`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -68,7 +70,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         setBranches(selectedCompany?.branches || []);
       } catch (err: any) {
         console.error('Error fetching branches:', err);
-        setError('Failed to fetch branches.');
+        showNotification(t('errors.fetchBranchesFailed') || 'Failed to fetch branches.', 'error', 'Error');
       } finally {
         setLoading(false);
       }
@@ -77,7 +79,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     if (open) {
       fetchBranches();
     }
-  }, [open, baseurl, companyId, token]);
+  }, [open, baseurl, companyId, token, showNotification, t]);
 
   // Set default branchId when branches are loaded and branchId is empty
   useEffect(() => {
@@ -98,22 +100,21 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         // Reset form fields if adding a new pilot
         setName('');
         setPhone('');
-        setBranchId('');
+        setBranchId(branches.length === 1 ? branches[0].branchId : '');
         setIsActive(true);
       }
     }
-  }, [open, pilotToEdit]);
+  }, [open, pilotToEdit, branches]);
 
   // Handle Form Submission
   const handleSubmit = async () => {
     // Basic Validation
     if (!name.trim() || !phone.trim() || !branchId) {
-      setError('Please fill in all required fields.');
+      showNotification(t('errors.fillAllFields') || 'Please fill in all required fields.', 'warning', 'Incomplete Data');
       return;
     }
 
     setLoading(true);
-    setError(null);
     try {
       const pilotData: Partial<PilotTableData> = {
         name: name.trim(),
@@ -135,6 +136,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             },
           }
         );
+        showNotification(t('alerts.pilotUpdated') || 'Pilot updated successfully.', 'success', 'Success');
       } else {
         // Create Pilot
         await axios.post(`${baseurl}/PosPilot/CreatePilot`, pilotData, {
@@ -143,6 +145,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             'Content-Type': 'application/json',
           },
         });
+        showNotification(t('alerts.pilotAdded') || 'Pilot added successfully.', 'success', 'Success');
       }
 
       onUserAdded(); // Refresh the pilot list
@@ -150,8 +153,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     } catch (err: any) {
       console.error('Error submitting pilot data:', err);
       // Attempt to extract error message from response
-      const apiError = err.response?.data?.message || 'Failed to submit pilot data.';
-      setError(apiError);
+      const apiError = err.response?.data?.message || t('errors.submitFailed') || 'Failed to submit pilot data.';
+      showNotification(apiError, 'error', 'Error');
     } finally {
       setLoading(false);
     }
@@ -160,13 +163,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   return (
     <>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>{pilotToEdit ? 'Edit Pilot' : 'Add Pilot'}</DialogTitle>
+        <DialogTitle>{pilotToEdit ? (t('addUserForm.editPilot') || 'Edit Pilot') : (t('addUserForm.addPilot') || 'Add Pilot')}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
             {/* Name Field */}
             <Grid item xs={12}>
               <TextField
-                label="Name"
+                label={t('addUserForm.name') || 'Name'}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 fullWidth
@@ -177,7 +180,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             {/* Phone Field */}
             <Grid item xs={12}>
               <TextField
-                label="Phone"
+                label={t('addUserForm.phone') || 'Phone'}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 fullWidth
@@ -193,11 +196,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 required
                 disabled={!companyId || branches.length === 0 || loading}
               >
-                <InputLabel id="branch-select-label">Branch</InputLabel>
+                <InputLabel id="branch-select-label">{t('addUserForm.branch') || 'Branch'}</InputLabel>
                 <Select
                   labelId="branch-select-label"
                   value={branchId}
-                  label="Branch"
+                  label={t('addUserForm.branch') || 'Branch'}
                   onChange={(e) => setBranchId(e.target.value)}
                 >
                   {branches.map((branch) => (
@@ -218,26 +221,17 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                     onChange={(e) => setIsActive(e.target.checked)}
                   />
                 }
-                label="Is Active"
+                label={t('addUserForm.isActive') || 'Is Active'}
               />
             </Grid>
-
-            {/* Display Error if Any */}
-            {error && (
-              <Grid item xs={12}>
-                <Typography color="error" variant="body2">
-                  {error}
-                </Typography>
-              </Grid>
-            )}
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary" disabled={loading}>
-            Cancel
+            {t('buttons.cancel') || 'Cancel'}
           </Button>
           <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
-            {pilotToEdit ? 'Update' : 'Create'}
+            {pilotToEdit ? (t('buttons.update') || 'Update') : (t('buttons.create') || 'Create')}
           </Button>
         </DialogActions>
       </Dialog>

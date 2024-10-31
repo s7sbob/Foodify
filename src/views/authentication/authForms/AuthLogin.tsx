@@ -1,6 +1,6 @@
 // src/views/authentication/auth1/AuthLogin.tsx
 
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -26,9 +26,11 @@ import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheck
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setToken } from '../../../store/apps/auth/AuthSlice';
 import { useNotification } from '../../../context/NotificationContext'; // Ensure correct path
+import { AppState } from 'src/store/Store'; // Import AppState for type safety
+import { useTranslation } from 'react-i18next'; // Import useTranslation for i18n
 
 const baseurl = 'https://erp.ts-egy.com/api';
 
@@ -45,6 +47,17 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
   const theme = useTheme();
 
   const { showNotification } = useNotification(); // Destructure showNotification
+
+  // Select the current language from Redux store
+  const language = useSelector((state: AppState) => state.customizer.isLanguage);
+  const { i18n } = useTranslation();
+
+  // Effect to change language when the language state changes
+  useEffect(() => {
+    if (language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language, i18n]);
 
   const dialogStyles = useMemo(
     () => ({
@@ -85,8 +98,6 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      console.log('login clicked ');
-      console.log(`username:${username} ,password: ${password}`);
       try {
         setIsLoading(true);
         setError(null);

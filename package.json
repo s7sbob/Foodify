@@ -28,7 +28,7 @@
     "@reduxjs/toolkit": "1.8.3",
     "@svgr/rollup": "8.1.0",
     "@tabler/icons-react": "2.38.0",
-    "@tanstack/react-table": "8.20.5",
+    "@tanstack/react-table": "^8.20.5",
     "@types/react-big-calendar": "0.38.2",
     "@types/react-slick": "0.23.10",
     "apexcharts": "3.48.0",
