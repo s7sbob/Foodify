@@ -13,12 +13,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Typography,
 } from '@mui/material';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { Table as TableType, Company, Branch, TableSection } from 'src/types/TablesTable';
 import { useNotification } from '../../../context/NotificationContext';
+import { useTranslation } from 'react-i18next';
 
 interface AddTableFormProps {
   open: boolean;
@@ -33,6 +35,8 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
   onTableAdded,
   tableToEdit,
 }) => {
+  const { t } = useTranslation(); // Initialize translation hook
+
   const [tableName, setTableName] = useState<string>('');
   const [tableSectionId, setTableSectionId] = useState<string>('');
   const [branchId, setBranchId] = useState<string>('');
@@ -42,7 +46,7 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
   const [allTableSections, setAllTableSections] = useState<TableSection[]>([]); // All sections
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { showNotification } = useNotification();
 
@@ -82,10 +86,10 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
           );
           setAllTableSections(companyTableSections);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching data:', err);
-        setError('Failed to fetch data.');
-        showNotification('Failed to fetch data.', 'error', 'Error');
+        setError(t('errors.fetchData') || 'Failed to fetch data.');
+        showNotification(t('notifications.fetchDataFailed') || 'Failed to fetch data.', 'error', t('notifications.error') || 'Error');
       } finally {
         setLoading(false);
       }
@@ -94,7 +98,7 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
     if (open) {
       fetchData();
     }
-  }, [open, baseurl, token, showNotification]);
+  }, [open, baseurl, token, showNotification, t]);
 
   // Populate Form Fields When Form Opens
   useEffect(() => {
@@ -148,7 +152,8 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
   // Handle Form Submission
   const handleSubmit = async () => {
     if (!tableName || !branchId || !tableSectionId) {
-      showNotification('Please fill in all required fields.', 'warning', 'Incomplete Data');
+      setError(t('errors.fillAllFields') || 'Please fill in all required fields.');
+      showNotification(t('notifications.fillAllFields') || 'Please fill in all required fields.', 'warning', t('notifications.incompleteData') || 'Incomplete Data');
       return;
     }
 
@@ -158,13 +163,13 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
       // Assuming only one company
       const company = companies[0];
       if (!company) {
-        showNotification('Company data is missing.', 'error', 'Error');
+        showNotification(t('notifications.missingCompanyData') || 'Company data is missing.', 'error', t('notifications.error') || 'Error');
         setLoading(false);
         return;
       }
 
       const tableData: Partial<TableType> = {
-        tableName,
+        tableName: tableName.trim(),
         tableSectionId,
         branchId,
         companyId: company.companyId,
@@ -182,7 +187,7 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
             },
           }
         );
-        showNotification('Table updated successfully.', 'success', 'Success');
+        showNotification(t('notifications.tableUpdated') || 'Table updated successfully.', 'success', t('notifications.success') || 'Success');
       } else {
         // Create Table
         await axios.post(`${baseurl}/PosTable/CreateTable`, tableData, {
@@ -191,15 +196,15 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
             'Content-Type': 'application/json',
           },
         });
-        showNotification('Table created successfully.', 'success', 'Success');
+        showNotification(t('notifications.tableCreated') || 'Table created successfully.', 'success', t('notifications.success') || 'Success');
       }
 
       onTableAdded(); // Refresh the table list
       handleClose(); // Close the modal
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error submitting table data:', err);
-      setError('Failed to submit table data.');
-      showNotification('Failed to submit table data.', 'error', 'Error');
+      setError(t('errors.submitTable') || 'Failed to submit table data.');
+      showNotification(t('notifications.submitTableFailed') || 'Failed to submit table data.', 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
@@ -208,29 +213,31 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
   return (
     <>
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>{tableToEdit ? 'Edit Table' : 'Add Table'}</DialogTitle>
+        <DialogTitle>{tableToEdit ? t('tables.editTable') || 'Edit Table' : t('tables.addTable') || 'Add Table'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
             {/* Table Name */}
             <Grid item xs={12}>
               <TextField
-                label="Table Name"
+                label={t('tables.tableName') || 'Table Name'}
                 value={tableName}
                 onChange={(e) => setTableName(e.target.value)}
                 fullWidth
                 required
+                placeholder={t('tables.tableNamePlaceholder') || 'Enter table name'}
               />
             </Grid>
 
             {/* Branch Selection */}
             <Grid item xs={12}>
-              <FormControl fullWidth required disabled={branches.length === 0}>
-                <InputLabel id="branch-select-label">Branch</InputLabel>
+              <FormControl fullWidth required disabled={branches.length === 0 || loading}>
+                <InputLabel id="branch-select-label">{t('tables.branch') || 'Branch'}</InputLabel>
                 <Select
                   labelId="branch-select-label"
                   value={branchId}
-                  label="Branch"
+                  label={t('tables.branch') || 'Branch'}
                   onChange={(e) => setBranchId(e.target.value)}
+                  placeholder={t('tables.branchPlaceholder') || 'Select branch'}
                 >
                   {branches.map((branch) => (
                     <MenuItem key={branch.branchId} value={branch.branchId}>
@@ -246,14 +253,15 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
               <FormControl
                 fullWidth
                 required
-                disabled={!branchId || filteredTableSections.length === 0}
+                disabled={!branchId || filteredTableSections.length === 0 || loading}
               >
-                <InputLabel id="table-section-select-label">Table Section</InputLabel>
+                <InputLabel id="table-section-select-label">{t('tables.tableSection') || 'Table Section'}</InputLabel>
                 <Select
                   labelId="table-section-select-label"
                   value={tableSectionId}
-                  label="Table Section"
+                  label={t('tables.tableSection') || 'Table Section'}
                   onChange={(e) => setTableSectionId(e.target.value)}
+                  placeholder={t('tables.tableSectionPlaceholder') || 'Select table section'}
                 >
                   {filteredTableSections.map((section) => (
                     <MenuItem key={section.tableSectionId} value={section.tableSectionId}>
@@ -263,14 +271,23 @@ const AddTableForm: React.FC<AddTableFormProps> = ({
                 </Select>
               </FormControl>
             </Grid>
+
+            {/* Display Error if Any */}
+            {error && (
+              <Grid item xs={12}>
+                <Typography color="error" variant="body2">
+                  {error}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="secondary" disabled={loading}>
-            Cancel
+            {t('buttons.cancel') || 'Cancel'}
           </Button>
           <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
-            {tableToEdit ? 'Update' : 'Create'}
+            {tableToEdit ? t('buttons.update') || 'Update' : t('buttons.create') || 'Create'}
           </Button>
         </DialogActions>
       </Dialog>

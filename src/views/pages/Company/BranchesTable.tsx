@@ -1,4 +1,4 @@
-// BranchesTable.tsx
+// src/components/Company/BranchesTable.tsx
 
 import React from 'react';
 import {
@@ -25,9 +25,11 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   VisibilityState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import EditIcon from '@mui/icons-material/Edit';
 import { Branch } from '../../../types/companyTypes';
+import { useTranslation } from 'react-i18next';
 
 interface BranchesTableProps {
   branches: Branch[];
@@ -35,15 +37,17 @@ interface BranchesTableProps {
 }
 
 const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch }) => {
+  const { t } = useTranslation();
+
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 
   const columnHelper = createColumnHelper<Branch>();
 
-  const columns = [
+  const columns: ColumnDef<Branch, any>[] = [
     columnHelper.accessor('branchCode', {
-      header: 'Branch Code',
+      header: t('branchesTable.branchCode') || 'Branch Code',
       cell: info => (
         <Typography variant="body1">
           {info.getValue()}
@@ -52,7 +56,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
       enableColumnFilter: true,
     }),
     columnHelper.accessor('branchName', {
-      header: 'Branch Name',
+      header: t('branchesTable.branchName') || 'Branch Name',
       cell: info => (
         <Typography variant="body1">
           {info.getValue()}
@@ -61,7 +65,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
       enableColumnFilter: true,
     }),
     columnHelper.accessor('country', {
-      header: 'Country',
+      header: t('branchesTable.country') || 'Country',
       cell: info => (
         <Typography variant="body1">
           {info.getValue()}
@@ -70,7 +74,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
       enableColumnFilter: true,
     }),
     columnHelper.accessor('governate', {
-      header: 'Governate',
+      header: t('branchesTable.governate') || 'Governate',
       cell: info => (
         <Typography variant="body1">
           {info.getValue()}
@@ -79,7 +83,43 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
       enableColumnFilter: true,
     }),
     columnHelper.accessor('address', {
-      header: 'Address',
+      header: t('branchesTable.address') || 'Address',
+      cell: info => (
+        <Typography variant="body1">
+          {info.getValue()}
+        </Typography>
+      ),
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor('phoneNo1', {
+      header: t('branchesTable.phoneNumber1') || 'Phone Number 1',
+      cell: info => (
+        <Typography variant="body1">
+          {info.getValue()}
+        </Typography>
+      ),
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor('phoneNo2', {
+      header: t('branchesTable.phoneNumber2') || 'Phone Number 2',
+      cell: info => (
+        <Typography variant="body1">
+          {info.getValue() || '-'}
+        </Typography>
+      ),
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor('email', {
+      header: t('branchesTable.email') || 'Email',
+      cell: info => (
+        <Typography variant="body1">
+          {info.getValue()}
+        </Typography>
+      ),
+      enableColumnFilter: true,
+    }),
+    columnHelper.accessor('currency', {
+      header: t('branchesTable.currency') || 'Currency',
       cell: info => (
         <Typography variant="body1">
           {info.getValue()}
@@ -89,12 +129,12 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
     }),
     columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('branchesTable.actions') || 'Actions',
       cell: info => (
-        <Tooltip title="Edit">
+        <Tooltip title={t('actions.edit') || 'Edit'}>
           <IconButton
             color="primary"
-            aria-label="edit-branch"
+            aria-label={t('actions.edit') || 'Edit'}
             onClick={() => onEditBranch(info.row.original)}
           >
             <EditIcon />
@@ -145,7 +185,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('search.global') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
@@ -174,7 +214,7 @@ const BranchesTable: React.FC<BranchesTableProps> = ({ branches, onEditBranch })
                           size="small"
                           value={(header.column.getFilterValue() ?? '') as string}
                           onChange={e => header.column.setFilterValue(e.target.value)}
-                          placeholder={`Search...`}
+                          placeholder={t('search.column') || 'Search...'}
                           style={{ marginLeft: '8px' }}
                         />
                       ) : null}

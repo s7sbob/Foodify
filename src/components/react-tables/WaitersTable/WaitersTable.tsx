@@ -59,12 +59,8 @@ const WaitersTable: React.FC<TableProps> = ({ data, companies, onWaiterAdded, on
   const [selectedWaiter, setSelectedWaiter] = useState<EnhancedWaiter | null>(null);
 
   // Use the Notification Context
-  const { showNotification } = useNotification();
+  useNotification();
 
-  const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
-  const token =
-    useSelector((state: AppState) => state.auth.token) ||
-    localStorage.getItem('authToken');
 
   // Define columns
   const columns = useMemo(() => [

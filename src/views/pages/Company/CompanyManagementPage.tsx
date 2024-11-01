@@ -1,6 +1,6 @@
 // src/pages/CompanyManagementPage.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Tabs,
@@ -19,6 +19,7 @@ import EditBranchForm from './EditBranchForm';
 import AddBranchForm from './AddBranchForm';
 import AddIcon from '@mui/icons-material/Add';
 import { useNotification } from '../../../context/NotificationContext'; // Import the hook
+import { useTranslation } from 'react-i18next';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,6 +46,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
 };
 
 const CompanyManagementPage: React.FC = () => {
+  const { t } = useTranslation();
   const [tabValue, setTabValue] = useState(0);
   const [companyData, setCompanyData] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -61,7 +63,7 @@ const CompanyManagementPage: React.FC = () => {
 
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
 
-  const fetchCompanyData = async () => {
+  const fetchCompanyData = useCallback(async () => {
     const token = localStorage.getItem('token');
     setLoading(true);
     setError(null);
@@ -72,16 +74,16 @@ const CompanyManagementPage: React.FC = () => {
       setCompanyData(response.data);
     } catch (err: any) {
       console.error('Error fetching company data:', err);
-      setError('Failed to fetch company data.');
-      showNotification('Failed to fetch company data.', 'error', 'Error');
+      setError(t('errors.fetchCompanyData') || 'Failed to fetch company data.');
+      showNotification(t('notifications.fetchCompanyDataFailed') || 'Failed to fetch company data.', 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [baseurl, showNotification, t]);
 
   useEffect(() => {
     fetchCompanyData();
-  }, [baseurl]); // Only re-run if baseurl changes
+  }, [fetchCompanyData]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -89,7 +91,7 @@ const CompanyManagementPage: React.FC = () => {
 
   const handleCompanyUpdate = (updatedData: CompanyData) => {
     setCompanyData(updatedData);
-    showNotification('Company data updated successfully!', 'success', 'Success');
+    showNotification(t('notifications.companyDataUpdated') || 'Company data updated successfully!', 'success', t('notifications.success') || 'Success');
   };
 
   const handleBranchUpdate = (updatedBranch: Branch) => {
@@ -123,11 +125,11 @@ const CompanyManagementPage: React.FC = () => {
       );
 
       setCompanyData(response.data);
-      showNotification('Company data updated successfully!', 'success', 'Success');
+      showNotification(t('notifications.companyDataUpdated') || 'Company data updated successfully!', 'success', t('notifications.success') || 'Success');
     } catch (err: any) {
       console.error('Error updating company data:', err);
-      setError('Failed to update company data.');
-      showNotification('Failed to update company data.', 'error', 'Error');
+      setError(t('errors.updateCompanyData') || 'Failed to update company data.');
+      showNotification(t('notifications.updateCompanyDataFailed') || 'Failed to update company data.', 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
@@ -182,11 +184,11 @@ const CompanyManagementPage: React.FC = () => {
   return (
     <Box sx={{ width: '100%' }}>
       <Typography variant="h4" gutterBottom>
-        Company Management
+        {t('companyManagement.companyManagement') || 'Company Management'}
       </Typography>
       <Tabs value={tabValue} onChange={handleTabChange} aria-label="company management tabs">
-        <Tab label="Edit Company Data" id="company-tab-0" aria-controls="company-tabpanel-0" />
-        <Tab label="Branches" id="company-tab-1" aria-controls="company-tabpanel-1" />
+        <Tab label={t('companyManagement.editCompanyData') || 'Edit Company Data'} id="company-tab-0" aria-controls="company-tabpanel-0" />
+        <Tab label={t('companyManagement.branches') || 'Branches'} id="company-tab-1" aria-controls="company-tabpanel-1" />
       </Tabs>
 
       <TabPanel value={tabValue} index={0}>
@@ -222,7 +224,7 @@ const CompanyManagementPage: React.FC = () => {
                 onClick={handleAddBranchModalOpen}
                 startIcon={<AddIcon />}
               >
-                Add Branch
+                {t('buttons.addBranch') || 'Add Branch'}
               </Button>
             </Box>
 

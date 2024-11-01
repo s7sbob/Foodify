@@ -49,7 +49,10 @@
     "companyName": "Company Name",
     "branchName": "Branch Name",
     "zoneList": "Zone List",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "sectionName": "Section Name",
+    "service": "Service",
+    "tableSectionsList": "Table Sections List"
     },
     "actions": {
       "edit": "Edit",
@@ -60,7 +63,6 @@
       "userCodePlaceholder": "User Code",
       "usernamePlaceholder": "Username",
       "passwordPlaceholder": "Password",
-      "confirmPasswordPlaceholder": "Confirm Password",
       "username":  "username" ,
       "userCode":"userCode",
       "password": "password",
@@ -82,9 +84,33 @@
         "active": "Active",
         "inactive": "Inactive",
         "status": "Status"
-      }
+      },
+      "rememberDevice": "Remember This Device",
+      "confirmPasswordPlaceholder": "Re-enter Password"
+    },
+    "authLogin": {
+      "signIn": "Sign In",
+      "signingIn": "Signing In..."
     },
 
+    "editUserForm": {
+      "title": "Edit User",
+      "userCode": "User Code",
+      "userCodePlaceholder": "Enter User Code",
+      "username": "Username",
+      "usernamePlaceholder": "Enter Username",
+      "password": "Password",
+      "passwordPlaceholder": "Enter Password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter Password"
+    },
+    "downloadCard": {
+      "title": "Users Table"
+    },
+    "auth": {
+      "login": "Login",
+      "forgotPassword": "Forgot Password?"
+    },
 
     "search": {
       "global": "Global Search",
@@ -125,7 +151,11 @@
       "addZone": "Add Zone",
       "loading": "Loading...",
       "saveAndStartNew": "Save & Start New",
-      "saveAndViewAll": "Save & View All"
+      "saveAndViewAll": "Save & View All",
+      "addTableSection": "Add Table Section",
+      "addTable": "Add Table",
+      "addBranch": "Add Branch",
+      "close": "Close"
     },
     "alerts": {
       "fetchWaitersFailed": "Failed to fetch waiters.",
@@ -140,7 +170,14 @@
       "zoneAddedSuccess": "Zone added successfully.",
       "zoneUpdatedSuccess": "Zone updated successfully.",
       "fetchBranchesFailed": "Failed to fetch branches.",
-      "submitZoneFailed": "Failed to submit zone data."
+      "submitZoneFailed": "Failed to submit zone data.",
+      "updateTableSectionSuccess": "Table section updated successfully.",
+      "createTableSectionSuccess": "Table section created successfully.",
+      "associatedBranchNotFound": "Associated branch not found.",
+      "userAdded": "User added successfully.",
+      "userEdited": "User edited successfully.",
+      "userEditFailed": "Failed to edit user. Please try again.",
+      "userRegistrationFailed": "Failed to register user. Please try again."
     },
     "errors": {
       "waiterNameRequired": "Waiter name is required.",
@@ -149,8 +186,54 @@
       "fetchBranchesFailed": "Failed to fetch branches.",
       "submitFailed": "Failed to submit pilot data.",
       "fetchPilotsFailed": "Failed to fetch pilots.",
-      "fetchZonesFailed": "Failed to fetch zones."
+      "fetchZonesFailed": "Failed to fetch zones.",
+      "fetchTableSectionsFailed": "Failed to fetch table sections.",
+      "fetchCompaniesFailed": "Failed to fetch companies.",
+      "submitTableSectionFailed": "Failed to submit table section data.",
+      "companyDataMissing": "Company data is missing.",
+      "multipleCompanies": "Multiple companies found or no company associated with the user.",
+      "fetchCompanyData": "Failed to fetch company data.",
+      "updateCompanyData": "Failed to update company data.",
+      "addBranchFailed": "Failed to add branch.",
+      "editBranchFailed": "Failed to edit branch.",
+      "passwordLength": "Password must be at least 8 characters long.",
+      "passwordMismatch": "Passwords do not match.",
+      "submitCompanyUpdateFailed": "Failed to submit company update.",
+      "branchNotFound": "Associated branch not found.",
+      "missingCompanyData": "Company data is missing."
     },
+    "addTableSectionForm": {
+      "addTableSection": "Add Table Section",
+      "editTableSection": "Edit Table Section",
+      "sectionName": "Section Name",
+      "service": "Service (%)",
+      "branch": "Branch"
+    },
+    "tableSections": {
+      "sectionName": "Section Name",
+      "service": "Service",
+      "servicePercentage": "Service (%)",
+      "companyName": "Company Name",
+      "branchName": "Branch Name",
+      "unknown": "Unknown",
+      "actions": "Actions",
+      "edit": "Edit",
+      "addTableSection": "Add Table Section",
+      "editTableSection": "Edit Table Section",
+      "addTableSectionPlaceholder": "Enter table section name",
+      "servicePlaceholder": "Enter service percentage",
+      "branch": "Branch",
+      "branchPlaceholder": "Select branch",
+      "tableSectionsList": "Table Sections List"
+    },
+
+    "common": {
+      "error": "Error",
+      "warning": "Warning",
+      "success": "Success",
+      "incompleteData": "Incomplete Data"
+    },
+
     "zones": {
       "addZoneForm": {
         "titleAdd": "Add Zone",
@@ -164,6 +247,151 @@
         "deliveryBonusPlaceholder": "Enter delivery bonus",
         "branchPlaceholder": "Select branch"
       }
+    },
+    "addWaiterForm":{
+      "waiterName":"Waiter Name",
+      "waiterNamePlaceholder":"waiter Name",
+      "branch":"Branch"
+    },
+    "pilotList": {
+      "pilotName": "Pilot Name",
+      "phoneNumber": "Phone Number",
+      "companyName": "Company Name",
+      "branchName": "Branch Name",
+      "unknown": "Unknown",
+      "actions": "Actions",
+      "addPilot": "Add Pilot",
+      "editPilot": "Edit Pilot",
+      "pilotList": "Pilot List"
+    },
+
+    "notifications": {
+      "fetchTableSectionsFailed": "Failed to fetch table sections.",
+      "fetchCompaniesFailed": "Failed to fetch companies.",
+      "branchNotFound": "Associated branch not found.",
+      "missingCompanyData": "Company data is missing.",
+      "tableSectionUpdated": "Table section updated successfully.",
+      "tableSectionCreated": "Table section created successfully.",
+      "submitTableSectionFailed": "Failed to submit table section data.",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning",
+      "incompleteData": "Incomplete Data",
+      "fillAllFields": "Please fill in all required fields.",
+      "fetchZonesFailed": "Failed to fetch zones.",
+      "fetchTablesFailed": "Failed to fetch tables.",
+      "zoneAddedSuccess": "Zone added successfully.",
+      "zoneUpdatedSuccess": "Zone updated successfully.",
+      "tableCreated": "Table created successfully.",
+      "tableUpdated": "Table updated successfully.",
+      "submitZoneFailed": "Failed to submit zone data.",
+      "submitTableFailed": "Failed to submit table data.",
+      "fetchPilotsFailed": "Failed to fetch pilots.",
+      "pilotAdded": "Pilot added successfully.",
+      "pilotUpdated": "Pilot updated successfully.",
+      "submitPilotFailed": "Failed to submit pilot data.",
+      "companyDataUpdated": "Company data updated successfully!",
+      "branchAdded": "Branch added successfully!",
+      "branchUpdated": "Branch updated successfully.",
+      "addBranchFailed": "Failed to add branch.",
+      "editBranchFailed": "Failed to edit branch.",
+      "submitCompanyUpdateFailed": "Failed to submit company update.",
+      "fetchBranchesFailed": "Failed to fetch branches.",
+      "fetchDataFailed": "Failed to fetch data.",
+      "updateCompanyDataFailed": "Failed to update company data.",
+      "fetchCompanyDataFailed": "Failed to fetch company data.",
+      "passwordLength": "Password must be at least 8 characters long.",
+      "passwordMismatch": "Passwords do not match.",
+      "userAdded": "User added successfully.",
+      "userEdited": "User edited successfully.",
+      "userAddFailed": "Failed to add user.",
+      "userEditFailed": "Failed to edit user.",
+      "userRegistrationFailed": "Failed to register user. Please try again.",
+      "loggedIn":"Logged in successfully!",
+      "loginFaild": "Invalid username or password"
+    },
+    "tables": {
+      "tableName": "Table Name",
+      "tableSection": "Table Section",
+      "companyName": "Company Name",
+      "branchName": "Branch Name",
+      "unknown": "Unknown",
+      "actions": "Actions",
+      "edit": "Edit",
+      "addTable": "Add Table",
+      "editTable": "Edit Table",
+      "addTablePlaceholder": "Enter table name",
+      "branch": "Branch",
+      "branchPlaceholder": "Select branch",
+      "tableSectionPlaceholder": "Select table section",
+      "tablesList": "Tables List"
+    },
+    "header": {
+      "toggleSidebar": "Toggle Sidebar",
+      "toggleTheme": "Toggle Theme",
+      "menu": "Menu"
+
+    },
+    "language": {
+      "selectLanguage": "Select Language",
+      "english": "English",
+      "arabic": "Arabic"
+    },
+    "companyManagement": {
+      "companyManagement": "Company Management",
+      "editCompanyData": "Edit Company Data",
+      "branches": "Branches"
+    },
+    "branchesTable": {
+      "branchCode": "Branch Code",
+      "branchName": "Branch Name",
+      "country": "Country",
+      "governate": "Governate",
+      "address": "Address",
+      "phoneNumber1": "Phone Number 1",
+      "phoneNumber2": "Phone Number 2",
+      "email": "Email",
+      "currency": "Currency",
+      "actions": "Actions"
+    },
+    "addBranchForm": {
+      "addNewBranch": "Add New Branch",
+      "companyName": "Company Name",
+      "branchCode": "Branch Code",
+      "branchName": "Branch Name",
+      "country": "Country",
+      "governate": "Governate",
+      "address": "Address",
+      "phoneNo1": "Phone Number 1",
+      "phoneNo2": "Phone Number 2",
+      "email": "Email",
+      "currency": "Currency"
+    },
+    "editBranchForm": {
+      "editBranch": "Edit Branch",
+      "branchCode": "Branch Code",
+      "branchName": "Branch Name",
+      "country": "Country",
+      "governate": "Governate",
+      "address": "Address",
+      "phoneNo1": "Phone Number 1",
+      "phoneNo2": "Phone Number 2",
+      "email": "Email",
+      "currency": "Currency",
+      "saveChanges": "Save Changes"
+    },
+    "editCompanyForm": {
+      "companyName": "Company Name",
+      "country": "Country",
+      "governate": "Governate",
+      "address": "Address",
+      "activity": "Activity",
+      "phoneNo1": "Phone Number 1",
+      "phoneNo2": "Phone Number 2",
+      "phoneNo3": "Phone Number 3",
+      "currency": "Currency",
+      "email": "Email",
+      "saveChanges": "Save Changes"
     }
   
 }

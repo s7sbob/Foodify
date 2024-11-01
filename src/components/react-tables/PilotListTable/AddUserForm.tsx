@@ -1,6 +1,6 @@
 // src/components/Pilots/AddUserForm.tsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Button,
   FormControl,
@@ -15,13 +15,14 @@ import {
   MenuItem,
   InputLabel,
   TextField,
+  Typography,
 } from '@mui/material';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { AppState } from 'src/store/Store';
 import { PilotTableData, Branch } from './types';
-import { useTranslation } from 'react-i18next';
 import { useNotification } from '../../../context/NotificationContext'; // Import the hook
+import { useTranslation } from 'react-i18next';
 
 interface AddUserFormProps {
   open: boolean;
@@ -38,7 +39,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   pilotToEdit = null,
   companyId,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(); // Initialize translation hook
   const { showNotification } = useNotification(); // Use the notification hook
 
   const [name, setName] = useState<string>('');
@@ -50,10 +51,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
   // Loading and error states
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
   const token =
-    useSelector((state: AppState) => state.auth.token) || localStorage.getItem('token');
+    useSelector((state: AppState) => state.auth.token) ||
+    localStorage.getItem('token');
 
   // Fetch Branches Based on companyId
   useEffect(() => {
@@ -70,7 +73,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         setBranches(selectedCompany?.branches || []);
       } catch (err: any) {
         console.error('Error fetching branches:', err);
-        showNotification(t('errors.fetchBranchesFailed') || 'Failed to fetch branches.', 'error', 'Error');
+        showNotification(t('errors.fetchBranchesFailed') || 'Failed to fetch branches.', 'error', t('notifications.error') || 'Error');
       } finally {
         setLoading(false);
       }
@@ -104,17 +107,19 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         setIsActive(true);
       }
     }
-  }, [open, pilotToEdit, branches]);
+  }, [open, pilotToEdit, branches, t]);
 
   // Handle Form Submission
   const handleSubmit = async () => {
     // Basic Validation
     if (!name.trim() || !phone.trim() || !branchId) {
-      showNotification(t('errors.fillAllFields') || 'Please fill in all required fields.', 'warning', 'Incomplete Data');
+      setError(t('errors.fillAllFields') || 'Please fill in all required fields.');
+      showNotification(t('errors.fillAllFields') || 'Please fill in all required fields.', 'warning', t('notifications.incompleteData') || 'Incomplete Data');
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       const pilotData: Partial<PilotTableData> = {
         name: name.trim(),
@@ -136,7 +141,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             },
           }
         );
-        showNotification(t('alerts.pilotUpdated') || 'Pilot updated successfully.', 'success', 'Success');
+        showNotification(t('notifications.pilotUpdated') || 'Pilot updated successfully.', 'success', t('notifications.success') || 'Success');
       } else {
         // Create Pilot
         await axios.post(`${baseurl}/PosPilot/CreatePilot`, pilotData, {
@@ -145,7 +150,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             'Content-Type': 'application/json',
           },
         });
-        showNotification(t('alerts.pilotAdded') || 'Pilot added successfully.', 'success', 'Success');
+        showNotification(t('notifications.pilotAdded') || 'Pilot added successfully.', 'success', t('notifications.success') || 'Success');
       }
 
       onUserAdded(); // Refresh the pilot list
@@ -153,8 +158,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     } catch (err: any) {
       console.error('Error submitting pilot data:', err);
       // Attempt to extract error message from response
-      const apiError = err.response?.data?.message || t('errors.submitFailed') || 'Failed to submit pilot data.';
-      showNotification(apiError, 'error', 'Error');
+      const apiError = err.response?.data?.message || t('errors.submitPilotFailed') || 'Failed to submit pilot data.';
+      showNotification(apiError, 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
@@ -174,6 +179,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 fullWidth
                 required
+                placeholder={t('addUserForm.namePlaceholder') || 'Enter name'}
               />
             </Grid>
 
@@ -186,6 +192,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 fullWidth
                 required
                 inputProps={{ maxLength: 15 }}
+                placeholder={t('addUserForm.phonePlaceholder') || 'Enter phone number'}
               />
             </Grid>
 
@@ -202,6 +209,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   value={branchId}
                   label={t('addUserForm.branch') || 'Branch'}
                   onChange={(e) => setBranchId(e.target.value)}
+                  placeholder={t('addUserForm.branchPlaceholder') || 'Select branch'}
                 >
                   {branches.map((branch) => (
                     <MenuItem key={branch.branchId} value={branch.branchId}>
@@ -224,6 +232,15 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 label={t('addUserForm.isActive') || 'Is Active'}
               />
             </Grid>
+
+            {/* Display Error if Any */}
+            {error && (
+              <Grid item xs={12}>
+                <Typography color="error" variant="body2">
+                  {error}
+                </Typography>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>

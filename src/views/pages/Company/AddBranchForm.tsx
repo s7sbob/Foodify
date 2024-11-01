@@ -10,16 +10,30 @@ import {
   TextField,
   Grid,
   CircularProgress,
-
 } from '@mui/material';
 import { Branch } from '../../../types/companyTypes';
 import { useNotification } from '../../../context/NotificationContext';
-import { AppState, useSelector } from 'src/store/Store';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../store/Store';
+import { useTranslation } from 'react-i18next';
+
+// 1. Define a new interface for the form data
+interface AddBranchFormData {
+  branchCode: number;
+  branchName: string;
+  country: string;
+  governate: string;
+  address: string;
+  phoneNo1: string;
+  phoneNo2?: string;
+  email: string;
+  currency: string;
+}
 
 interface AddBranchFormProps {
   open: boolean;
   handleClose: () => void;
-  onAddBranch: (branch: Partial<Branch>) => Promise<void>; // Updated to return Promise
+  onAddBranch: (branch: AddBranchFormData) => Promise<void>; // Update the type accordingly
   companyName: string;
   companyId: string;
 }
@@ -29,8 +43,10 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
   handleClose,
   companyName,
   companyId,
+  onAddBranch,
 }) => {
-  const [formData, setFormData] = useState<Partial<Branch>>({
+  const { t } = useTranslation();
+  const [formData, setFormData] = useState<AddBranchFormData>({
     branchCode: 0,
     branchName: '',
     country: '',
@@ -57,30 +73,24 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Optional: Add form validation here
+    // Basic Validation
+    if (!formData.branchName.trim() || !formData.branchCode) {
+      showNotification(
+        t('errors.fillAllFields') || 'Please fill in all required fields.',
+        'warning',
+        t('notifications.incompleteData') || 'Incomplete Data'
+      );
+      return;
+    }
 
     setLoading(true);
     try {
-      // Make API call using the centralized Axios instance
-      const response = await fetch(`${baseurl}/Branches/AddBranch`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json', // Set content type since sending JSON
-        },
-        body: JSON.stringify({
-          ...formData,
-          companyId, // Include companyId in the payload
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add branch.');
-      }
-
-      // Optionally, handle response data
-      showNotification('Branch added successfully!', 'success', 'Success');
+      await onAddBranch(formData);
+      showNotification(
+        t('notifications.branchAdded') || 'Branch added successfully!',
+        'success',
+        t('notifications.success') || 'Success'
+      );
 
       // Reset form
       setFormData({
@@ -99,7 +109,11 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
       handleClose();
     } catch (error: any) {
       console.error('Error adding branch:', error);
-      showNotification(error.message || 'Failed to add branch.', 'error', 'Error');
+      showNotification(
+        error.message || (t('errors.addBranchFailed') || 'Failed to add branch.'),
+        'error',
+        t('notifications.error') || 'Error'
+      );
     } finally {
       setLoading(false);
     }
@@ -107,13 +121,13 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Add New Branch</DialogTitle>
+      <DialogTitle>{t('addBranchForm.addNewBranch') || 'Add New Branch'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
           {/* Company Name - Read-only */}
           <Grid item xs={12}>
             <TextField
-              label="Company Name"
+              label={t('addBranchForm.companyName') || 'Company Name'}
               value={companyName}
               fullWidth
               InputProps={{
@@ -126,7 +140,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Branch Code */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Branch Code"
+              label={t('addBranchForm.branchCode') || 'Branch Code'}
               name="branchCode"
               type="number"
               value={formData.branchCode}
@@ -139,7 +153,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Branch Name */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Branch Name"
+              label={t('addBranchForm.branchName') || 'Branch Name'}
               name="branchName"
               value={formData.branchName}
               onChange={handleChange}
@@ -151,7 +165,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Country */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Country"
+              label={t('addBranchForm.country') || 'Country'}
               name="country"
               value={formData.country}
               onChange={handleChange}
@@ -163,7 +177,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Governate */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Governate"
+              label={t('addBranchForm.governate') || 'Governate'}
               name="governate"
               value={formData.governate}
               onChange={handleChange}
@@ -175,7 +189,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Address */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Address"
+              label={t('addBranchForm.address') || 'Address'}
               name="address"
               value={formData.address}
               onChange={handleChange}
@@ -187,7 +201,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Phone Number 1 */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Phone Number 1"
+              label={t('addBranchForm.phoneNo1') || 'Phone Number 1'}
               name="phoneNo1"
               value={formData.phoneNo1}
               onChange={handleChange}
@@ -199,7 +213,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Phone Number 2 */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Phone Number 2"
+              label={t('addBranchForm.phoneNo2') || 'Phone Number 2'}
               name="phoneNo2"
               value={formData.phoneNo2 || ''}
               onChange={handleChange}
@@ -210,7 +224,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
           {/* Email */}
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Email"
+              label={t('addBranchForm.email') || 'Email'}
               name="email"
               value={formData.email}
               onChange={handleChange}
@@ -224,7 +238,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
             <TextField
               name="currency"
               value={formData.currency}
-              label="Currency"
+              label={t('addBranchForm.currency') || 'Currency'}
               onChange={handleChange}
               fullWidth
               required
@@ -234,10 +248,10 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="secondary" disabled={loading}>
-          Cancel
+          {t('buttons.cancel') || 'Cancel'}
         </Button>
         <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
-          {loading ? <CircularProgress size={24} /> : 'Add Branch'}
+          {loading ? <CircularProgress size={24} /> : (t('buttons.addBranch') || 'Add Branch')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -29,6 +29,7 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   VisibilityState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import DownloadCard from 'src/components/shared/DownloadCard';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,8 +40,11 @@ import { AppState } from 'src/store/Store';
 import { TableSection, Company } from 'src/types/TablesTable';
 import { useNotification } from '../../../context/NotificationContext';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const TableSectionListTable: React.FC = () => {
+  const { t } = useTranslation();
+
   const [data, setData] = useState<TableSection[]>([]);
   const [companyData, setCompanyData] = useState<Company[]>([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -79,15 +83,14 @@ const TableSectionListTable: React.FC = () => {
 
       setData(sections);
       setCompanyData(companies);
-
     } catch (err: any) {
       console.error('Error fetching table sections:', err);
-      setError('Failed to fetch table sections. Please try again later.');
-      showNotification('Failed to fetch table sections.', 'error', 'Error');
+      setError(t('errors.fetchTableSections') || 'Failed to fetch table sections. Please try again later.');
+      showNotification(t('notifications.fetchTableSectionsFailed') || 'Failed to fetch table sections.', 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
-  }, [baseurl, token, showNotification]);
+  }, [baseurl, token, showNotification, t]);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -103,9 +106,9 @@ const TableSectionListTable: React.FC = () => {
   // Define Columns
   const columnHelper = createColumnHelper<TableSection>();
 
-  const columns = useMemo(() => [
+  const columns = useMemo<ColumnDef<TableSection, any>[]>(() => [
     columnHelper.accessor('sectionName', {
-      header: 'Section Name',
+      header: t('tableSections.sectionName') || 'Section Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -114,7 +117,7 @@ const TableSectionListTable: React.FC = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('service', {
-      header: 'Service',
+      header: t('tableSections.service') || 'Service',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue().toFixed(2)}%
@@ -124,12 +127,12 @@ const TableSectionListTable: React.FC = () => {
     }),
     // Company Name Column - Auto-assigned
     columnHelper.accessor('companyId', {
-      header: 'Company Name',
+      header: t('tableSections.companyName') || 'Company Name',
       cell: () => {
         const company = companyData[0]; // Assuming only one company
         return (
           <Typography variant="h6" fontWeight="400">
-            {company ? company.companyName : 'Unknown'}
+            {company ? company.companyName : t('tableSections.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -137,13 +140,13 @@ const TableSectionListTable: React.FC = () => {
     }),
     // Branch Name Column
     columnHelper.accessor('branchId', {
-      header: 'Branch Name',
+      header: t('tableSections.branchName') || 'Branch Name',
       cell: info => {
         const company = companyData[0]; // Assuming only one company
         const branch = company?.branches.find(b => b.branchId === info.getValue());
         return (
           <Typography variant="h6" fontWeight="400">
-            {branch ? branch.branchName : 'Unknown'}
+            {branch ? branch.branchName : t('tableSections.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -152,13 +155,13 @@ const TableSectionListTable: React.FC = () => {
     // Actions Column
     columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('tableSections.actions') || 'Actions',
       cell: info => (
         <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit">
+          <Tooltip title={t('tableSections.edit') || 'Edit'}>
             <IconButton
               color="primary"
-              aria-label="edit"
+              aria-label={t('tableSections.edit') || 'edit'}
               onClick={() => handleEdit(info.row.original)}
             >
               <EditIcon />
@@ -168,7 +171,7 @@ const TableSectionListTable: React.FC = () => {
         </Stack>
       ),
     }),
-  ], [columnHelper, companyData]);
+  ], [columnHelper, companyData, t]);
 
   // Initialize the table
   const table = useReactTable<TableSection>({
@@ -188,15 +191,20 @@ const TableSectionListTable: React.FC = () => {
 
   // Handle Download CSV
   const handleDownload = useCallback(() => {
-    const headers = ['Section Name', 'Service', 'Company Name', 'Branch Name'];
+    const headers = [
+      t('tableSections.sectionName') || 'Section Name',
+      t('tableSections.service') || 'Service',
+      t('tableSections.companyName') || 'Company Name',
+      t('tableSections.branchName') || 'Branch Name'
+    ];
     const company = companyData[0]; // Assuming only one company
     const rows = data.map((section: TableSection) => {
       const branch = company?.branches.find(b => b.branchId === section.branchId);
       return [
         section.sectionName,
-        section.service.toFixed(2),
-        company ? company.companyName : 'Unknown',
-        branch ? branch.branchName : 'Unknown',
+        `${section.service.toFixed(2)}%`,
+        company ? company.companyName : t('tableSections.unknown') || 'Unknown',
+        branch ? branch.branchName : t('tableSections.unknown') || 'Unknown',
       ];
     });
 
@@ -211,7 +219,7 @@ const TableSectionListTable: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [data, companyData]);
+  }, [data, companyData, t]);
 
   // Modal Control Functions
   const handleOpen = useCallback(() => {
@@ -233,7 +241,7 @@ const TableSectionListTable: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleOpen}
         >
-          Add Table Section
+          {t('buttons.addTableSection') || 'Add Table Section'}
         </Button>
       </Box>
 
@@ -252,7 +260,7 @@ const TableSectionListTable: React.FC = () => {
                     onChange={e => column.toggleVisibility(e.target.checked)}
                   />
                 }
-                label={column.columnDef.header as string}
+                label={column.columnDef.header as string || column.id}
               />
             ))}
         </FormGroup>
@@ -261,7 +269,7 @@ const TableSectionListTable: React.FC = () => {
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('search.global') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
@@ -279,7 +287,7 @@ const TableSectionListTable: React.FC = () => {
           {error}
         </Typography>
       ) : (
-        <DownloadCard title="Table Sections List" onDownload={handleDownload}>
+        <DownloadCard title={t('tableSections.tableSectionsList') || 'Table Sections List'} onDownload={handleDownload}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TableContainer>
@@ -302,7 +310,7 @@ const TableSectionListTable: React.FC = () => {
                                   size="small"
                                   value={(header.column.getFilterValue() ?? '') as string}
                                   onChange={e => header.column.setFilterValue(e.target.value)}
-                                  placeholder={`Search...`}
+                                  placeholder={t('search.column') || 'Search...'}
                                   style={{ marginLeft: '8px' }}
                                 />
                               ) : null}

@@ -37,7 +37,7 @@ const AddWaiterForm: React.FC<AddWaiterFormProps> = ({
   companies,
 }) => {
   const { t } = useTranslation(); // Initialize translation hook
-  const { showNotification } = useNotification(); // Use the notification hook
+  useNotification(); // Use the notification hook
 
   const token =
     useSelector((state: AppState) => state.auth.token) ||

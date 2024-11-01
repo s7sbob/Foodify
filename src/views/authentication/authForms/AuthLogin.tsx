@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next'; // Import useTranslation for i18
 const baseurl = 'https://erp.ts-egy.com/api';
 
 const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -116,23 +117,22 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         if (res.status === 200) {
           console.log('User logged in successfully');
           dispatch(setToken(res.data.token));
-          showNotification('Logged in successfully!', 'success', 'Success'); // Show success notification
+          showNotification(t('notifications.loggedIn') || 'Logged in successfully!', 'success', t('notifications.success') || 'Success'); // Show success notification
           navigate('/');
         } else {
           const unexpectedError = 'Unexpected response from the server.';
           setError(unexpectedError);
-          showNotification(unexpectedError, 'error', 'Error'); // Show error notification
+          showNotification(t('notifications.error') || 'Unexpected error.', 'error', t('notifications.error') || 'Error'); // Show error notification
         }
       } catch (error: any) {
-        console.error('Invalid username or password:', error);
-        const message = error.response?.data?.message || 'Incorrect username or password.';
+        const message = error.response?.data?.message || t('notifications.loginFaild') || 'Incorrect username or password.';
         setError(message);
-        showNotification(message, 'error', 'Error'); // Show error notification
+        showNotification(message, 'error', t('notifications.error') || 'Error'); // Show error notification
       } finally {
         setIsLoading(false);
       }
     },
-    [username, password, dispatch, navigate, showNotification]
+    [username, password, dispatch, navigate, showNotification, t]
   );
 
   return (
@@ -149,7 +149,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
       <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
           <Box>
-            <CustomFormLabel htmlFor="username">Username</CustomFormLabel>
+            <CustomFormLabel htmlFor="username">{t('addUserForm.username') || 'Username'}</CustomFormLabel>
             <CustomTextField
               id="username"
               variant="outlined"
@@ -159,7 +159,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
             />
           </Box>
           <Box>
-            <CustomFormLabel htmlFor="password">Password</CustomFormLabel>
+            <CustomFormLabel htmlFor="password">{t('addUserForm.password') || 'Password'}</CustomFormLabel>
             <CustomTextField
               id="password"
               type="password"
@@ -181,7 +181,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
             <FormGroup>
               <FormControlLabel
                 control={<CustomCheckbox defaultChecked />}
-                label="Remember this Device"
+                label={t('addUserForm.rememberDevice') || 'Remember this Device'}
               />
             </FormGroup>
             <Typography
@@ -202,7 +202,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
                 }
               }}
             >
-              Forgot Password?
+              {t('auth.forgotPassword') || 'Forgot Password?'}
             </Typography>
           </Stack>
 
@@ -215,7 +215,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
               type="submit"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? t('authLogin.signingIn') || 'Signing In...' : t('authLogin.signIn') || 'Sign In'}
             </Button>
           </Box>
         </Stack>
@@ -237,7 +237,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         >
           <Box display="flex" alignItems="center">
             <SupportAgentIcon color="primary" sx={{ mr: 1 }} />
-            Forgot Password
+            {t('auth.forgotPassword') || 'Forgot Password'}
           </Box>
           <IconButton
             aria-label="close"
@@ -251,14 +251,14 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="forgot-password-dialog-description">
-            If you forgot your password, please contact our technical support team at{' '}
-            <a href="mailto:support@yourdomain.com">support@yourdomain.com</a> or call us at{' '}
+            {t('auth.forgotPasswordInfo') || 'If you forgot your password, please contact our technical support team at '}
+            <a href="mailto:support@yourdomain.com">support@yourdomain.com</a> {t('auth.orCall') || 'or call us at '}
             <strong>+1 (800) 123-4567</strong>.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary" autoFocus>
-            Close
+            {t('buttons.close') || 'Close'}
           </Button>
         </DialogActions>
       </Dialog>

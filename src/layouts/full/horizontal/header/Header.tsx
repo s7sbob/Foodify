@@ -1,7 +1,5 @@
-// src\layouts\full\horizontal\header\Header.tsx
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import * as React from 'react';
+// src/layouts/full/horizontal/header/Header.tsx
+
 import {
   IconButton,
   Box,
@@ -23,12 +21,14 @@ import Language from 'src/layouts/full/vertical/header/Language';
 import Navigation from 'src/layouts/full/vertical/header/Navigation';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 import { AppState } from 'src/store/Store';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const Header = () => {
+  const { t } = useTranslation(); // Initialize useTranslation
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
 
-  // drawer
+  // Access customizer state
   const customizer = useSelector((state: AppState) => state.customizer);
   const dispatch = useDispatch();
 
@@ -63,7 +63,7 @@ const Header = () => {
         {lgDown ? (
           <IconButton
             color="inherit"
-            aria-label="menu"
+            aria-label={t('header.menu') || 'Menu'} // Use translation
             onClick={() => dispatch(toggleMobileSidebar())}
           >
             <IconMenu2 />
@@ -84,17 +84,19 @@ const Header = () => {
         <Stack spacing={1} direction="row" alignItems="center">
           <Language />
           {/* ------------------------------------------- */}
-          {/* Ecommerce Dropdown */}
-          {/* ------------------------------------------- */}
-          {/* ------------------------------------------- */}
-          {/* End Ecommerce Dropdown */}
+          {/* Theme Toggle Button */}
           {/* ------------------------------------------- */}
 
-          <IconButton size="large" color="inherit">
+          <IconButton
+            size="large"
+            color="inherit"
+            aria-label={t('header.toggleTheme') || 'Toggle Theme'} // Use translation
+            onClick={() => dispatch(setDarkMode(customizer.activeMode === 'light' ? 'dark' : 'light'))}
+          >
             {customizer.activeMode === 'light' ? (
-              <IconMoon size="21" stroke="1.5" onClick={() => dispatch(setDarkMode('dark'))} />
+              <IconMoon size="21" stroke="1.5" />
             ) : (
-              <IconSun size="21" stroke="1.5" onClick={() => dispatch(setDarkMode('light'))} />
+              <IconSun size="21" stroke="1.5" />
             )}
           </IconButton>
           <Notifications />

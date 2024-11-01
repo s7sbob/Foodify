@@ -26,6 +26,7 @@ import Language from './Language'; // Renamed for consistency
 import { AppState } from 'src/store/Store';
 import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const AppBarStyled = styled(AppBar)<{ customizer: AppState['customizer'] }>(({ theme, customizer }) => ({
   boxShadow: 'none',
@@ -43,6 +44,7 @@ const ToolbarStyled = styled(Toolbar)(({ theme }) => ({
 }));
 
 const Header: React.FC = () => {
+  const { t } = useTranslation(); // Initialize useTranslation
   const lgUp = useMediaQuery((theme: Theme) => theme.breakpoints.up('lg'));
   const lgDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
 
@@ -72,7 +74,7 @@ const Header: React.FC = () => {
         {/* Toggle Button Sidebar */}
         <IconButton
           color="inherit"
-          aria-label="toggle sidebar"
+          aria-label={t('header.toggleSidebar') || 'Toggle Sidebar'} // Use translation
           onClick={handleSidebarToggle}
         >
           <IconMenu2 size="20" />
@@ -93,7 +95,7 @@ const Header: React.FC = () => {
           <IconButton
             size="large"
             color="inherit"
-            aria-label="toggle theme"
+            aria-label={t('header.toggleTheme') || 'Toggle Theme'} // Use translation
             onClick={handleThemeToggle}
           >
             {customizer.activeMode === 'light' ? (

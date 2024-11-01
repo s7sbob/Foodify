@@ -93,7 +93,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       setCompanyData(companies);
   
       if (companies.length !== 1) {
-        throw new Error('Multiple companies found or no company associated with the user.');
+        throw new Error(t('errors.multipleCompanies') || 'Multiple companies found or no company associated with the user.');
       }
   
       const company = companies[0];
@@ -107,9 +107,9 @@ const PilotListTable: React.FC<TableProps> = () => {
           name: pilot.name,
           phone: pilot.phone,
           isActive: pilot.isActive,
-          companyName: company.companyName || 'Unknown',
+          companyName: company.companyName || t('tables.unknown') || 'Unknown',
           companyId: company.companyId || '',
-          branchName: branch?.branchName || 'Unknown',
+          branchName: branch?.branchName || t('tables.unknown') || 'Unknown',
           branchId: branch?.branchId || '',
         };
       });
@@ -117,8 +117,8 @@ const PilotListTable: React.FC<TableProps> = () => {
       setData(updatedData);
     } catch (error: any) {
       console.error('Error fetching pilot data:', error);
-      setError('Failed to fetch pilots. Please try again later.');
-      showNotification(t('alerts.fetchPilotsFailed') || 'Failed to fetch pilots.', 'error', 'Error');
+      setError(t('errors.fetchPilotsFailed') || 'Failed to fetch pilots. Please try again later.');
+      showNotification(t('notifications.fetchPilotsFailed') || 'Failed to fetch pilots.', 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
@@ -146,7 +146,7 @@ const PilotListTable: React.FC<TableProps> = () => {
   
   const columns = useMemo<ColumnDef<PilotTableData, any>[]>(() => [
     columnHelper.accessor('name', {
-      header: t('table.pilotName') || 'Pilot Name',
+      header: t('pilotList.pilotName') || 'Pilot Name',
       cell: info => {
         const isActive = info.row.original.isActive;
         return (
@@ -166,7 +166,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('phone', {
-      header: t('table.phoneNumber') || 'Phone Number',
+      header: t('pilotList.phoneNumber') || 'Phone Number',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -175,7 +175,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('companyName', {
-      header: t('table.companyName') || 'Company Name',
+      header: t('pilotList.companyName') || 'Company Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -184,7 +184,7 @@ const PilotListTable: React.FC<TableProps> = () => {
       enableColumnFilter: true,
     }),
     columnHelper.accessor('branchName', {
-      header: t('table.branchName') || 'Branch Name',
+      header: t('pilotList.branchName') || 'Branch Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -194,7 +194,7 @@ const PilotListTable: React.FC<TableProps> = () => {
     }),
     columnHelper.display({
       id: 'actions',
-      header: t('table.actions') || 'Actions',
+      header: t('pilotList.actions') || 'Actions',
       cell: info => (
         <Stack direction="row" spacing={1}>
           <Tooltip title={t('actions.edit') || 'Edit'}>
@@ -231,10 +231,10 @@ const PilotListTable: React.FC<TableProps> = () => {
   // Handle Download CSV
   const handleDownload = useCallback(() => {
     const headers = [
-      t('table.pilotName') || 'Pilot Name',
-      t('table.phoneNumber') || 'Phone Number',
-      t('table.companyName') || 'Company Name',
-      t('table.branchName') || 'Branch Name',
+      t('pilotList.pilotName') || 'Pilot Name',
+      t('pilotList.phoneNumber') || 'Phone Number',
+      t('pilotList.companyName') || 'Company Name',
+      t('pilotList.branchName') || 'Branch Name',
       t('status.status') || 'Status',
     ];
     const rows = data.map((item: PilotTableData) => [
@@ -268,11 +268,11 @@ const PilotListTable: React.FC<TableProps> = () => {
   const handlePilotAdded = useCallback(() => {
     fetchPilotData();
     showNotification(
-      pilotToEdit ? 'Pilot updated successfully.' : 'Pilot added successfully.',
+      pilotToEdit ? (t('notifications.pilotUpdated') || 'Pilot updated successfully.') : (t('notifications.pilotAdded') || 'Pilot added successfully.'),
       'success',
-      'Success'
+      t('notifications.success') || 'Success'
     );
-  }, [fetchPilotData, pilotToEdit, showNotification]);
+  }, [fetchPilotData, pilotToEdit, showNotification, t]);
   
   return (
     <>
@@ -331,7 +331,7 @@ const PilotListTable: React.FC<TableProps> = () => {
           {error}
         </Typography>
       ) : (
-        <DownloadCard title={t('table.pilotList') || 'Pilot List'} onDownload={handleDownload}>
+        <DownloadCard title={t('pilotList.pilotList') || 'Pilot List'} onDownload={handleDownload}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TableContainer>

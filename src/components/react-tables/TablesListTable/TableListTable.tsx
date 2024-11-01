@@ -29,6 +29,7 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   VisibilityState,
+  ColumnDef,
 } from '@tanstack/react-table';
 import DownloadCard from 'src/components/shared/DownloadCard';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,8 +40,11 @@ import { AppState } from 'src/store/Store';
 import { Table as TableType, Company, TableSection } from 'src/types/TablesTable';
 import { useNotification } from '../../../context/NotificationContext';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const TableListTable: React.FC = () => {
+  const { t } = useTranslation();
+
   const [data, setData] = useState<TableType[]>([]);
   const [companyData, setCompanyData] = useState<Company[]>([]);
   const [tableSections, setTableSections] = useState<TableSection[]>([]); // Manage TableSections separately
@@ -86,12 +90,12 @@ const TableListTable: React.FC = () => {
 
     } catch (err: any) {
       console.error('Error fetching tables:', err);
-      setError('Failed to fetch tables. Please try again later.');
-      showNotification('Failed to fetch tables.', 'error', 'Error');
+      setError(t('errors.fetchTables') || 'Failed to fetch tables. Please try again later.');
+      showNotification(t('notifications.fetchTablesFailed') || 'Failed to fetch tables.', 'error', t('notifications.error') || 'Error');
     } finally {
       setLoading(false);
     }
-  }, [baseurl, token, showNotification]);
+  }, [baseurl, token, showNotification, t]);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -107,9 +111,9 @@ const TableListTable: React.FC = () => {
   // Define Columns
   const columnHelper = createColumnHelper<TableType>();
 
-  const columns = useMemo(() => [
+  const columns = useMemo<ColumnDef<TableType, any>[]>(() => [
     columnHelper.accessor('tableName', {
-      header: 'Table Name',
+      header: t('tables.tableName') || 'Table Name',
       cell: info => (
         <Typography variant="h6" fontWeight="400">
           {info.getValue()}
@@ -119,12 +123,12 @@ const TableListTable: React.FC = () => {
     }),
     // Table Section Name Column
     columnHelper.accessor('tableSectionId', {
-      header: 'Table Section',
+      header: t('tables.tableSection') || 'Table Section',
       cell: info => {
         const section = tableSections.find(ts => ts.tableSectionId === info.getValue());
         return (
           <Typography variant="h6" fontWeight="400">
-            {section ? section.sectionName : 'Unknown'}
+            {section ? section.sectionName : t('tables.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -132,12 +136,12 @@ const TableListTable: React.FC = () => {
     }),
     // Company Name Column - Auto-assigned
     columnHelper.accessor('companyId', {
-      header: 'Company Name',
+      header: t('tables.companyName') || 'Company Name',
       cell: info => {
         const company = companyData[0]; // Assuming only one company
         return (
           <Typography variant="h6" fontWeight="400">
-            {company ? company.companyName : 'Unknown'}
+            {company ? company.companyName : t('tables.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -145,13 +149,13 @@ const TableListTable: React.FC = () => {
     }),
     // Branch Name Column
     columnHelper.accessor('branchId', {
-      header: 'Branch Name',
+      header: t('tables.branchName') || 'Branch Name',
       cell: info => {
         const company = companyData[0]; // Assuming only one company
         const branch = company?.branches.find(b => b.branchId === info.getValue());
         return (
           <Typography variant="h6" fontWeight="400">
-            {branch ? branch.branchName : 'Unknown'}
+            {branch ? branch.branchName : t('tables.unknown') || 'Unknown'}
           </Typography>
         );
       },
@@ -160,13 +164,13 @@ const TableListTable: React.FC = () => {
     // Actions Column
     columnHelper.display({
       id: 'actions',
-      header: 'Actions',
+      header: t('tables.actions') || 'Actions',
       cell: info => (
         <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit">
+          <Tooltip title={t('tables.edit') || 'Edit'}>
             <IconButton
               color="primary"
-              aria-label="edit"
+              aria-label={t('tables.edit') || 'edit'}
               onClick={() => handleEdit(info.row.original)}
             >
               <EditIcon />
@@ -176,7 +180,7 @@ const TableListTable: React.FC = () => {
         </Stack>
       ),
     }),
-  ], [columnHelper, companyData, tableSections]);
+  ], [columnHelper, companyData, tableSections, t]);
 
   // Initialize the table
   const table = useReactTable<TableType>({
@@ -196,16 +200,21 @@ const TableListTable: React.FC = () => {
 
   // Handle Download CSV
   const handleDownload = useCallback(() => {
-    const headers = ['Table Name', 'Table Section', 'Company Name', 'Branch Name'];
+    const headers = [
+      t('tables.tableName') || 'Table Name',
+      t('tables.tableSection') || 'Table Section',
+      t('tables.companyName') || 'Company Name',
+      t('tables.branchName') || 'Branch Name'
+    ];
     const company = companyData[0]; // Assuming only one company
     const rows = data.map((table: TableType) => {
       const branch = company?.branches.find(b => b.branchId === table.branchId);
       const tableSection = tableSections.find(ts => ts.tableSectionId === table.tableSectionId);
       return [
         table.tableName,
-        tableSection ? tableSection.sectionName : 'Unknown',
-        company ? company.companyName : 'Unknown',
-        branch ? branch.branchName : 'Unknown',
+        tableSection ? tableSection.sectionName : t('tables.unknown') || 'Unknown',
+        company ? company.companyName : t('tables.unknown') || 'Unknown',
+        branch ? branch.branchName : t('tables.unknown') || 'Unknown',
       ];
     });
 
@@ -220,7 +229,7 @@ const TableListTable: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [data, companyData, tableSections]);
+  }, [data, companyData, tableSections, t]);
 
   // Modal Control Functions
   const handleOpen = useCallback(() => {
@@ -242,7 +251,7 @@ const TableListTable: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleOpen}
         >
-          Add Table
+          {t('tables.addTable') || 'Add Table'}
         </Button>
       </Box>
 
@@ -261,7 +270,7 @@ const TableListTable: React.FC = () => {
                     onChange={e => column.toggleVisibility(e.target.checked)}
                   />
                 }
-                label={column.columnDef.header as string}
+                label={column.columnDef.header as string || column.id}
               />
             ))}
         </FormGroup>
@@ -270,7 +279,7 @@ const TableListTable: React.FC = () => {
       {/* Global Search Input */}
       <Box mb={2}>
         <TextField
-          label="Global Search"
+          label={t('search.global') || 'Global Search'}
           variant="outlined"
           value={globalFilter}
           onChange={e => setGlobalFilter(e.target.value)}
@@ -288,7 +297,7 @@ const TableListTable: React.FC = () => {
           {error}
         </Typography>
       ) : (
-        <DownloadCard title="Tables List" onDownload={handleDownload}>
+        <DownloadCard title={t('tables.tablesList') || 'Tables List'} onDownload={handleDownload}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <TableContainer>
@@ -311,7 +320,7 @@ const TableListTable: React.FC = () => {
                                   size="small"
                                   value={(header.column.getFilterValue() ?? '') as string}
                                   onChange={e => header.column.setFilterValue(e.target.value)}
-                                  placeholder={`Search...`}
+                                  placeholder={t('search.column') || 'Search...'}
                                   style={{ marginLeft: '8px' }}
                                 />
                               ) : null}

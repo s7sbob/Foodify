@@ -56,7 +56,7 @@ const FullLayout: FC = () => {
         <Container
           sx={{
             pt: '30px',
-            maxWidth: customizer.isLayout === 'boxed' ? 'lg' : '100%!important',
+            maxWidth: customizer.isLayout === 'lg' ? 'boxed' : '100%!important',
           }}
         >
           {/* ------------------------------------------- */}

@@ -50,7 +50,20 @@
           "deliveryFee": "رسوم التوصيل",
           "deliveryBonus": "مكافأة التوصيل",
           "zoneList": "قائمة المناطق",
-          "unknown": "غير معروف"
+          "unknown": "غير معروف",
+          "sectionName": "اسم القسم",
+          "service": "الخدمة",
+          "tableSectionsList": "قائمة أقسام الطاولة",
+          "tableName": "اسم الطاولة",
+          "tableSection": "قسم الطاولة",
+          "edit": "تعديل",
+          "addTable": "إضافة طاولة",
+          "editTable": "تعديل الطاولة",
+          "addTablePlaceholder": "أدخل اسم الطاولة",
+          "branch": "فرع",
+          "branchPlaceholder": "اختر فرعًا",
+          "tableSectionPlaceholder": "اختر قسم الطاولة",
+          "tablesList": "قائمة الطاولات"
         },
         "actions": {
           "edit": "تعديل",
@@ -58,10 +71,6 @@
           "permissions": "أذونات"
         },
         "addUserForm": {
-          "userCodePlaceholder": "رمز المستخدم",
-          "usernamePlaceholder": "اسم المستخدم",
-          "passwordPlaceholder": "كلمة المرور",
-          "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
           "username": "اسم المستخدم" ,
           "userCode":"رمز المستخدم",
           "password": "كلمة المرور",
@@ -83,7 +92,12 @@
             "active": "نشط",
             "inactive": "غير نشط",
             "status": "الحالة"
-          }
+          },
+          "rememberDevice": "تذكر كلمة السر",
+          "userCodePlaceholder": "أدخل رمز المستخدم",
+          "usernamePlaceholder": "أدخل اسم المستخدم",
+          "passwordPlaceholder": "أدخل كلمة المرور",
+          "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور"
         },
         "search": {
           "global": "بحث شامل",
@@ -124,7 +138,11 @@
           "addZone": "إضافة منطقة",
           "loading": "جارٍ التحميل...",
           "saveAndStartNew": "حفظ وبدء جديد",
-          "saveAndViewAll": "حفظ وعرض الكل"
+          "saveAndViewAll": "حفظ وعرض الكل",
+          "addTableSection": "إضافة قسم طاولة",
+          "addBranch": "إضافة فرع",
+          "addTable": "إضافة طاولة",
+          "close": "إغلاق"
         },
         "alerts": {
           "fetchWaitersFailed": "فشل في جلب النوادل.",
@@ -139,7 +157,14 @@
           "zoneAddedSuccess": "تمت إضافة المنطقة بنجاح.",
           "zoneUpdatedSuccess": "تم تحديث المنطقة بنجاح.",
           "fetchBranchesFailed": "فشل في جلب الفروع.",
-          "submitZoneFailed": "فشل في إرسال بيانات المنطقة."
+          "submitZoneFailed": "فشل في إرسال بيانات المنطقة.",
+          "updateTableSectionSuccess": "تم تحديث قسم الطاولة بنجاح.",
+          "createTableSectionSuccess": "تم إنشاء قسم الطاولة بنجاح.",
+          "associatedBranchNotFound": "الفرع المرتبط غير موجود.",
+          "userAdded": "تم إضافة المستخدم بنجاح.",
+          "userEdited": "تم تعديل المستخدم بنجاح.",
+          "userEditFailed": "فشل في تعديل المستخدم. يرجى المحاولة مرة أخرى.",
+          "userRegistrationFailed": "فشل في تسجيل المستخدم. يرجى المحاولة مرة أخرى."
         },
         "errors": {
           "waiterNameRequired": "اسم النادل مطلوب.",
@@ -148,7 +173,58 @@
           "fetchBranchesFailed": "فشل في جلب الفروع.",
           "submitFailed": "فشل في إرسال بيانات الطيار.",
           "fetchPilotsFailed": "فشل في جلب الطيارين.",
-          "fetchZonesFailed": "فشل في جلب المناطق."
+          "fetchZonesFailed": "فشل في جلب المناطق.",
+          "fetchTableSectionsFailed": "فشل في جلب أقسام الطاولة.",
+          "fetchCompaniesFailed": "فشل في جلب الشركات.",
+          "submitTableSectionFailed": "فشل في إرسال بيانات قسم الطاولة.",
+          "companyDataMissing": "بيانات الشركة مفقودة.",
+          "fetchTableSections": "فشل في جلب أقسام الطاولة. يرجى المحاولة مرة أخرى لاحقًا.",
+          "fetchCompanies": "فشل في جلب الشركات.",
+          "submitTableSection": "فشل في إرسال بيانات قسم الطاولة.",
+          "fetchTables": "فشل في جلب الطاولات. يرجى المحاولة مرة أخرى لاحقًا.",
+          "fetchData": "فشل في جلب البيانات.",
+          "multipleCompanies": "تم العثور على عدة شركات أو لا توجد شركة مرتبطة بالمستخدم.",
+          "fetchCompanyData": "فشل في جلب بيانات الشركة.",
+          "updateCompanyData": "فشل في تحديث بيانات الشركة.",
+          "addBranchFailed": "فشل في إضافة فرع.",
+          "passwordLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+          "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+          "editBranchFailed": "فشل في تعديل الفرع.",
+          "submitCompanyUpdateFailed": "فشل في إرسال تحديث الشركة.",
+          "branchNotFound": "لم يتم العثور على الفرع المرتبط.",
+          "missingCompanyData": "بيانات الشركة مفقودة."
+        },
+
+        "addTableSectionForm": {
+          "addTableSection": "إضافة قسم طاولة",
+          "editTableSection": "تعديل قسم طاولة",
+          "sectionName": "اسم القسم",
+          "service": "الخدمة (%)",
+          "branch": "الفرع"
+        },
+        "tableSections": {
+          "sectionName": "اسم القسم",
+          "service": "الخدمة",
+          "servicePercentage": "الخدمة (%)",
+          "companyName": "اسم الشركة",
+          "branchName": "اسم الفرع",
+          "unknown": "غير معروف",
+          "actions": "الإجراءات",
+          "edit": "تعديل",
+          "addTableSection": "إضافة قسم طاولة",
+          "editTableSection": "تعديل قسم الطاولة",
+          "addTableSectionPlaceholder": "أدخل اسم قسم الطاولة",
+          "servicePlaceholder": "أدخل نسبة الخدمة",
+          "branch": "فرع",
+          "branchPlaceholder": "اختر فرعًا",
+          "tableSectionsList": "قائمة أقسام الطاولة"
+        },
+
+        "common": {
+          "error": "خطأ",
+          "warning": "تحذير",
+          "success": "نجاح",
+          "incompleteData": "بيانات غير مكتملة"
         },
         "addWaiterForm":{
           "waiterName":"اسم النادل",
@@ -168,5 +244,149 @@
             "deliveryBonusPlaceholder": "أدخل مكافأة التوصيل",
             "branchPlaceholder": "اختر الفرع"
           }
+        },
+        "notifications": {
+          "fetchTableSectionsFailed": "فشل في جلب أقسام الطاولة.",
+          "fetchCompaniesFailed": "فشل في جلب الشركات.",
+          "branchNotFound": "لم يتم العثور على الفرع المرتبط.",
+          "missingCompanyData": "بيانات الشركة مفقودة.",
+          "tableSectionUpdated": "تم تحديث قسم الطاولة بنجاح.",
+          "tableSectionCreated": "تم إنشاء قسم الطاولة بنجاح.",
+          "submitTableSectionFailed": "فشل في إرسال بيانات قسم الطاولة.",
+          "error": "خطأ",
+          "success": "نجاح",
+          "warning": "تحذير",
+          "incompleteData": "بيانات غير مكتملة",
+          "fillAllFields": "يرجى ملء جميع الحقول المطلوبة.",
+          "fetchTablesFailed": "فشل في جلب الطاولات.",
+          "tableUpdated": "تم تحديث الطاولة بنجاح.",
+          "tableCreated": "تم إنشاء الطاولة بنجاح.",
+          "submitTableFailed": "فشل في إرسال بيانات الطاولة.",
+          "fetchDataFailed": "فشل في جلب البيانات.",
+          "fetchPilotsFailed": "فشل في جلب الطيارين.",
+          "zoneAddedSuccess": "تمت إضافة المنطقة بنجاح.",
+          "zoneUpdatedSuccess": "تمت تحديث المنطقة بنجاح.",
+          "pilotAdded": "تمت إضافة الطيار بنجاح.",
+          "pilotUpdated": "تمت تحديث الطيار بنجاح.",
+          "submitZoneFailed": "فشل في إرسال بيانات المنطقة.",
+          "submitPilotFailed": "فشل في إرسال بيانات الطيار.",
+          "fetchCompanyDataFailed": "فشل في جلب بيانات الشركة.",
+          "updateCompanyDataFailed": "فشل في تحديث بيانات الشركة.",
+          "passwordLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+          "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+          "userAdded": "تم إضافة المستخدم بنجاح.",
+          "userEdited": "تم تعديل المستخدم بنجاح.",
+          "userAddFailed": "فشل في إضافة المستخدم.",
+          "userEditFailed": "فشل في تعديل المستخدم.",
+          "userRegistrationFailed": "فشل في تسجيل المستخدم. يرجى المحاولة مرة أخرى.",
+          "loggedIn": "تم تسجيل الدخول بنجاح!",
+          "loginFaild": "اسم المستخدم أو كلمة السر غير صحيحة"
+
+
+        },
+        "header": {
+          "toggleSidebar": "تبديل الشريط الجانبي",
+          "toggleTheme": "تبديل الوضع",
+          "menu": "القائمة"
+
+        },
+        "language": {
+          "selectLanguage": "اختر اللغة",
+          "english": "الإنجليزية",
+          "arabic": "العربية"
+        }, 
+        "pilotList": {
+          "pilotName": "اسم الطيار",
+          "phoneNumber": "رقم الهاتف",
+          "companyName": "اسم الشركة",
+          "branchName": "اسم الفرع",
+          "unknown": "غير معروف",
+          "actions": "الإجراءات",
+          "addPilot": "إضافة طيار",
+          "editPilot": "تعديل الطيار",
+          "pilotList": "قائمة الطيارين"
+        },
+        "tables": {
+          "tableName": "اسم الطاولة",
+          "tableSection": "قسم الطاولة",
+          "companyName": "اسم الشركة",
+          "branchName": "اسم الفرع",
+          "unknown": "غير معروف",
+          "actions": "الإجراءات",
+          "edit": "تعديل",
+          "addTable": "إضافة طاولة",
+          "editTable": "تعديل الطاولة",
+          "addTablePlaceholder": "أدخل اسم الطاولة",
+          "branch": "فرع",
+          "branchPlaceholder": "اختر فرعًا",
+          "tableSectionPlaceholder": "اختر قسم الطاولة",
+          "tablesList": "قائمة الطاولات"
+        },
+        "companyManagement": {
+          "companyManagement": "إدارة الشركة",
+          "editCompanyData": "تعديل بيانات الشركة",
+          "branches": "الفروع"
+        },
+        "downloadCard": {
+    "title": "جدول المستخدمين"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "forgotPassword": "هل نسيت كلمة المرور؟"
+  },
+  "authLogin": {
+    "signIn": "تسجيل الدخول",
+    "signingIn": "جارٍ تسجيل الدخول..."
+  },
+        "branchesTable": {
+          "branchCode": "رمز الفرع",
+          "branchName": "اسم الفرع",
+          "country": "البلد",
+          "governate": "المحافظة",
+          "address": "العنوان",
+          "phoneNumber1": "رقم الهاتف 1",
+          "phoneNumber2": "رقم الهاتف 2",
+          "email": "البريد الإلكتروني",
+          "currency": "العملة",
+          "actions": "الإجراءات"
+        },
+        "addBranchForm": {
+          "addNewBranch": "إضافة فرع جديد",
+          "companyName": "اسم الشركة",
+          "branchCode": "رمز الفرع",
+          "branchName": "اسم الفرع",
+          "country": "البلد",
+          "governate": "المحافظة",
+          "address": "العنوان",
+          "phoneNo1": "رقم الهاتف 1",
+          "phoneNo2": "رقم الهاتف 2",
+          "email": "البريد الإلكتروني",
+          "currency": "العملة"
+        },
+        "editBranchForm": {
+          "editBranch": "تعديل الفرع",
+          "branchCode": "رمز الفرع",
+          "branchName": "اسم الفرع",
+          "country": "البلد",
+          "governate": "المحافظة",
+          "address": "العنوان",
+          "phoneNo1": "رقم الهاتف 1",
+          "phoneNo2": "رقم الهاتف 2",
+          "email": "البريد الإلكتروني",
+          "currency": "العملة",
+          "saveChanges": "حفظ التغييرات"
+        },
+        "editCompanyForm": {
+          "companyName": "اسم الشركة",
+          "country": "البلد",
+          "governate": "المحافظة",
+          "address": "العنوان",
+          "activity": "النشاط",
+          "phoneNo1": "رقم الهاتف 1",
+          "phoneNo2": "رقم الهاتف 2",
+          "phoneNo3": "رقم الهاتف 3",
+          "currency": "العملة",
+          "email": "البريد الإلكتروني",
+          "saveChanges": "حفظ التغييرات"
         }
 }
