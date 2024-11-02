@@ -188,11 +188,7 @@ const EditWaiterForm: React.FC<EditWaiterFormProps> = ({
             />
           </FormControl>
 
-          {/* Company is auto-assigned, display it as read-only */}
-          <FormControl fullWidth margin="normal">
-            <CustomFormLabel>{t('addWaiterForm.company') || 'Company'}</CustomFormLabel>
-            <Typography variant="body1">{currentCompany.companyName}</Typography>
-          </FormControl>
+          {/* Company is auto-assigned */}
 
           <FormControl fullWidth margin="normal">
             <InputLabel id="branch-label">{t('addWaiterForm.branch') || 'Branch'}</InputLabel>

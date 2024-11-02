@@ -113,12 +113,12 @@ const WaitersPage: React.FC = () => {
   // Handlers to refresh data
   const handleWaiterAdded = useCallback(() => {
     fetchWaiters();
-    showNotification(t('alerts.waiterAddedSuccess') || 'Waiter added successfully!', 'success', 'Success');
+    showNotification(t('alerts.waiterAddedSuccess') || 'Waiter added successfully!', 'success', t('notifications.success') || 'Success');
   }, [fetchWaiters, showNotification, t]);
 
   const handleWaiterUpdated = useCallback(() => {
     fetchWaiters();
-    showNotification(t('alerts.waiterUpdatedSuccess') || 'Waiter updated successfully!', 'success', 'Success');
+    showNotification(t('alerts.waiterUpdatedSuccess') || 'Waiter updated successfully!', 'success', t('notifications.success') || 'Success');
   }, [fetchWaiters, showNotification, t]);
 
   return (

@@ -123,7 +123,7 @@ const AddBranchForm: React.FC<AddBranchFormProps> = ({
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>{t('addBranchForm.addNewBranch') || 'Add New Branch'}</DialogTitle>
       <DialogContent>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
           {/* Company Name - Read-only */}
           <Grid item xs={12}>
             <TextField

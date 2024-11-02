@@ -10,14 +10,12 @@ import {
   TextField,
   Grid,
   CircularProgress,
-  Typography,
 } from '@mui/material';
 import { Branch } from '../../../types/companyTypes';
 import { useNotification } from '../../../context/NotificationContext';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../../store/Store';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import { margin } from '@mui/system';
+import top100Films from 'src/components/forms/form-elements/autoComplete/data';
 
 interface EditBranchFormProps {
   open: boolean;
@@ -36,9 +34,6 @@ const EditBranchForm: React.FC<EditBranchFormProps> = ({
   const { showNotification } = useNotification();
   const [formData, setFormData] = useState<Branch>(branchData);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
-  const token = useSelector((state: AppState) => state.auth.token);
 
   useEffect(() => {
     setFormData(branchData);
@@ -67,22 +62,9 @@ const EditBranchForm: React.FC<EditBranchFormProps> = ({
 
     setLoading(true);
     try {
-      // Make API call to update the branch
-      const response = await axios.post<Branch>(
-        `${baseurl}/Branches/UpdateBranch`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      // Assuming the API returns the updated branch data
-      onBranchUpdated(response.data);
+      await onBranchUpdated(formData);
       showNotification(
-        t('notifications.branchUpdated') || 'Branch updated successfully.',
+        t('notifications.branchUpdated'),
         'success',
         t('notifications.success') || 'Success'
       );
@@ -92,8 +74,7 @@ const EditBranchForm: React.FC<EditBranchFormProps> = ({
     } catch (error: any) {
       console.error('Error updating branch:', error);
       showNotification(
-        error.response?.data?.message ||
-          (t('errors.editBranchFailed') || 'Failed to edit branch.'),
+        error.message || (t('errors.editBranchFailed') || 'Failed to edit branch.'),
         'error',
         t('notifications.error') || 'Error'
       );
@@ -103,10 +84,10 @@ const EditBranchForm: React.FC<EditBranchFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm" >
       <DialogTitle>{t('editBranchForm.editBranch') || 'Edit Branch'}</DialogTitle>
-      <DialogContent>
-        <Grid container spacing={2}>
+      <DialogContent >
+        <Grid container spacing={2} sx={{ marginTop: '0.5%' }}>
           {/* Branch Code */}
           <Grid item xs={12} sm={6}>
             <TextField

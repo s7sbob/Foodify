@@ -140,7 +140,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
             },
           }
         );
-        showNotification(t('alerts.zoneUpdatedSuccess') || 'Zone updated successfully.', 'success', 'Success');
+        showNotification(t('alerts.zoneUpdatedSuccess') || 'Zone updated successfully.', 'success', t('notifications.success') || 'Success');
       } else {
         // Add Zone
         await axios.post(`${baseurl}/PosZone/AddZone`, zoneData, {
@@ -149,7 +149,7 @@ const AddZoneForm: React.FC<AddZoneFormProps> = ({
             'Content-Type': 'application/json',
           },
         });
-        showNotification(t('alerts.zoneAddedSuccess') || 'Zone added successfully.', 'success', 'Success');
+        showNotification(t('alerts.zoneAddedSuccess') || 'Zone added successfully.', 'success', t('notifications.success') || 'Success');
       }
 
       onZoneAdded(); // Refresh the zone list
