@@ -32,7 +32,7 @@
           "posDataPOSScreens": "شاشات نقطة البيع",
           "posDataPilotList": "الطيارين",
           "posDataZoneList": "المناطق",
-          "posDataWaitersList": "النوادل",
+          "posDataWaitersList": "الويتر",
           "posDataTablesSectionList": "الصالات",
           "posDataTablesList": "الترابيزات"
         },
@@ -128,14 +128,14 @@
           "branch": "الفرع"
         },
         "waitersPage": {
-          "title": "إدارة النوادل"
+          "title": "إدارة الويتر"
         },
         "waitersTable": {
-          "waiterName": "اسم النادل",
+          "waiterName": "اسم الويتر",
           "branchName": "اسم الفرع",
           "companyName": "اسم الشركة",
           "actions": "الإجراءات",
-          "waitersTable": "جدول النوادل",
+          "waitersTable": "جدول الويتر",
           "globalSearch": "بحث شامل",
           "searchPlaceholder": "بحث..."
         },
@@ -157,9 +157,9 @@
           "saveChanges":"حفظ التغييرات"
         },
         "alerts": {
-          "fetchWaitersFailed": "فشل في جلب النوادل.",
-          "waiterAddedSuccess": "تم إضافة النادل بنجاح!",
-          "waiterUpdatedSuccess": "تم تحديث النادل بنجاح!",
+          "fetchWaitersFailed": "فشل في جلب الويتر.",
+          "waiterAddedSuccess": "تم إضافة الويتر بنجاح!",
+          "waiterUpdatedSuccess": "تم تحديث الويتر بنجاح!",
           "fetchPilotsFailed": "فشل في جلب الطيارين.",
           "createPilotSuccess": "تم إنشاء الطيار بنجاح.",
           "updatePilotSuccess": "تم تحديث الطيار بنجاح.",
@@ -179,7 +179,7 @@
           "userRegistrationFailed": "فشل في تسجيل المستخدم. يرجى المحاولة مرة أخرى."
         },
         "errors": {
-          "waiterNameRequired": "اسم النادل مطلوب.",
+          "waiterNameRequired": "اسم الويتر مطلوب.",
           "branchRequired": "الفرع مطلوب.",
           "fillAllFields": "يرجى ملء جميع الحقول المطلوبة.",
           "fetchBranchesFailed": "فشل في جلب الفروع.",
@@ -239,9 +239,9 @@
           "incompleteData": "بيانات غير مكتملة"
         },
         "addWaiterForm":{
-          "waiterName":"اسم النادل",
+          "waiterName":"اسم الويتر",
           "branch":"الفرع",
-          "waiterNamePlaceholder":"اسم النادل"
+          "waiterNamePlaceholder":"اسم الويتر"
         },
         "zones": {
           "addZoneForm": {
@@ -257,6 +257,7 @@
             "branchPlaceholder": "اختر الفرع"
           }
         },
+        "Download":"تحميل",
         "notifications": {
           "fetchTableSectionsFailed": "فشل في جلب الصالات.",
           "fetchCompaniesFailed": "فشل في جلب الشركات.",

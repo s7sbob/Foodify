@@ -7,7 +7,7 @@ import rtlPlugin from 'stylis-plugin-rtl';
 
 interface RTLProps {
   children: React.ReactNode;
-  direction: 'rtl' | 'ltr'; // Restrict to valid directions for type safety
+  direction: 'rtl' | 'ltr';
 }
 
 // Create caches outside the component to prevent recreation
@@ -28,7 +28,6 @@ const RTL: React.FC<RTLProps> = ({ children, direction }) => {
     document.dir = direction;
   }, [direction]);
 
-  // Memoize the cache based on direction to avoid unnecessary re-renders
   const cache = useMemo(() => (direction === 'rtl' ? rtlCache : ltrCache), [direction]);
 
   return <CacheProvider value={cache}>{children}</CacheProvider>;

@@ -9,15 +9,15 @@ import RTL from './layouts/full/shared/customizer/RTL';
 import ScrollToTop from './components/shared/ScrollToTop';
 import Router from './routes/Router';
 import Spinner from './views/spinner/Spinner';
-import { selectActiveDir, selectLanguage } from './selectors/customizerSelectors'; // Ensure selector for language
-import './utils/i18n'; // Ensure i18n is initialized
+import { selectActiveDir, selectLanguage } from './selectors/customizerSelectors';
+import './utils/i18n';
 import { useTranslation } from 'react-i18next';
 
 function App() {
   const routing = useRoutes(Router);
   const theme = ThemeSettings();
-  const activeDir = useSelector(selectActiveDir) as 'rtl' | 'ltr'; // Ensure type safety
-  const language = useSelector(selectLanguage); // Selector for current language
+  const activeDir = useSelector(selectActiveDir) as 'rtl' | 'ltr';
+  const language = useSelector(selectLanguage);
   const { i18n } = useTranslation();
 
   useEffect(() => {

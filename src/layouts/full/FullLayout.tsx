@@ -1,3 +1,5 @@
+// src/layouts/full/FullLayout.tsx
+
 import { FC } from 'react';
 import { styled, Container, Box, useTheme } from '@mui/material';
 import { useSelector } from 'src/store/Store';
@@ -27,18 +29,13 @@ const PageWrapper = styled('div')(() => ({
 
 const FullLayout: FC = () => {
   const customizer = useSelector((state: AppState) => state.customizer);
-
   const theme = useTheme();
 
   return (
     <MainWrapper className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}>
-      {/* ------------------------------------------- */}
       {/* Sidebar */}
-      {/* ------------------------------------------- */}
-      {customizer.isHorizontal ? '' : <Sidebar />}
-      {/* ------------------------------------------- */}
+      {!customizer.isHorizontal && <Sidebar />}
       {/* Main Wrapper */}
-      {/* ------------------------------------------- */}
       <PageWrapper
         className="page-wrapper"
         sx={{
@@ -47,30 +44,21 @@ const FullLayout: FC = () => {
           }),
         }}
       >
-      
-        {/* ------------------------------------------- */}
         {/* Header */}
-        {/* ------------------------------------------- */}
         {customizer.isHorizontal ? <HorizontalHeader /> : <Header />}
         {/* PageContent */}
-        {customizer.isHorizontal ? <Navigation /> : ''}
+        {customizer.isHorizontal && <Navigation />}
         <Container
           sx={{
             pt: '30px',
             maxWidth: customizer.isLayout === 'lg' ? 'boxed' : '100%!important',
           }}
         >
-          {/* ------------------------------------------- */}
           {/* PageContent */}
-          {/* ------------------------------------------- */}
-
           <Box sx={{ minHeight: 'calc(100vh - 170px)' }}>
             <Outlet />
           </Box>
-
-          {/* ------------------------------------------- */}
           {/* End Page */}
-          {/* ------------------------------------------- */}
         </Container>
         <Customizer />
       </PageWrapper>

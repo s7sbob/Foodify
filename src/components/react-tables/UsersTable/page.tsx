@@ -218,7 +218,7 @@ const ReactColumnVisibilityTable: React.FC<TableProps> = ({ data, onUserAdded })
       </Box>
 
       {/* Table with per-column search inputs */}
-      <DownloadCard title={t('table.usersTable') || 'Users Table'} onDownload={handleDownload}>
+      <DownloadCard title={t('table.usersTable')} onDownload={handleDownload}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TableContainer>

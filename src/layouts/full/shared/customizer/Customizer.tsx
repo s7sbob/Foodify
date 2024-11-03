@@ -1,4 +1,6 @@
-import { FC, useState } from 'react';
+// src/components/customizer/Customizer.tsx
+
+import React, { FC, useState } from 'react';
 import {
   Fab,
   Drawer,
@@ -16,7 +18,6 @@ import Box, { BoxProps } from '@mui/material/Box';
 import { IconX, IconSettings, IconCheck } from '@tabler/icons-react';
 import {
   setTheme,
-  setDir,
   setDarkMode,
   toggleLayout,
   toggleSidebar,
@@ -28,8 +29,6 @@ import { AppState } from 'src/store/Store';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 import WbSunnyTwoToneIcon from '@mui/icons-material/WbSunnyTwoTone';
 import DarkModeTwoToneIcon from '@mui/icons-material/DarkModeTwoTone';
-import SwipeLeftAltTwoToneIcon from '@mui/icons-material/SwipeLeftAltTwoTone';
-import SwipeRightAltTwoToneIcon from '@mui/icons-material/SwipeRightAltTwoTone';
 import AspectRatioTwoToneIcon from '@mui/icons-material/AspectRatioTwoTone';
 import CallToActionTwoToneIcon from '@mui/icons-material/CallToActionTwoTone';
 import ViewSidebarTwoToneIcon from '@mui/icons-material/ViewSidebarTwoTone';
@@ -38,7 +37,6 @@ import { ViewComfyTwoTone, PaddingTwoTone, BorderOuter } from '@mui/icons-materi
 
 const SidebarWidth = '320px';
 
-// Updated colors interface with disp as required
 interface colors {
   id: number;
   bgColor: string;
@@ -48,7 +46,6 @@ interface colors {
 const Customizer: FC = () => {
   const [showDrawer, setShowDrawer] = useState(false);
   const customizer = useSelector((state: AppState) => state.customizer);
-
   const dispatch = useDispatch();
 
   const StyledBox = styled(Box)<BoxProps>(({ theme }) => ({
@@ -147,27 +144,6 @@ const Customizer: FC = () => {
                   color={customizer.activeMode === 'dark' ? 'primary' : 'inherit'}
                 />
                 Dark
-              </StyledBox>
-            </Stack>
-
-            <Box pt={3} />
-
-            {/* RTL Theme Setting */}
-            <Typography variant="h6" gutterBottom>
-              Theme Direction
-            </Typography>
-            <Stack direction={'row'} gap={2} my={2}>
-              <StyledBox onClick={() => dispatch(setDir('ltr'))} display="flex" gap={1}>
-                <SwipeLeftAltTwoToneIcon
-                  color={customizer.activeDir === 'ltr' ? 'primary' : 'inherit'}
-                />{' '}
-                LTR
-              </StyledBox>
-              <StyledBox onClick={() => dispatch(setDir('rtl'))} display="flex" gap={1}>
-                <SwipeRightAltTwoToneIcon
-                  color={customizer.activeDir === 'rtl' ? 'primary' : 'inherit'}
-                />{' '}
-                RTL
               </StyledBox>
             </Stack>
 

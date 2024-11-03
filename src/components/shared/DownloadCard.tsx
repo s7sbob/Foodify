@@ -2,6 +2,7 @@ import { useTheme } from '@mui/material/styles';
 import { Card, CardHeader, Tooltip, Divider, IconButton, Box } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { IconDownload } from '@tabler/icons-react';
+import { t } from 'i18next';
 
 const DownloadCard = ({ title, children, onDownload, searchComponent }: any) => {
   const customizer = useSelector((state: any) => state.customizer);
@@ -27,7 +28,7 @@ const DownloadCard = ({ title, children, onDownload, searchComponent }: any) => 
           </Box>
         }
         action={
-          <Tooltip title="Download" placement="left">
+          <Tooltip title={t("Download")} placement="left">
             <IconButton onClick={onDownload}>
               <IconDownload />
             </IconButton>

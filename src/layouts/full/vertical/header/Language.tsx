@@ -12,7 +12,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from 'src/store/customizer/CustomizerSlice';
 import FlagEn from 'src/assets/images/flag/icon-flag-en.svg';
-import FlagEg from 'src/assets/images/flag/icon-flag-eg.svg'; // Updated import
+import FlagEg from 'src/assets/images/flag/icon-flag-eg.svg';
 import { useTranslation } from 'react-i18next';
 import { AppState } from 'src/store/Store';
 
@@ -29,13 +29,13 @@ const Languages: LanguageOption[] = [
     value: 'en',
   },
   {
-    flagname: 'مصر (Egypt)', // Updated flagname
-    icon: FlagEg,           // Updated icon
+    flagname: 'مصر (Egypt)',
+    icon: FlagEg,
     value: 'ar',
   },
 ];
 
-const Language: React.FC = () => { // Renamed component for clarity
+const LanguageSwitcher: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const dispatch = useDispatch();
   const open = Boolean(anchorEl);
@@ -55,8 +55,7 @@ const Language: React.FC = () => { // Renamed component for clarity
   const changeLanguage = (lng: string) => {
     dispatch(setLanguage(lng));
     i18n.changeLanguage(lng);
-    localStorage.setItem('language', lng); // Persist language preference
-    // Direction is handled within the slice's setLanguage reducer if needed
+    // `setLanguage` reducer handles direction and persistence
   };
 
   useEffect(() => {
@@ -110,4 +109,4 @@ const Language: React.FC = () => { // Renamed component for clarity
   );
 };
 
-export default Language;
+export default LanguageSwitcher;
