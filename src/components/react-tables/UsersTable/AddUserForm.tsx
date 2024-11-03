@@ -73,25 +73,42 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
   };
 
   const handleSubmit = async (closeForm: boolean) => {
-    // Validate password length
-    if (password.length < 8) {
-      setError(t('errors.passwordLength') || 'Password must be at least 8 characters long.');
-      setSuccessMessage('');
-      return;
+    // Determine if the operation is edit or add
+    const isEditMode = !!userToEdit;
+
+    // If adding a new user, password is required
+    // If editing, password fields are optional
+    if (!isEditMode || (isEditMode && (password || confirmPassword))) {
+      // Validate password length only if password is provided
+      if (password && password.length < 8) {
+        setError(t('errors.passwordLength') || 'Password must be at least 8 characters long.');
+        setSuccessMessage('');
+        return;
+      }
+
+      // Check if passwords match only if password is provided
+      if (password !== confirmPassword) {
+        setError(t('errors.passwordMismatch') || 'Passwords do not match.');
+        setSuccessMessage('');
+        return;
+      }
     }
 
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      setError(t('errors.passwordMismatch') || 'Passwords do not match.');
-      setSuccessMessage('');
-      return;
+    // Prepare the payload
+    const payload: any = {
+      userName: username,
+      UserCode: userCode,
+    };
+
+    // Include password if it's being set or changed
+    if (password) {
+      payload.Password = password;
     }
 
     // Determine API endpoint and method based on operation
-    const isEditMode = !!userToEdit;
     const url = isEditMode
-      ? `${baseurl}/account/Update?userName=${username}&UserCode=${userCode}&Password=${password}`
-      : `${baseurl}/account/Register?userName=${username}&UserCode=${userCode}&Password=${password}`;
+      ? `${baseurl}/account/Update`
+      : `${baseurl}/account/Register`;
     const method = isEditMode ? 'PUT' : 'POST';
 
     const headers = {
@@ -103,10 +120,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
       const response = await fetch(url, {
         method: method,
         headers: headers,
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Network error');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Network error');
       }
 
       if (isEditMode) {
@@ -124,7 +143,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
       if (!closeForm) {
         handleClose(); // Close modal if not starting a new entry
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to submit user:', error);
       setError(
         isEditMode
@@ -137,7 +156,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t('addUserForm.title') || (userToEdit ? 'Edit User' : 'Adding New Users')}</DialogTitle>
+      <DialogTitle>
+        {userToEdit ? (t('editUserForm.title') || 'Edit User') : (t('addUserForm.title') || 'Add New User')}
+      </DialogTitle>
       <DialogContent>
         <form
           onSubmit={(e) => {
@@ -160,6 +181,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
               value={userCode}
               onChange={(e) => setUserCode(e.target.value)}
               fullWidth
+              readOnly={!!userToEdit} // Make read-only if editing
             />
           </FormControl>
 
@@ -184,6 +206,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
           <FormControl fullWidth margin="normal">
             <CustomFormLabel htmlFor="pwd-text">
               {t('addUserForm.password') || 'Password'}
+              {userToEdit && (
+                <span style={{ color: 'gray', fontSize: '0.8em', marginLeft: '5px' }}>
+                  ({t('addUserForm.Leave.blank.to.keep.unchanged')})
+                </span>
+              )}
             </CustomFormLabel>
             <OutlinedInput
               type="password"
@@ -193,7 +220,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
                 </InputAdornment>
               }
               id="pwd-text"
-              placeholder={t('addUserForm.passwordPlaceholder') || 'Enter Password'}
+              placeholder={
+                userToEdit
+                  ? t('addUserForm.passwordPlaceholderEdit') || 'Enter new Password'
+                  : t('addUserForm.passwordPlaceholder') || 'Enter Password'
+              }
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
@@ -203,6 +234,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
           <FormControl fullWidth margin="normal">
             <CustomFormLabel htmlFor="cpwd-text">
               {t('addUserForm.confirmPassword') || 'Confirm Password'}
+              {userToEdit && (
+                <span style={{ color: 'gray', fontSize: '0.8em', marginLeft: '5px' }}>
+                 ( {t('addUserForm.Leave.blank.to.keep.unchanged')})
+                </span>
+              )}
             </CustomFormLabel>
             <OutlinedInput
               type="password"
@@ -212,7 +248,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
                 </InputAdornment>
               }
               id="cpwd-text"
-              placeholder={t('addUserForm.confirmPasswordPlaceholder') || 'Re-enter Password'}
+              placeholder={
+                userToEdit
+                  ? t('addUserForm.confirmPasswordPlaceholderEdit') || 'Re-enter new Password'
+                  : t('addUserForm.confirmPasswordPlaceholder') || 'Re-enter Password'
+              }
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               fullWidth
@@ -237,12 +277,22 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ open, handleClose, onUserAdde
         <Button onClick={handleClose} color="error">
           {t('buttons.cancel') || 'Cancel'}
         </Button>
-        <Button onClick={() => handleSubmit(true)} color="primary">
-          {t('buttons.saveAndStartNew') || 'Save & Start New'}
-        </Button>
-        <Button onClick={() => handleSubmit(false)} color="info">
-          {t('buttons.saveAndViewAll') || 'Save & View All'}
-        </Button>
+        {userToEdit ? (
+          // Single button for editing
+          <Button onClick={() => handleSubmit(false)} color="primary">
+            {t('buttons.saveChanges') || 'Save Changes'}
+          </Button>
+        ) : (
+          // Multiple buttons for adding
+          <>
+            <Button onClick={() => handleSubmit(true)} color="primary">
+              {t('buttons.saveAndStartNew') || 'Save & Start New'}
+            </Button>
+            <Button onClick={() => handleSubmit(false)} color="info">
+              {t('buttons.saveAndViewAll') || 'Save & View All'}
+            </Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );

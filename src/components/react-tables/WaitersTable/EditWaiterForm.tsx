@@ -14,7 +14,6 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  Typography,
 } from '@mui/material';
 import CustomFormLabel from '../../forms/theme-elements/CustomFormLabel';
 import { IconUser } from '@tabler/icons-react';

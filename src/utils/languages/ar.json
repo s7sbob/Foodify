@@ -30,11 +30,11 @@
           "posData": "بيانات نقطة البيع",
           "posDataProductGroup": "مجموعة المنتجات",
           "posDataPOSScreens": "شاشات نقطة البيع",
-          "posDataPilotList": "قائمة الطيارين",
-          "posDataZoneList": "قائمة المناطق",
-          "posDataWaitersList": "قائمة النوادل",
-          "posDataTablesSectionList": "قائمة أقسام الطاولات",
-          "posDataTablesList": "قائمة الطاولات"
+          "posDataPilotList": "الطيارين",
+          "posDataZoneList": "المناطق",
+          "posDataWaitersList": "النوادل",
+          "posDataTablesSectionList": "الصالات",
+          "posDataTablesList": "الترابيزات"
         },
         "table": {
           "userCode": "رمز المستخدم",
@@ -45,25 +45,25 @@
           "phoneNumber": "رقم الهاتف",
           "companyName": "اسم الشركة",
           "branchName": "اسم الفرع",
-          "pilotList": "قائمة الطيارين",
+          "pilotList": "الطيارين",
           "zoneName": "اسم المنطقة",
           "deliveryFee": "رسوم التوصيل",
           "deliveryBonus": "مكافأة التوصيل",
-          "zoneList": "قائمة المناطق",
+          "zoneList": "المناطق",
           "unknown": "غير معروف",
-          "sectionName": "اسم القسم",
+          "sectionName": "اسم الصالة",
           "service": "الخدمة",
-          "tableSectionsList": "قائمة أقسام الطاولة",
+          "tableSectionsList": "الصالات ",
           "tableName": "اسم الطاولة",
-          "tableSection": "قسم الطاولة",
+          "tableSection": "الصالة",
           "edit": "تعديل",
           "addTable": "إضافة طاولة",
           "editTable": "تعديل الطاولة",
           "addTablePlaceholder": "أدخل اسم الطاولة",
           "branch": "فرع",
           "branchPlaceholder": "اختر فرعًا",
-          "tableSectionPlaceholder": "اختر قسم الطاولة",
-          "tablesList": "قائمة الطاولات"
+          "tableSectionPlaceholder": "اختر الصالة",
+          "tablesList": "الترابيزات"
         },
         "actions": {
           "edit": "تعديل",
@@ -75,7 +75,9 @@
           "userCode":"رمز المستخدم",
           "password": "كلمة المرور",
           "confirmPassword": "تأكيد كلمة المرور",
-          "title": "إضافة مستخدمين جدد",
+          "passwordPlaceholderEdit": "كلمة السر الجديدة",
+          "confirmPasswordPlaceholderEdit": "تأكيد كلمة السر الجديدة",
+          "title": "إضافة مستخدم جدد",
           "addPilot": "إضافة طيار",
           "editPilot": "تعديل طيار",
           "name": "الاسم",
@@ -87,7 +89,7 @@
           "companyName": "اسم الشركة",
           "branchName": "اسم الفرع",
           "actions": "الإجراءات",
-          "pilotList": "قائمة الطيارين",
+          "pilotList": "الطيارين",
           "status": {
             "active": "نشط",
             "inactive": "غير نشط",
@@ -97,7 +99,16 @@
           "userCodePlaceholder": "أدخل رمز المستخدم",
           "usernamePlaceholder": "أدخل اسم المستخدم",
           "passwordPlaceholder": "أدخل كلمة المرور",
-          "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور"
+          "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+          "Leave.blank.to.keep.unchanged": "أتركها فارغة إذا كنت لاترغب فى التعديل"
+        },
+        "editUserForm": {
+          "userCode":"رمز المستخدم",
+          "password": "كلمة المرور",
+          "confirmPassword": "تأكيد كلمة المرور",
+          "passwordPlaceholderEdit": "كلمة السر الجديدة",
+          "confirmPasswordPlaceholderEdit": "تأكيد كلمة السر الجديدة",
+          "title": "تعديل مستخدم"
         },
         "search": {
           "global": "بحث شامل",
@@ -130,7 +141,7 @@
         },
         "buttons": {
           "addWaiter": "إضافة نادل",
-          "addUser":"إضافة مستخدمين",
+          "addUser":"إضافة مستخدم",
           "addPilot": "إضافة طيار",
           "cancel": "إلغاء",
           "update": "تحديث",
@@ -139,10 +150,11 @@
           "loading": "جارٍ التحميل...",
           "saveAndStartNew": "حفظ وبدء جديد",
           "saveAndViewAll": "حفظ وعرض الكل",
-          "addTableSection": "إضافة قسم طاولة",
+          "addTableSection": "إضافة صالة",
           "addBranch": "إضافة فرع",
           "addTable": "إضافة طاولة",
-          "close": "إغلاق"
+          "close": "إغلاق",
+          "saveChanges":"حفظ التغييرات"
         },
         "alerts": {
           "fetchWaitersFailed": "فشل في جلب النوادل.",
@@ -158,8 +170,8 @@
           "zoneUpdatedSuccess": "تم تحديث المنطقة بنجاح.",
           "fetchBranchesFailed": "فشل في جلب الفروع.",
           "submitZoneFailed": "فشل في إرسال بيانات المنطقة.",
-          "updateTableSectionSuccess": "تم تحديث قسم الطاولة بنجاح.",
-          "createTableSectionSuccess": "تم إنشاء قسم الطاولة بنجاح.",
+          "updateTableSectionSuccess": "تم تحديث الصالة بنجاح.",
+          "createTableSectionSuccess": "تم إنشاء صالة بنجاح.",
           "associatedBranchNotFound": "الفرع المرتبط غير موجود.",
           "userAdded": "تم إضافة المستخدم بنجاح.",
           "userEdited": "تم تعديل المستخدم بنجاح.",
@@ -174,14 +186,14 @@
           "submitFailed": "فشل في إرسال بيانات الطيار.",
           "fetchPilotsFailed": "فشل في جلب الطيارين.",
           "fetchZonesFailed": "فشل في جلب المناطق.",
-          "fetchTableSectionsFailed": "فشل في جلب أقسام الطاولة.",
+          "fetchTableSectionsFailed": "فشل في جلب الصالات.",
           "fetchCompaniesFailed": "فشل في جلب الشركات.",
-          "submitTableSectionFailed": "فشل في إرسال بيانات قسم الطاولة.",
+          "submitTableSectionFailed": "فشل في إرسال بيانات الصالات.",
           "companyDataMissing": "بيانات الشركة مفقودة.",
-          "fetchTableSections": "فشل في جلب أقسام الطاولة. يرجى المحاولة مرة أخرى لاحقًا.",
+          "fetchTableSections": "فشل في جلب الصالات. يرجى المحاولة مرة أخرى لاحقًا.",
           "fetchCompanies": "فشل في جلب الشركات.",
-          "submitTableSection": "فشل في إرسال بيانات قسم الطاولة.",
-          "fetchTables": "فشل في جلب الطاولات. يرجى المحاولة مرة أخرى لاحقًا.",
+          "submitTableSection": "فشل في إرسال بيانات الصالة.",
+          "fetchTables": "فشل في جلب الترابيزات. يرجى المحاولة مرة أخرى لاحقًا.",
           "fetchData": "فشل في جلب البيانات.",
           "multipleCompanies": "تم العثور على عدة شركات أو لا توجد شركة مرتبطة بالمستخدم.",
           "fetchCompanyData": "فشل في جلب بيانات الشركة.",
@@ -196,14 +208,14 @@
         },
 
         "addTableSectionForm": {
-          "addTableSection": "إضافة قسم طاولة",
-          "editTableSection": "تعديل قسم طاولة",
-          "sectionName": "اسم القسم",
+          "addTableSection": "إضافة صالة ",
+          "editTableSection": "تعديل صالة",
+          "sectionName": "اسم الصالة",
           "service": "الخدمة (%)",
           "branch": "الفرع"
         },
         "tableSections": {
-          "sectionName": "اسم القسم",
+          "sectionName": "اسم الصالة",
           "service": "الخدمة",
           "servicePercentage": "الخدمة (%)",
           "companyName": "اسم الشركة",
@@ -211,13 +223,13 @@
           "unknown": "غير معروف",
           "actions": "الإجراءات",
           "edit": "تعديل",
-          "addTableSection": "إضافة قسم طاولة",
-          "editTableSection": "تعديل قسم الطاولة",
+          "addTableSection": "إضافة صالة",
+          "editTableSection": "تعديل صالة ",
           "addTableSectionPlaceholder": "أدخل اسم قسم الطاولة",
           "servicePlaceholder": "أدخل نسبة الخدمة",
           "branch": "فرع",
           "branchPlaceholder": "اختر فرعًا",
-          "tableSectionsList": "قائمة أقسام الطاولة"
+          "tableSectionsList":  "الصالات "
         },
 
         "common": {
@@ -246,19 +258,19 @@
           }
         },
         "notifications": {
-          "fetchTableSectionsFailed": "فشل في جلب أقسام الطاولة.",
+          "fetchTableSectionsFailed": "فشل في جلب الصالات.",
           "fetchCompaniesFailed": "فشل في جلب الشركات.",
           "branchNotFound": "لم يتم العثور على الفرع المرتبط.",
           "missingCompanyData": "بيانات الشركة مفقودة.",
-          "tableSectionUpdated": "تم تحديث قسم الطاولة بنجاح.",
-          "tableSectionCreated": "تم إنشاء قسم الطاولة بنجاح.",
-          "submitTableSectionFailed": "فشل في إرسال بيانات قسم الطاولة.",
+          "tableSectionUpdated": "تم تحديث الصالة بنجاح.",
+          "tableSectionCreated": "تم إنشاءالصالة بنجاح.",
+          "submitTableSectionFailed": "فشل في إرسال بيانات الصالة.",
           "error": "خطأ",
           "success": "نجاح",
           "warning": "تحذير",
           "incompleteData": "بيانات غير مكتملة",
           "fillAllFields": "يرجى ملء جميع الحقول المطلوبة.",
-          "fetchTablesFailed": "فشل في جلب الطاولات.",
+          "fetchTablesFailed": "فشل في جلب الترابيزات.",
           "tableUpdated": "تم تحديث الطاولة بنجاح.",
           "tableCreated": "تم إنشاء الطاولة بنجاح.",
           "submitTableFailed": "فشل في إرسال بيانات الطاولة.",
@@ -306,11 +318,11 @@
           "actions": "الإجراءات",
           "addPilot": "إضافة طيار",
           "editPilot": "تعديل الطيار",
-          "pilotList": "قائمة الطيارين"
+          "pilotList": "الطيارين"
         },
         "tables": {
           "tableName": "اسم الطاولة",
-          "tableSection": "قسم الطاولة",
+          "tableSection": "الصالات",
           "companyName": "اسم الشركة",
           "branchName": "اسم الفرع",
           "unknown": "غير معروف",
@@ -321,8 +333,8 @@
           "addTablePlaceholder": "أدخل اسم الطاولة",
           "branch": "فرع",
           "branchPlaceholder": "اختر فرعًا",
-          "tableSectionPlaceholder": "اختر قسم الطاولة",
-          "tablesList": "قائمة الطاولات"
+          "tableSectionPlaceholder": "اختر صالة",
+          "tablesList": "الترابيزات"
         },
         "companyManagement": {
           "companyManagement": "إدارة الشركة",

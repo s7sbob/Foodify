@@ -66,6 +66,8 @@
       "username":  "username" ,
       "userCode":"userCode",
       "password": "password",
+      "passwordPlaceholderEdit": "New Password",
+      "confirmPasswordPlaceholderEdit": "Confirm New Password",
       "confirmPassword":  "confirmPassword",
       "title": "Adding New Users",
       "addPilot": "Add Pilot",
@@ -86,7 +88,8 @@
         "status": "Status"
       },
       "rememberDevice": "Remember This Device",
-      "confirmPasswordPlaceholder": "Re-enter Password"
+      "confirmPasswordPlaceholder": "Re-enter Password",
+            "Leave.blank.to.keep.unchanged": "Leave blank to keep unchanged"
     },
     "authLogin": {
       "signIn": "Sign In",
@@ -102,7 +105,8 @@
       "password": "Password",
       "passwordPlaceholder": "Enter Password",
       "confirmPassword": "Confirm Password",
-      "confirmPasswordPlaceholder": "Re-enter Password"
+      "confirmPasswordPlaceholder": "Re-enter Password",
+      "Leave.blank.to.keep.unchanged": "Leave blank to keep unchanged"
     },
     "downloadCard": {
       "title": "Users Table"
@@ -155,7 +159,8 @@
       "addTableSection": "Add Table Section",
       "addTable": "Add Table",
       "addBranch": "Add Branch",
-      "close": "Close"
+      "close": "Close",
+      "saveChanges": "Save Changes"
     },
     "alerts": {
       "fetchWaitersFailed": "Failed to fetch waiters.",

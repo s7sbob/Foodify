@@ -12,9 +12,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from 'src/store/customizer/CustomizerSlice';
 import FlagEn from 'src/assets/images/flag/icon-flag-en.svg';
-import FlagFr from 'src/assets/images/flag/icon-flag-fr.svg';
-import FlagCn from 'src/assets/images/flag/icon-flag-cn.svg';
-import FlagSa from 'src/assets/images/flag/icon-flag-sa.svg';
+import FlagEg from 'src/assets/images/flag/icon-flag-eg.svg'; // Updated import
 import { useTranslation } from 'react-i18next';
 import { AppState } from 'src/store/Store';
 
@@ -31,18 +29,8 @@ const Languages: LanguageOption[] = [
     value: 'en',
   },
   {
-    flagname: '中国人 (Chinese)',
-    icon: FlagCn,
-    value: 'ch',
-  },
-  {
-    flagname: 'français (French)',
-    icon: FlagFr,
-    value: 'fr',
-  },
-  {
-    flagname: 'عربي (Arabic)',
-    icon: FlagSa,
+    flagname: 'مصر (Egypt)', // Updated flagname
+    icon: FlagEg,           // Updated icon
     value: 'ar',
   },
 ];
