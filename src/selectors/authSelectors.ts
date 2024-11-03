@@ -1,4 +1,5 @@
 // src/selectors/authSelectors.ts
+
 import { createSelector } from 'reselect';
 import { AppState } from '../store/Store';
 
@@ -9,6 +10,11 @@ const selectAuth = (state: AppState) => state.auth;
 export const selectAuthToken = createSelector(
   [selectAuth],
   (auth) => auth.token
+);
+
+export const selectAuthTokenExpiration = createSelector(
+  [selectAuth],
+  (auth) => auth.tokenExpiration
 );
 
 // Add more selectors as needed

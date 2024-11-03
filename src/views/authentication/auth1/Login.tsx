@@ -1,4 +1,4 @@
-// src/pages/auth/Login2.tsx
+// src/pages/auth/Login.tsx
 
 import { Grid, Box, Card, Stack } from '@mui/material';
 
@@ -9,7 +9,7 @@ import AuthLogin from '../authForms/AuthLogin';
 
 const Login2 = () => {
   return (
-    <PageContainer title="Login" description="This is the Login page">
+    <PageContainer description="This is the Login page">
       <Box
         sx={{
           position: 'relative',

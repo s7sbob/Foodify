@@ -1,13 +1,17 @@
-
+// src/apps/auth/AuthSlice.tsx
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
   token: string | null;
+  tokenExpiration: number | null; // Unix timestamp in milliseconds
 }
 
 const initialState: AuthState = {
-  token: localStorage.getItem('token'), // Initialize token from localStorage instead of sessionStorage
+  token: localStorage.getItem('token'),
+  tokenExpiration: localStorage.getItem('tokenExpiration')
+    ? Number(localStorage.getItem('tokenExpiration'))
+    : null,
 };
 
 const authSlice = createSlice({
@@ -16,11 +20,16 @@ const authSlice = createSlice({
   reducers: {
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
-      localStorage.setItem('token', action.payload); // Save token to localStorage
+      const expiration = Date.now() + 2 * 24 * 60 * 60 * 1000; // 2 days in ms
+      state.tokenExpiration = expiration;
+      localStorage.setItem('token', action.payload);
+      localStorage.setItem('tokenExpiration', expiration.toString());
     },
     clearToken: (state) => {
       state.token = null;
-      localStorage.removeItem('token'); // Remove token from localStorage
+      state.tokenExpiration = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('tokenExpiration');
     },
   },
 });
