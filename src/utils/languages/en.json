@@ -108,6 +108,39 @@
       "confirmPasswordPlaceholder": "Re-enter Password",
       "Leave.blank.to.keep.unchanged": "Leave blank to keep unchanged"
     },
+    
+      "posScreen": {
+        "title": "POS Screen",
+        "addNewScreen": "Add New Screen",
+        "editPOSScreen": "Edit POS Screen",
+        "screenName": "Screen Name",
+        "parentScreen": "Parent Screen",
+        "addNewSubScreen": "Add New Sub-Screen",
+        "save": "Save",
+        "color" :"Color",
+        "image" :"Image"
+      },
+      "infoPreview": {
+        "selectNode": "Select a node to see its details.",
+        "details": "Details"
+      },
+
+      "productGroups": {
+        "title": "Product Groups",
+        "addNewGroup": "Add New Group",
+        "details": "Details",
+        "groupName": "Group Name",
+        "parentGroup": "Parent Group",
+        "color": "Color",
+        "image": "Image",
+        "edit": "Edit",
+        "addNewBranch": "Add New Branch",
+        "selectNode": "Select a node to see its details.",
+        "save": "Save",
+        "editProductGroup": "Edit Product Group",
+        "addNewSubGroup": "Add New SubGroup"
+      },
+
     "Download":"Download",
     "downloadCard": {
       "title": "Users Table"
@@ -161,7 +194,10 @@
       "addTable": "Add Table",
       "addBranch": "Add Branch",
       "close": "Close",
-      "saveChanges": "Save Changes"
+      "saveChanges": "Save Changes",
+      "edit":"Edit",
+      "addNewBranch":"Add New Branch",
+      "add": "Add"
     },
     "alerts": {
       "fetchWaitersFailed": "Failed to fetch waiters.",
@@ -237,7 +273,10 @@
       "error": "Error",
       "warning": "Warning",
       "success": "Success",
-      "incompleteData": "Incomplete Data"
+      "incompleteData": "Incomplete Data",
+      "color": "Color",
+      "image": "Image",
+      "group": "Group"
     },
 
     "zones": {
@@ -314,7 +353,24 @@
       "userEditFailed": "Failed to edit user.",
       "userRegistrationFailed": "Failed to register user. Please try again.",
       "loggedIn":"Logged in successfully!",
-      "loginFaild": "Invalid username or password"
+      "loginFaild": "Invalid username or password",
+      "fetchProductGroupsFailed": "Failed to fetch Product Groups.",
+    "productGroupAddedSuccess": "Product Group added successfully!",
+    "productGroupUpdatedSuccess": "Product Group updated successfully!",
+    "productGroupAddFailed": "Failed to add Product Group.",
+    "productGroupUpdateFailed": "Failed to update Product Group.",
+    "groupNameRequired": "Group name is required.",
+    "tokenMissing": "Authentication token missing. Please log in.",
+    "onlyImageFilesAllowed": "Only image files are allowed.",
+    "imageSizeLimit": "Image size should be less than 2MB.",
+    "selectGroupToAddSubGroup": "Please select a group to add a sub-group.",
+    "fetchPOSScreensFailed": "Failed to fetch POS Screens.",
+    "posScreenAddedSuccess": "POS Screen added successfully!",
+    "posScreenUpdatedSuccess": "POS Screen updated successfully!",
+    "posScreenAddFailed": "Failed to add POS Screen.",
+    "posScreenUpdateFailed": "Failed to update POS Screen.",
+    "screenNameRequired": "Screen name is required.",
+    "selectScreenToAddSubScreen": "Please select a screen to add a sub-screen."
     },
     "tables": {
       "tableName": "Table Name",

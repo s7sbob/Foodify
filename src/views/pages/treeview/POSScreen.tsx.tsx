@@ -25,8 +25,10 @@ import { useNotification } from '../../../context/NotificationContext';
 import api from '../../../axiosConfig';
 import ImageWithFallback from './ImageWithFallback';
 import { normalizeImagePath } from './pathUtils';
+import { useTranslation } from 'react-i18next';
 
 const POSScreen: React.FC = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<TreeNode<POSScreenInfo>[]>([]);
   const [selectedNodeInfo, setSelectedNodeInfo] = useState<POSScreenInfo | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -62,9 +64,9 @@ const POSScreen: React.FC = () => {
     } catch (error: any) {
       console.error('Error fetching data:', error);
       showNotification(
-        error.message || 'Failed to fetch POS Screens.',
-        'error',
-        'Error'
+        error.message || t('notifications.fetchPOSScreensFailed'),
+        
+        t('common.error')
       );
     }
   };
@@ -76,7 +78,7 @@ const POSScreen: React.FC = () => {
       setCompanyData(company);
     } catch (error: any) {
       console.error('Error fetching company data:', error);
-      showNotification('Failed to fetch company data.', 'error', 'Error');
+      showNotification(t('notifications.fetchCompanyDataFailed'),  t('common.error'));
     }
   };
 
@@ -161,8 +163,8 @@ const POSScreen: React.FC = () => {
         parentScreenName: selectedNodeInfo.parentScreenName || '',
         parentScreenId: selectedNodeInfo.parentScreenId || '',
         color: selectedNodeInfo.color || '#000000',
-        img: selectedNodeInfo.img || '', // Image path for display (not to be sent)
-        imageFile: null, // Reset imageFile to null; only append if a new image is uploaded
+        img: selectedNodeInfo.img || '',
+        imageFile: null,
       });
       setImagePreview(selectedNodeInfo.img || '');
       setIsEditDialogOpen(true);
@@ -173,11 +175,11 @@ const POSScreen: React.FC = () => {
   const handleAddSubmit = async (screen: Partial<any>) => {
     // Validation: Ensure screenName is provided
     if (!screen.screenName || screen.screenName.trim() === '') {
-      showNotification('Screen name is required.', 'warning', 'Warning');
+      showNotification(t('notifications.screenNameRequired'),  t('common.warning'));
       return;
     }
 
-    console.log("Submitting screen data:", screen);
+    console.log('Submitting screen data:', screen);
 
     try {
       setIsAddLoading(true);
@@ -206,13 +208,13 @@ const POSScreen: React.FC = () => {
 
       // Refetch the tree data
       fetchTreeData();
-      showNotification('POS Screen added successfully!', 'success', 'Success');
+      showNotification(t('notifications.posScreenAddedSuccess'),  t('common.success'));
     } catch (error: any) {
       console.error('Error adding POS Screen:', error);
 
       // Show detailed error message if available
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to add POS Screen.';
-      showNotification(errorMessage, 'error', 'Error');
+      const errorMessage = error.response?.data?.message || error.message || t('notifications.posScreenAddFailed');
+      showNotification(errorMessage,  t('common.error'));
 
       throw error;
     } finally {
@@ -252,13 +254,13 @@ const POSScreen: React.FC = () => {
       // Refetch the tree data
       fetchTreeData();
       setIsEditDialogOpen(false);
-      showNotification('POS Screen updated successfully!', 'success', 'Success');
+      showNotification(t('notifications.posScreenUpdatedSuccess'),  t('common.success'));
     } catch (error: any) {
       console.error('Error updating POS Screen:', error);
 
       // Show detailed error message if available
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update POS Screen.';
-      showNotification(errorMessage, 'error', 'Error');
+      const errorMessage = error.response?.data?.message || error.message || t('notifications.posScreenUpdateFailed');
+      showNotification(errorMessage,  t('common.error'));
     } finally {
       setIsEditLoading(false);
     }
@@ -270,14 +272,14 @@ const POSScreen: React.FC = () => {
     if (file) {
       // Validate file type (optional)
       if (!file.type.startsWith('image/')) {
-        setImageError('Only image files are allowed.');
+        setImageError(t('notifications.onlyImageFilesAllowed') as string);
         return;
       }
 
       // Validate file size (optional, e.g., max 2MB)
       const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
       if (file.size > maxSizeInBytes) {
-        setImageError('Image size should be less than 2MB.');
+        setImageError(t('notifications.imageSizeLimit') as string);
         return;
       }
 
@@ -287,7 +289,7 @@ const POSScreen: React.FC = () => {
       // Update formData with the new image file
       setFormData((prev: any) => ({
         ...prev,
-        imageFile: file, // Store the File object
+        imageFile: file,
       }));
 
       // Generate a preview URL
@@ -298,7 +300,7 @@ const POSScreen: React.FC = () => {
       reader.readAsDataURL(file);
 
       // Debug: Log the selected file
-      console.log("Selected image file:", file);
+      console.log('Selected image file:', file);
     }
   };
 
@@ -309,8 +311,8 @@ const POSScreen: React.FC = () => {
       parentScreenId: null,
       parentScreenName: '',
       color: '#000000',
-      img: '', // Image path for display (not to be sent)
-      imageFile: null, // Image file for upload
+      img: '',
+      imageFile: null,
     });
     setImagePreview('');
     setImageError('');
@@ -322,17 +324,17 @@ const POSScreen: React.FC = () => {
     if (selectedNodeInfo) {
       setFormData({
         screenName: '',
-        parentScreenId: selectedNodeInfo.screenId, // Set parentScreenId to selected node's id
+        parentScreenId: selectedNodeInfo.screenId,
         parentScreenName: selectedNodeInfo.screenName,
         color: '#000000',
-        img: '', // Image path for display (not to be sent)
-        imageFile: null, // Image file for upload
+        img: '',
+        imageFile: null,
       });
       setImagePreview('');
       setImageError('');
       setIsAddDialogOpen(true);
     } else {
-      showNotification('Please select a screen to add a sub-screen.', 'warning', 'Warning');
+      showNotification(t('notifications.selectScreenToAddSubScreen'),  t('common.warning'));
     }
   };
 
@@ -355,13 +357,13 @@ const POSScreen: React.FC = () => {
   };
 
   return (
-    <PageContainer title="POS Screen" description="This is POS Screen page">
-      <ParentCard title="POS Screen">
+    <PageContainer description={t('posScreen.description')}>
+      <ParentCard title={t('posScreen.title')}>
         <ChildCard>
           {/* Add New Screen Button */}
           <div style={{ marginBottom: '1em' }}>
             <Button variant="contained" color="primary" onClick={handleAddRootScreen}>
-              Add New Screen
+              {t('posScreen.addNewScreen')}
             </Button>
           </div>
           <div style={{ display: 'flex', height: '400px' }}>
@@ -393,11 +395,11 @@ const POSScreen: React.FC = () => {
             fullWidth
             maxWidth="sm"
           >
-            <DialogTitle>Edit POS Screen</DialogTitle>
+            <DialogTitle>{t('posScreen.editPOSScreen')}</DialogTitle>
             <DialogContent>
               {formData.parentScreenName && (
                 <TextField
-                  label="Parent Screen"
+                  label={t('posScreen.parentScreen')}
                   value={formData.parentScreenName}
                   disabled
                   fullWidth
@@ -405,23 +407,23 @@ const POSScreen: React.FC = () => {
                 />
               )}
               <TextField
-                label="Screen Name"
+                label={t('posScreen.screenName')}
                 value={formData.screenName || ''}
                 onChange={(e) => {
                   setFormData({ ...formData, screenName: e.target.value });
-                  console.log("Updated formData.screenName:", e.target.value);
+                  console.log('Updated formData.screenName:', e.target.value);
                 }}
                 fullWidth
                 margin="normal"
               />
               <TextField
-                label="Color"
+                label={t('posScreen.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
                 onChange={(e) => {
                   setFormData({ ...formData, color: e.target.value });
-                  console.log("Updated formData.color:", e.target.value);
+                  console.log('Updated formData.color:', e.target.value);
                 }}
                 fullWidth
                 margin="normal"
@@ -429,7 +431,7 @@ const POSScreen: React.FC = () => {
               {/* Image Upload Field */}
               <FormControl fullWidth margin="normal">
                 <InputLabel shrink htmlFor="image-upload">
-                  Image
+                  {t('posScreen.image')}
                 </InputLabel>
                 <input
                   id="image-upload"
@@ -450,7 +452,7 @@ const POSScreen: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setIsEditDialogOpen(false)} disabled={isEditLoading}>
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button
                 onClick={handleEditSubmit}
@@ -458,7 +460,7 @@ const POSScreen: React.FC = () => {
                 variant="contained"
                 disabled={isEditLoading}
               >
-                {isEditLoading ? <CircularProgress size={24} /> : 'Save'}
+                {isEditLoading ? <CircularProgress size={24} /> : t('buttons.save')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -471,12 +473,12 @@ const POSScreen: React.FC = () => {
             maxWidth="sm"
           >
             <DialogTitle>
-              {formData.parentScreenId ? 'Add New Sub-Screen' : 'Add New Screen'}
+              {formData.parentScreenId ? t('posScreen.addNewSubScreen') : t('posScreen.addNewScreen')}
             </DialogTitle>
             <DialogContent>
               {formData.parentScreenName && (
                 <TextField
-                  label="Parent Screen"
+                  label={t('posScreen.parentScreen')}
                   value={formData.parentScreenName}
                   disabled
                   fullWidth
@@ -484,23 +486,23 @@ const POSScreen: React.FC = () => {
                 />
               )}
               <TextField
-                label="Screen Name"
+                label={t('posScreen.screenName')}
                 value={formData.screenName || ''}
                 onChange={(e) => {
                   setFormData({ ...formData, screenName: e.target.value });
-                  console.log("Updated formData.screenName:", e.target.value);
+                  console.log('Updated formData.screenName:', e.target.value);
                 }}
                 fullWidth
                 margin="normal"
               />
               <TextField
-                label="Color"
+                label={t('posScreen.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
                 onChange={(e) => {
                   setFormData({ ...formData, color: e.target.value });
-                  console.log("Updated formData.color:", e.target.value);
+                  console.log('Updated formData.color:', e.target.value);
                 }}
                 fullWidth
                 margin="normal"
@@ -508,7 +510,7 @@ const POSScreen: React.FC = () => {
               {/* Image Upload Field */}
               <FormControl fullWidth margin="normal">
                 <InputLabel shrink htmlFor="image-upload">
-                  Image
+                  {t('posScreen.image')}
                 </InputLabel>
                 <input
                   id="image-upload"
@@ -529,7 +531,7 @@ const POSScreen: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleAddDialogClose} disabled={isAddLoading}>
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button
                 onClick={handleAddDialogSubmit}
@@ -537,7 +539,7 @@ const POSScreen: React.FC = () => {
                 variant="contained"
                 disabled={isAddLoading}
               >
-                {isAddLoading ? <CircularProgress size={24} /> : 'Add'}
+                {isAddLoading ? <CircularProgress size={24} /> : t('buttons.add')}
               </Button>
             </DialogActions>
           </Dialog>

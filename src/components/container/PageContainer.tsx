@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet';
 
 type Props = {
-  description?: string;
+  description?: any;
   children: JSX.Element | JSX.Element[];
 };
 

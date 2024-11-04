@@ -25,6 +25,7 @@ import { useNotification } from '../../../context/NotificationContext';
 import api from '../../../axiosConfig';
 import ImageWithFallback from './ImageWithFallback';
 import { normalizeImagePath } from './pathUtils';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 // Updated interface
 interface ProductGroupFormData {
@@ -35,6 +36,7 @@ interface ProductGroupFormData {
 }
 
 const Treeview: React.FC = () => {
+  const { t } = useTranslation(); // Initialize t function
   const [data, setData] = useState<TreeNode<ProductGroupInfo>[]>([]);
   const [selectedNodeInfo, setSelectedNodeInfo] = useState<ProductGroupInfo | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -80,9 +82,9 @@ const Treeview: React.FC = () => {
     } catch (error: any) {
       console.error('Error fetching data:', error);
       showNotification(
-        error.message || 'Failed to fetch Product Groups.',
-        'error',
-        'Error'
+        error.message || t('notifications.fetchProductGroupsFailed'),
+        
+        t('common.error')
       );
     }
   };
@@ -98,7 +100,7 @@ const Treeview: React.FC = () => {
       setCompanyData(company);
     } catch (error: any) {
       console.error('Error fetching company data:', error);
-      showNotification('Failed to fetch company data.', 'error', 'Error');
+      showNotification(t('notifications.fetchCompanyDataFailed'),  t('common.error'));
     }
   };
 
@@ -193,7 +195,7 @@ const Treeview: React.FC = () => {
   const handleAddSubmit = async (group: Partial<ProductGroupFormData>) => {
     // Validation: Ensure groupName is provided
     if (!group.groupName || group.groupName.trim() === '') {
-      showNotification('Group name is required.', 'warning', 'Warning');
+      showNotification(t('notifications.groupNameRequired'),  t('common.warning'));
       return;
     }
 
@@ -230,13 +232,13 @@ const Treeview: React.FC = () => {
 
       // Refetch the tree data
       fetchTreeData();
-      showNotification('Product Group added successfully!', 'success', 'Success');
+      showNotification(t('notifications.productGroupAddedSuccess'),  t('common.success'));
     } catch (error: any) {
       console.error('Error adding Product Group:', error);
 
       // Show detailed error message if available
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to add Product Group.';
-      showNotification(errorMessage, 'error', 'Error');
+      const errorMessage = error.response?.data?.message || error.message || t('errors.failedToAddProductGroup');
+      showNotification(errorMessage,  t('common.error'));
 
       throw error;
     } finally {
@@ -248,7 +250,7 @@ const Treeview: React.FC = () => {
   const handleEditSubmit = async () => {
     if (!token) {
       console.warn('No token available. Cannot perform edit operation.');
-      showNotification('Authentication token missing. Please log in.', 'error', 'Error');
+      showNotification(t('notifications.authTokenMissing'),  t('common.error'));
       return;
     }
 
@@ -283,13 +285,13 @@ const Treeview: React.FC = () => {
       // Refetch the tree data
       fetchTreeData();
       setIsEditDialogOpen(false);
-      showNotification('Product Group updated successfully!', 'success', 'Success');
+      showNotification(t('notifications.productGroupUpdatedSuccess'),  t('common.success'));
     } catch (error: any) {
       console.error('Error updating Product Group:', error);
 
       // Show detailed error message if available
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update Product Group.';
-      showNotification(errorMessage, 'error', 'Error');
+      const errorMessage = error.response?.data?.message || error.message || t('errors.failedToUpdateProductGroup');
+      showNotification(errorMessage,  t('common.error'));
     } finally {
       setIsEditLoading(false);
     }
@@ -303,14 +305,15 @@ const Treeview: React.FC = () => {
 
       // Validate file type (optional)
       if (!file.type.startsWith('image/')) {
-        setImageError('Only image files are allowed.');
+        setImageError(t('errors.onlyImageFilesAllowed') as string);
+
         return;
       }
 
       // Validate file size (optional, e.g., max 2MB)
       const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
       if (file.size > maxSizeInBytes) {
-        setImageError('Image size should be less than 2MB.');
+        setImageError(t('errors.imageSizeTooLarge') as string);
         return;
       }
 
@@ -361,7 +364,7 @@ const Treeview: React.FC = () => {
       setImageError('');
       setIsAddDialogOpen(true);
     } else {
-      showNotification('Please select a group to add a sub-group.', 'warning', 'Warning');
+      showNotification(t('notifications.selectGroupToAddSubGroup'),  t('common.warning'));
     }
   };
 
@@ -389,13 +392,13 @@ const Treeview: React.FC = () => {
   };
 
   return (
-    <PageContainer title="Product Groups" description="Manage Product Groups">
-      <ParentCard title="Product Groups">
+    <PageContainer description = {t('productGroups.description')}>
+      <ParentCard title={t('productGroups.title')}>
         <ChildCard>
           {/* Add New Group Button */}
           <div style={{ marginBottom: '1em' }}>
             <Button variant="contained" color="primary" onClick={handleAddRootGroup}>
-              Add New Group
+              {t('productGroups.addNewGroup')}
             </Button>
           </div>
           <div style={{ display: 'flex', height: '400px' }}>
@@ -427,11 +430,11 @@ const Treeview: React.FC = () => {
             fullWidth
             maxWidth="sm"
           >
-            <DialogTitle>Edit Product Group</DialogTitle>
+            <DialogTitle>{t('productGroups.editProductGroup')}</DialogTitle>
             <DialogContent>
               {selectedNodeInfo?.groupParentID && (
                 <TextField
-                  label="Parent Group"
+                  label={t('productGroups.parentGroup')}
                   value={selectedNodeInfo.parentGroupName || ''}
                   disabled
                   fullWidth
@@ -439,7 +442,7 @@ const Treeview: React.FC = () => {
                 />
               )}
               <TextField
-                label="Group Name"
+                label={t('productGroups.groupName')}
                 value={formData.groupName || ''}
                 onChange={(e) => {
                   setFormData({ ...formData, groupName: e.target.value });
@@ -449,7 +452,7 @@ const Treeview: React.FC = () => {
                 margin="normal"
               />
               <TextField
-                label="Color"
+                label={t('productGroups.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
@@ -463,7 +466,7 @@ const Treeview: React.FC = () => {
               {/* Image Upload Field */}
               <FormControl fullWidth margin="normal">
                 <InputLabel shrink htmlFor="image-upload">
-                  Image
+                  {t('productGroups.image')}
                 </InputLabel>
                 <input
                   id="image-upload"
@@ -484,7 +487,7 @@ const Treeview: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setIsEditDialogOpen(false)} disabled={isEditLoading}>
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button
                 onClick={handleEditSubmit}
@@ -492,7 +495,7 @@ const Treeview: React.FC = () => {
                 variant="contained"
                 disabled={isEditLoading}
               >
-                {isEditLoading ? <CircularProgress size={24} /> : 'Save'}
+                {isEditLoading ? <CircularProgress size={24} /> : t('buttons.save')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -505,12 +508,12 @@ const Treeview: React.FC = () => {
             maxWidth="sm"
           >
             <DialogTitle>
-              {formData.groupParentID ? 'Add New Sub-Group' : 'Add New Group'}
+              {formData.groupParentID ? t('productGroups.addNewSubGroup') : t('productGroups.addNewGroup')}
             </DialogTitle>
             <DialogContent>
               {formData.groupParentID && (
                 <TextField
-                  label="Parent Group"
+                  label={t('productGroups.parentGroup')}
                   value={selectedNodeInfo?.groupName || ''}
                   disabled
                   fullWidth
@@ -518,7 +521,7 @@ const Treeview: React.FC = () => {
                 />
               )}
               <TextField
-                label="Group Name"
+                label={t('productGroups.groupName')}
                 value={formData.groupName || ''}
                 onChange={(e) => {
                   setFormData({ ...formData, groupName: e.target.value });
@@ -528,7 +531,7 @@ const Treeview: React.FC = () => {
                 margin="normal"
               />
               <TextField
-                label="Color"
+                label={t('productGroups.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
                 value={formData.color || '#000000'}
@@ -542,7 +545,7 @@ const Treeview: React.FC = () => {
               {/* Image Upload Field */}
               <FormControl fullWidth margin="normal">
                 <InputLabel shrink htmlFor="image-upload">
-                  Image
+                  {t('productGroups.image')}
                 </InputLabel>
                 <input
                   id="image-upload"
@@ -563,7 +566,7 @@ const Treeview: React.FC = () => {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleAddDialogClose} disabled={isAddLoading}>
-                Cancel
+                {t('buttons.cancel')}
               </Button>
               <Button
                 onClick={handleAddDialogSubmit}
@@ -571,7 +574,7 @@ const Treeview: React.FC = () => {
                 variant="contained"
                 disabled={isAddLoading}
               >
-                {isAddLoading ? <CircularProgress size={24} /> : 'Add'}
+                {isAddLoading ? <CircularProgress size={24} /> : t('buttons.add')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -582,3 +585,4 @@ const Treeview: React.FC = () => {
 };
 
 export default Treeview;
+

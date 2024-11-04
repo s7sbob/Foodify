@@ -36,6 +36,37 @@
           "posDataTablesSectionList": "الصالات",
           "posDataTablesList": "الترابيزات"
         },
+
+        "productGroups": {
+          "title": "مجموعات المنتجات",
+          "addNewGroup": "إضافة مجموعة جديدة",
+          "details": "تفاصيل",
+          "groupName": "اسم المجموعة",
+          "parentGroup": "المجموعة الرئيسية",
+          "color": "اللون",
+          "image": "صورة",
+          "edit": "تعديل",
+          "addNewBranch": "إضافة فرع جديد",
+          "selectNode": "اختر عقدة لعرض تفاصيلها.",
+          "save": "حفظ",
+          "editProductGroup": "تعديل المجموعة",
+          "addNewSubGroup": "إضافة مجموعة فرعية"
+        },
+        "posScreen": {
+          "title": "شاشة نقطة البيع",
+          "addNewScreen": "إضافة شاشة جديدة",
+          "editPOSScreen": "تعديل شاشة نقطة البيع",
+          "screenName": "اسم الشاشة",
+          "parentScreen": "الشاشة الرئيسية",
+          "addNewSubScreen": "إضافة شاشة فرعية جديدة",
+          "save": "حفظ",
+          "color" :"اللون",
+          "image" :"صورة"
+        },
+        "infoPreview": {
+          "selectNode": "اختر عقدة لعرض تفاصيلها.",
+          "details": "تفاصيل"
+        },
         "table": {
           "userCode": "رمز المستخدم",
           "userName": "اسم المستخدم",
@@ -154,7 +185,10 @@
           "addBranch": "إضافة فرع",
           "addTable": "إضافة طاولة",
           "close": "إغلاق",
-          "saveChanges":"حفظ التغييرات"
+          "saveChanges":"حفظ التغييرات",
+          "edit":"تعديل",
+          "addNewBranch":"إضافة فرع جديد",
+          "add": "إضافة"
         },
         "alerts": {
           "fetchWaitersFailed": "فشل في جلب الويتر.",
@@ -236,7 +270,10 @@
           "error": "خطأ",
           "warning": "تحذير",
           "success": "نجاح",
-          "incompleteData": "بيانات غير مكتملة"
+          "incompleteData": "بيانات غير مكتملة",
+          "color": "اللون",
+          "image": "صورة",
+          "group": "مجموعة"
         },
         "addWaiterForm":{
           "waiterName":"اسم الويتر",
@@ -295,7 +332,24 @@
           "loggedIn": "تم تسجيل الدخول بنجاح!",
           "loginFaild": "اسم المستخدم أو كلمة السر غير صحيحة",
           "companyDataUpdated": "تم تحديث بيانات الشركة بنجاح",
-          "branchUpdated":"تم تحديث بيانات الفرع بنجاح"
+          "branchUpdated":"تم تحديث بيانات الفرع بنجاح",
+          "fetchProductGroupsFailed": "فشل في جلب مجموعات المنتجات.",
+          "productGroupAddedSuccess": "تمت إضافة مجموعة المنتجات بنجاح!",
+          "productGroupUpdatedSuccess": "تم تحديث مجموعة المنتجات بنجاح!",
+          "productGroupAddFailed": "فشل في إضافة مجموعة المنتجات.",
+          "productGroupUpdateFailed": "فشل في تحديث مجموعة المنتجات.",
+          "groupNameRequired": "اسم المجموعة مطلوب.",
+          "tokenMissing": "رمز المصادقة مفقود. يرجى تسجيل الدخول.",
+          "onlyImageFilesAllowed": "فقط ملفات الصور مسموح بها.",
+          "imageSizeLimit": "يجب أن يكون حجم الصورة أقل من 2 ميجابايت.",
+          "selectGroupToAddSubGroup": "يرجى اختيار مجموعة لإضافة مجموعة فرعية.",
+          "fetchPOSScreensFailed": "فشل في جلب شاشات نقطة البيع.",
+          "posScreenAddedSuccess": "تمت إضافة شاشة نقطة البيع بنجاح!",
+          "posScreenUpdatedSuccess": "تم تحديث شاشة نقطة البيع بنجاح!",
+          "posScreenAddFailed": "فشل في إضافة شاشة نقطة البيع.",
+          "posScreenUpdateFailed": "فشل في تحديث شاشة نقطة البيع.",
+          "screenNameRequired": "اسم الشاشة مطلوب.",
+          "selectScreenToAddSubScreen": "يرجى اختيار شاشة لإضافة شاشة فرعية."
 
 
         },

@@ -4,6 +4,7 @@ import React from 'react';
 import { Button, Typography } from '@mui/material';
 import ImageWithFallback from './ImageWithFallback';
 import { normalizeImagePath } from './pathUtils';
+import { useTranslation } from 'react-i18next';
 
 interface InfoPreviewProps {
   selectedNodeInfo: any;
@@ -16,9 +17,11 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
   onEdit,
   onAdd,
 }) => {
+  const { t } = useTranslation();
+
   if (!selectedNodeInfo) {
     return (
-      <Typography variant="body1">Select a node to see its details.</Typography>
+      <Typography variant="body1">{t('infoPreview.selectNode')}</Typography>
     );
   }
 
@@ -36,32 +39,32 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
 
   return (
     <div>
-      <Typography variant="h6">Details</Typography>
+      <Typography variant="h6">{t('infoPreview.details')}</Typography>
       {selectedNodeInfo.screenName ? (
         <>
           <Typography>
-            <strong>Screen Name:</strong> {selectedNodeInfo.screenName}
+            <strong>{t('posScreen.screenName')}:</strong> {selectedNodeInfo.screenName}
           </Typography>
           {selectedNodeInfo.parentScreenName && (
             <Typography>
-              <strong>Parent Screen:</strong> {selectedNodeInfo.parentScreenName}
+              <strong>{t('posScreen.parentScreen')}:</strong> {selectedNodeInfo.parentScreenName}
             </Typography>
           )}
         </>
       ) : (
         <>
           <Typography>
-            <strong>Group Name:</strong> {selectedNodeInfo.groupName}
+            <strong>{t('productGroups.groupName')}:</strong> {selectedNodeInfo.groupName}
           </Typography>
           {selectedNodeInfo.parentGroupName && (
             <Typography>
-              <strong>Parent Group:</strong> {selectedNodeInfo.parentGroupName}
+              <strong>{t('productGroups.parentGroup')}:</strong> {selectedNodeInfo.parentGroupName}
             </Typography>
           )}
         </>
       )}
       <Typography>
-        <strong>Color:</strong>{' '}
+        <strong>{t('common.color')}:</strong>{' '}
         <span
           style={{
             display: 'inline-block',
@@ -77,11 +80,11 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
       {imageUrl && (
         <div>
           <Typography>
-            <strong>Image:</strong>
+            <strong>{t('common.image')}:</strong>
           </Typography>
           <ImageWithFallback
             src={imageUrl}
-            alt={selectedNodeInfo.screenName || selectedNodeInfo.groupName || "Group"}
+            alt={selectedNodeInfo.screenName || selectedNodeInfo.groupName || t('common.group')}
             style={{ maxWidth: '25%', marginTop: '1em' }}
           />
         </div>
@@ -94,10 +97,10 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
           onClick={onEdit}
           style={{ marginRight: '1em' }}
         >
-          Edit
+          {t('buttons.edit')}
         </Button>
         <Button variant="contained" color="secondary" onClick={onAdd}>
-          Add New Branch
+          {t('buttons.addNewBranch')}
         </Button>
       </div>
     </div>
