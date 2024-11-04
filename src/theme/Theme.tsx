@@ -1,3 +1,5 @@
+// src/theme/Theme.ts
+
 import _ from 'lodash';
 import { createTheme } from '@mui/material/styles';
 import { useSelector } from 'src/store/Store';
@@ -18,6 +20,13 @@ export const BuildTheme = (config: any = {}) => {
   const defaultTheme = customizer.activeMode === 'dark' ? baseDarkTheme : baselightTheme;
   const defaultShadow = customizer.activeMode === 'dark' ? darkshadows : shadows;
   const themeSelect = customizer.activeMode === 'dark' ? darkthemeOptions : themeOptions;
+
+  // Determine font based on direction
+  const isRTL = config.direction === 'rtl';
+  const fontFamily = isRTL
+    ? "'Cairo', 'Plus Jakarta Sans', sans-serif"
+    : "'Plus Jakarta Sans', sans-serif";
+
   const baseMode = {
     palette: {
       mode: customizer.activeMode,
@@ -26,13 +35,18 @@ export const BuildTheme = (config: any = {}) => {
       borderRadius: customizer.borderRadius,
     },
     shadows: defaultShadow,
-    typography: typography,
+    typography: {
+      ...typography,
+      fontFamily: fontFamily,
+    },
   };
+
   const theme = createTheme(
     _.merge({}, baseMode, defaultTheme, locales, themeSelect, {
       direction: config.direction,
     }),
   );
+
   theme.components = components(theme);
 
   return theme;

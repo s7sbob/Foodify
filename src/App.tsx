@@ -34,6 +34,8 @@ function App() {
   useEffect(() => {
     if (language) {
       i18n.changeLanguage(language);
+      // Update the lang attribute on the html element
+      document.documentElement.lang = language;
     }
   }, [language, i18n]);
 
