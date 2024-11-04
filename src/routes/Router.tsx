@@ -3,10 +3,10 @@
 import { lazy } from 'react';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import PrivateRoute from './PrivateRoute';
-import HomePage from '../views/pages/frontend-pages/Homepage';
 import { Navigate } from 'react-router';
 import FullLayout from 'src/layouts/full/FullLayout';
 import BlankLayout from 'src/layouts/blank/BlankLayout';
+import HomePage from 'src/views/pages/frontend-pages/Homepage.tsx';
 
 // Lazy load pages
 const Treeview = Loadable(lazy(() => import('../views/pages/treeview/Treeview')));
@@ -39,45 +39,32 @@ const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 const Router = [
   {
     path: '/',
-    element: <FullLayout />,
+    element: (
+      <PrivateRoute>
+        <FullLayout />
+      </PrivateRoute>
+    ),
     children: [
-      // Since we're using MemoryRouter and want the URL to remain constant,
-      // we'll use relative paths and ensure that all navigation happens within the app.
-      { index: true, element: <Navigate to="/HomePage" replace /> },
+      // Now, since FullLayout is protected, no need to individually wrap child routes
+      { index: true, element: <HomePage /> },
       {
         path: 'HomePage',
-        element: (
-          <PrivateRoute>
-            <HomePage />
-          </PrivateRoute>
-        ),
+        element: <HomePage />,
       },
       {
         path: 'pages',
         children: [
           {
             path: 'treeview',
-            element: (
-              <PrivateRoute>
-                <Treeview />
-              </PrivateRoute>
-            ),
+            element: <Treeview />,
           },
           {
             path: 'POSScreen',
-            element: (
-              <PrivateRoute>
-                <POSScreen />
-              </PrivateRoute>
-            ),
+            element: <POSScreen />,
           },
           {
             path: 'Company',
-            element: (
-              <PrivateRoute>
-                <Company />
-              </PrivateRoute>
-            ),
+            element: <Company />,
           },
         ],
       },
@@ -86,51 +73,27 @@ const Router = [
         children: [
           {
             path: 'column-visiblity',
-            element: (
-              <PrivateRoute>
-                <ReactColumnVisibilityTable />
-              </PrivateRoute>
-            ),
+            element: <ReactColumnVisibilityTable />,
           },
           {
             path: 'PilotListTable',
-            element: (
-              <PrivateRoute>
-                <PilotListTable />
-              </PrivateRoute>
-            ),
+            element: <PilotListTable />,
           },
           {
             path: 'WaitersPage',
-            element: (
-              <PrivateRoute>
-                <WaitersTable />
-              </PrivateRoute>
-            ),
+            element: <WaitersTable />,
           },
           {
             path: 'ZoneListTable',
-            element: (
-              <PrivateRoute>
-                <ZoneListTable />
-              </PrivateRoute>
-            ),
+            element: <ZoneListTable />,
           },
           {
             path: 'TableListTable',
-            element: (
-              <PrivateRoute>
-                <TablesListTable />
-              </PrivateRoute>
-            ),
+            element: <TablesListTable />,
           },
           {
             path: 'TableSectionListTable',
-            element: (
-              <PrivateRoute>
-                <TablesSectionTable />
-              </PrivateRoute>
-            ),
+            element: <TablesSectionTable />,
           },
         ],
       },
