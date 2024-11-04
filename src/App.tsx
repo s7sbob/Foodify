@@ -14,7 +14,6 @@ import './utils/i18n';
 import { useTranslation } from 'react-i18next';
 import { isTokenExpired } from './utils/auth';
 import { clearToken } from './store/apps/auth/AuthSlice';
-import { AppState } from './store/Store';
 import { selectAuthToken, selectAuthTokenExpiration } from './selectors/authSelectors';
 import { useLocation } from 'react-router-dom';
 

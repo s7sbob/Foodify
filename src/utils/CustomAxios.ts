@@ -7,7 +7,7 @@ import { isTokenExpired } from './auth';
 
 // Create Axios instance
 const CustomAxios = axios.create({
-  baseURL: 'http://erp.ts-egy.com/api',
+  baseURL: 'https://erp.ts-egy.com/api',
 });
 
 // Request Interceptor

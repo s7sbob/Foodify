@@ -1,6 +1,6 @@
 // src/components/customizer/Customizer.tsx
 
-import React, { FC, useState } from 'react';
+import  { FC, useState } from 'react';
 import {
   Fab,
   Drawer,
