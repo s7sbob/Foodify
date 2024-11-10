@@ -12,6 +12,9 @@ import HomePage from 'src/views/pages/frontend-pages/Homepage.tsx';
 const Treeview = Loadable(lazy(() => import('../views/pages/treeview/Treeview')));
 const POSScreen = Loadable(lazy(() => import('../views/pages/treeview/POSScreen.tsx')));
 const Company = Loadable(lazy(() => import('../views/pages/Company/CompanyManagementPage')));
+const ProductsPage = Loadable(lazy(() => import('../views/pages/ProductsPage/ProductsPage')));
+const Products = Loadable(lazy(() => import('../views/pages/Products/ProductsPage')));
+
 const ReactColumnVisibilityTable = Loadable(
   lazy(() => import('../views/react-tables/columnvisibility/page')),
 );
@@ -45,11 +48,15 @@ const Router = [
       </PrivateRoute>
     ),
     children: [
-      // Now, since FullLayout is protected, no need to individually wrap child routes
+      // Protected routes within FullLayout
       { index: true, element: <HomePage /> },
       {
         path: 'HomePage',
         element: <HomePage />,
+      },
+      {
+        path: 'products',
+        element:  <Products />
       },
       {
         path: 'pages',
@@ -66,6 +73,7 @@ const Router = [
             path: 'Company',
             element: <Company />,
           },
+
         ],
       },
       {
@@ -100,6 +108,16 @@ const Router = [
       { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
+  // Separate route for ProductsPage
+  {
+    path: '/productsPage',
+    element: (
+      <PrivateRoute>
+        <ProductsPage />
+      </PrivateRoute>
+    ),
+  },
+
   {
     path: '/',
     element: <BlankLayout />,

@@ -56,6 +56,21 @@ const Menuitems: MenuitemsType[] = [
     href: '/pages/Company',
   },
 
+  // Updated ProductsPage Menu Item
+  {
+    id: 'products', // Changed from 'ProductsPage' to 'products' for consistency
+    title: 'menu.productPage', // Ensure this translation key exists
+    icon: IconApps,
+    href: '/productsPage', // Updated path to match the new route
+  },
+
+  {
+    id: 'products', // Changed from 'ProductsPage' to 'products' for consistency
+    title: 'menu.products', // Ensure this translation key exists
+    icon: IconApps,
+    href: '/products', // Updated path to match the new route
+  },
+
   // Menu group: POS
   {
     id: 'pos',
