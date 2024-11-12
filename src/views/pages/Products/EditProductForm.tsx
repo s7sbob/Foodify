@@ -7,18 +7,26 @@ import {
   Grid,
   Button,
   CircularProgress,
-  Tabs,
-  Tab,
-  Box,
   MenuItem,
+  IconButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider,
+  Paper,
+  Box,
 } from '@mui/material';
+import { IconChevronDown } from '@tabler/icons-react'; // تحديث الاستيراد
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
 import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
-import { Product, ProductPrice } from '../../../types/productTypes';
-import { getCompanyData, getProductGroups, getPosScreens } from '../../../services/apiService';
+import { Product, ProductPrice, PriceComment, GroupProduct } from '../../../types/productTypes';
+import { v4 as uuidv4 } from 'uuid';
+import { getCompanyData, getProductGroups, getPosScreens, updateProduct } from '../../../services/apiService';
 
 interface EditProductFormProps {
   productData: Product;
@@ -33,7 +41,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<Product>({
     ...productData,
-    productPrices: productData.productPrices || [], // ضمان أن productPrices مصفوفة
+    productPrices: productData.productPrices || [],
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,34 +51,30 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
   const { showNotification } = useNotification();
   const navigate = useNavigate();
 
-  // البيانات المجلوبة من الـ APIs
+  // Fetch necessary data: branches, productGroups, posScreens
   const [branches, setBranches] = useState<any[]>([]);
   const [productGroups, setProductGroups] = useState<any[]>([]);
-  const [companyId, setCompanyId] = useState<string>('');
   const [posScreens, setPosScreens] = useState<any[]>([]);
 
-  // التحقق من وجود token
-  useEffect(() => {
-    if (!token) {
-      showNotification('يجب تسجيل الدخول لتعديل المنتج.', 'error', 'غير مصرح');
-      navigate('/login');
-    }
-  }, [token, navigate, showNotification]);
-
-  // جلب البيانات عند تحميل المكون
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
       try {
+        // Fetch company data
         const companyData = await getCompanyData(baseurl, token);
         setBranches(companyData.branches);
-        setCompanyId(companyData.companyId);
+        setFormData((prev) => ({
+          ...prev,
+          companyId: companyData.companyId,
+        }));
 
-        const productGroupsData = await getProductGroups(baseurl, token);
-        setProductGroups(productGroupsData);
+        // Fetch product groups
+        const groups = await getProductGroups(baseurl, token);
+        setProductGroups(groups);
 
-        const posScreensData = await getPosScreens(baseurl, token);
-        setPosScreens(posScreensData);
+        // Fetch pos screens
+        const screens = await getPosScreens(baseurl, token);
+        setPosScreens(screens);
       } catch (error) {
         console.error('Error fetching data:', error);
         showNotification('فشل في جلب البيانات المطلوبة.', 'error', 'خطأ');
@@ -80,79 +84,119 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
     fetchData();
   }, [baseurl, token, showNotification]);
 
-  // حالة التبويبات
-  const [tabValue, setTabValue] = useState<number>(0);
+  // Handlers to add different types of entries
+  const handleAddEntry = (lineType: number) => {
+    let newEntry: ProductPrice = {
+      productPriceId: uuidv4(),
+      lineType,
+      branchId: formData.branchId,
+      companyId: formData.companyId!,
+      status: true,
+    };
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  useEffect(() => {
-    setFormData({
-      ...productData,
-      productPrices: productData.productPrices || [], // ضمان أن productPrices مصفوفة
-    });
-  }, [productData]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    switch (lineType) {
+      case 1: // price
+        newEntry.productPriceName = '';
+        newEntry.price = 0.0;
+        break;
+      case 2: // commentGroup
+        newEntry.comment = '';
+        newEntry.description = '';
+        newEntry.priceComments = [];
+        break;
+      case 3: // groupProduct
+        newEntry.qtyToSelect = 1.0;
+        newEntry.groupPriceType = 1;
+        newEntry.groupPrice = 0.0;
+        newEntry.priceGroups = [];
+        break;
+      default:
+        break;
+    }
 
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === 'discount' || name === 'vat'
-          ? parseFloat(value)
-          : value,
+      productPrices: [...prev.productPrices, newEntry],
     }));
   };
 
-  const handleSelectChange = (
-    e: React.ChangeEvent<{ name?: string; value: unknown }>
+  // Handlers to remove an entry
+  const handleRemoveEntry = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      productPrices: prev.productPrices.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Handlers to update entry fields based on lineType
+  const handleEntryChange = (
+    index: number,
+    field: keyof ProductPrice,
+    value: any
   ) => {
-    const { name, value } = e.target;
-    if (name) {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value as string,
-      }));
-    }
-  };
-
-  // دالة لتحديث ProductPrice عند معرفة الفهرس الأصلي
-  const setProductPriceAtIndex = (fullIndex: number, updatedPrice: ProductPrice) => {
-    if (fullIndex === -1) {
-      // إضافة عنصر جديد في نهاية المصفوفة الأصلية
-      setFormData((prev) => ({
-        ...prev,
-        productPrices: [...prev.productPrices, updatedPrice],
-      }));
-    } else {
-      const updatedProductPrices = [...formData.productPrices];
-      if (updatedProductPrices[fullIndex]) {
-        updatedProductPrices[fullIndex] = updatedPrice;
-        setFormData((prev) => ({
-          ...prev,
-          productPrices: updatedProductPrices,
-        }));
-      }
-    }
-  };
-
-  const handlePricesChange = (prices: ProductPrice[]) => {
-    // تحديث BranchId و CompanyId لكل ProductPrice
-    const updatedPrices = prices.map((price) => ({
-      ...price,
-      branchId: formData.branchId,
-      companyId: formData.companyId,
-      // إذا كان LineType 3، ترك GroupPriceType كما هو أو تعيينه إلى 1
-      groupPriceType: price.lineType === 3 ? price.groupPriceType ?? 1 : 1,
-    }));
+    const updatedPrices = [...formData.productPrices];
+    updatedPrices[index] = {
+      ...updatedPrices[index],
+      [field]: value,
+    };
     setFormData((prev) => ({
       ...prev,
       productPrices: updatedPrices,
     }));
   };
 
+  // Handlers for comments within commentGroup
+  const handleAddComment = (priceIndex: number) => {
+    const newComment: PriceComment = {
+      commentId: uuidv4(),
+      name: '',
+      description: '',
+      productPriceId: formData.productPrices[priceIndex].productPriceId,
+      branchId: formData.branchId,
+      companyId: formData.companyId!,
+      status: true,
+      errors: [],
+    };
+    const updatedPrices = [...formData.productPrices];
+    updatedPrices[priceIndex].priceComments = [
+      ...(updatedPrices[priceIndex].priceComments || []),
+      newComment,
+    ];
+    setFormData((prev) => ({
+      ...prev,
+      productPrices: updatedPrices,
+    }));
+  };
+
+  const handleRemoveComment = (priceIndex: number, commentIndex: number) => {
+    const updatedPrices = [...formData.productPrices];
+    updatedPrices[priceIndex].priceComments = updatedPrices[priceIndex].priceComments?.filter(
+      (_, i) => i !== commentIndex
+    );
+    setFormData((prev) => ({
+      ...prev,
+      productPrices: updatedPrices,
+    }));
+  };
+
+  const handleCommentChange = (
+    priceIndex: number,
+    commentIndex: number,
+    field: keyof PriceComment,
+    value: string
+  ) => {
+    const updatedPrices = [...formData.productPrices];
+    const updatedComments = updatedPrices[priceIndex].priceComments?.map((comment, i) =>
+      i === commentIndex ? { ...comment, [field]: value } : comment
+    );
+    updatedPrices[priceIndex].priceComments = updatedComments;
+    setFormData((prev) => ({
+      ...prev,
+      productPrices: updatedPrices,
+    }));
+  };
+
+  // Handle form submission
   const handleSubmit = async () => {
     if (!token) {
       showNotification('يجب تسجيل الدخول لإجراء هذه العملية.', 'error', 'غير مصرح');
@@ -160,88 +204,100 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
       return;
     }
 
-    if (
-      !formData.productName ||
-      !formData.productGroupId ||
-      !formData.productPrices ||
-      !formData.branchId
-    ) {
-      showNotification('يرجى ملء جميع الحقول المطلوبة.', 'warning', 'بيانات غير كاملة');
+    // Validate required fields
+    if (!formData.productName || !formData.productGroupId || !formData.branchId) {
+      showNotification('يرجى ملء جميع الحقول المطلوبة.', 'warning', 'بيانات غير مكتملة');
       return;
     }
 
-    // تعيين CompanyId
-    formData.companyId = companyId;
-
-    // تحديث ProductPrices
-    const updatedProductPrices = formData.productPrices.map((price) => {
-      // إذا كان LineType 3، تأكد من أن GroupPriceType هو 1، 2، أو 3
-      if (price.lineType === 3) {
-        if (![1, 2, 3].includes(price.groupPriceType ?? 1)) {
-          showNotification(`GroupPriceType يجب أن تكون 1، 2، أو 3`, 'warning', 'بيانات غير صحيحة');
-          throw new Error('Invalid GroupPriceType');
+    // Additional validations based on lineType
+    for (const [index, entry] of formData.productPrices.entries()) {
+      if (entry.lineType === 1) { // price
+        if (!entry.productPriceName || entry.price === undefined || entry.price <= 0) {
+          showNotification(`يرجى ملء جميع حقول سعر المنتج في الإدخال رقم ${index + 1}.`, 'warning', 'بيانات غير مكتملة');
+          return;
         }
-      } else {
-        // إذا لم يكن LineType 3، تعيين GroupPriceType إلى 1 تلقائيًا
-        price.groupPriceType = 1;
+      } else if (entry.lineType === 2) { // commentGroup
+        // Validate each comment
+        if (entry.priceComments) {
+          for (const [cIndex, comment] of entry.priceComments.entries()) {
+            if (!comment.name || !comment.description) {
+              showNotification(`يرجى ملء جميع حقول التعليقات في الإدخال رقم ${index + 1}, التعليق رقم ${cIndex + 1}.`, 'warning', 'بيانات غير مكتملة');
+              return;
+            }
+          }
+        }
+      } else if (entry.lineType === 3) { // groupProduct
+        if (entry.qtyToSelect === undefined || entry.qtyToSelect <= 0 || !entry.groupPriceType) {
+          showNotification(`يرجى ملء جميع حقول منتجات المجموعة في الإدخال رقم ${index + 1}.`, 'warning', 'بيانات غير مكتملة');
+          return;
+        }
+        if (entry.groupPriceType === 3 && (entry.groupPrice === undefined || entry.groupPrice <= 0)) {
+          showNotification(`يرجى إدخال سعر المجموعة بشكل صحيح في الإدخال رقم ${index + 1}.`, 'warning', 'بيانات غير مكتملة');
+          return;
+        }
       }
-
-      return {
-        ...price,
-        branchId: formData.branchId!,
-        companyId: formData.companyId!,
-      };
-    });
-
-    // بناء FormData
-    const formPayload = new FormData();
-    formPayload.append('productId', formData.productId || '');
-    formPayload.append('productName', formData.productName);
-    formPayload.append('productName2', formData.productName2 || '');
-    formPayload.append('productGroupId', formData.productGroupId);
-    formPayload.append('branchId', formData.branchId);
-    formPayload.append('posScreenId', formData.posScreenId || '');
-    formPayload.append('discount', formData.discount?.toString() || '0');
-    formPayload.append('vat', formData.vat?.toString() || '0');
-    formPayload.append('companyId', formData.companyId!);
-    formPayload.append('status', formData.status.toString());
-
-    // إضافة ProductPrices
-    updatedProductPrices.forEach((price, index) => {
-      formPayload.append(`productPrices[${index}].productPriceName`, price.productPriceName);
-      formPayload.append(`productPrices[${index}].price`, price.price.toString());
-      formPayload.append(`productPrices[${index}].groupPriceType`, price.groupPriceType?.toString() || '1');
-      formPayload.append(`productPrices[${index}].groupPrice`, price.groupPrice.toString());
-      formPayload.append(`productPrices[${index}].qtyToSelect`, price.qtyToSelect.toString());
-      formPayload.append(`productPrices[${index}].lineType`, price.lineType.toString());
-      formPayload.append(`productPrices[${index}].branchId`, price.branchId);
-      formPayload.append(`productPrices[${index}].companyId`, price.companyId);
-
-      // إضافة PriceComments
-      price.priceComments.forEach((comment, cIndex) => {
-        formPayload.append(`productPrices[${index}].priceComments[${cIndex}].name`, comment.name);
-        formPayload.append(`productPrices[${index}].priceComments[${cIndex}].branchId`, comment.branchId);
-      });
-    });
-
-    // تضمين الصورة إذا كانت موجودة
-    if (imageFile) {
-      formPayload.append('imageFile', imageFile);
-    }
-
-    console.log('FormData Entries:');
-    for (let pair of formPayload.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
     }
 
     setLoading(true);
     try {
-      await axios.post(`${baseurl}/Product/UpdateProduct`, formPayload, {
-        headers: { 
-          Authorization: `Bearer ${token}`, 
-          // 'Content-Type' سيتم تحديده تلقائيًا بواسطة Axios عند استخدام FormData
-        },
+      // بناء FormData
+      const formPayload = new FormData();
+      formPayload.append('productId', formData.productId || '');
+      formPayload.append('productName', formData.productName);
+      formPayload.append('productName2', formData.productName2 || '');
+      formPayload.append('productGroupId', formData.productGroupId);
+      formPayload.append('branchId', formData.branchId);
+      formPayload.append('posScreenId', formData.posScreenId || '');
+      formPayload.append('discount', formData.discount?.toString() || '0');
+      formPayload.append('vat', formData.vat?.toString() || '0');
+      formPayload.append('companyId', formData.companyId!);
+      formPayload.append('status', formData.status.toString());
+
+      // إضافة productPrices مع الأنواع المختلفة
+      formData.productPrices.forEach((entry, priceIndex) => {
+        formPayload.append(`productPrices[${priceIndex}].lineType`, entry.lineType.toString());
+        if (entry.lineType === 1) { // price
+          formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName!);
+          formPayload.append(`productPrices[${priceIndex}].price`, entry.price!.toString());
+        } else if (entry.lineType === 2) { // commentGroup
+          formPayload.append(`productPrices[${priceIndex}].comment`, entry.comment!);
+          formPayload.append(`productPrices[${priceIndex}].description`, entry.description!);
+          // إضافة التعليقات
+          if (entry.priceComments) {
+            entry.priceComments.forEach((comment, commentIndex) => {
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].name`, comment.name);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].description`, comment.description || '');
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`, comment.productPriceId);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, comment.branchId);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, comment.companyId);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].status`, comment.status.toString());
+            });
+          }
+        } else if (entry.lineType === 3) { // groupProduct
+          formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect!.toString());
+          formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType!.toString());
+          formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice!.toString());
+        }
+
+        formPayload.append(`productPrices[${priceIndex}].branchId`, entry.branchId);
+        formPayload.append(`productPrices[${priceIndex}].companyId`, entry.companyId);
+        formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());
       });
+
+      // إضافة الصورة إذا كانت موجودة
+      if (imageFile) {
+        formPayload.append('imageFile', imageFile);
+      }
+
+      console.log('FormData Entries:');
+      for (let pair of formPayload.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+
+      // إرسال طلب POST باستخدام وظيفة updateProduct من apiService
+      await updateProduct(baseurl, token, formPayload);
+
       showNotification('تم تحديث المنتج بنجاح!', 'success', 'نجاح');
       onProductUpdated();
     } catch (err) {
@@ -251,11 +307,6 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
       setLoading(false);
     }
   };
-
-  // إضافة تحقق من البيانات
-  useEffect(() => {
-    console.log('Form Data:', formData);
-  }, [formData]);
 
   return (
     <Box>
@@ -269,7 +320,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             label="اسم المنتج"
             name="productName"
             value={formData.productName}
-            onChange={handleChange}
+            onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
             fullWidth
             required
           />
@@ -279,8 +330,8 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           <TextField
             label="اسم المنتج 2"
             name="productName2"
-            value={formData.productName2}
-            onChange={handleChange}
+            value={formData.productName2 || ''}
+            onChange={(e) => setFormData({ ...formData, productName2: e.target.value })}
             fullWidth
           />
         </Grid>
@@ -291,7 +342,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             label="مجموعة المنتج"
             name="productGroupId"
             value={formData.productGroupId}
-            onChange={handleSelectChange}
+            onChange={(e) => setFormData({ ...formData, productGroupId: e.target.value })}
             fullWidth
             required
           >
@@ -309,7 +360,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             label="الفرع"
             name="branchId"
             value={formData.branchId}
-            onChange={handleSelectChange}
+            onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
             fullWidth
             required
           >
@@ -327,7 +378,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             label="شاشة نقاط البيع"
             name="posScreenId"
             value={formData.posScreenId || ''}
-            onChange={handleSelectChange}
+            onChange={(e) => setFormData({ ...formData, posScreenId: e.target.value })}
             fullWidth
           >
             <MenuItem value="">لا شيء</MenuItem>
@@ -345,7 +396,12 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             name="discount"
             type="number"
             value={formData.discount ?? ''}
-            onChange={handleChange}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                discount: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
             fullWidth
           />
         </Grid>
@@ -356,7 +412,12 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             name="vat"
             type="number"
             value={formData.vat ?? ''}
-            onChange={handleChange}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                vat: e.target.value ? parseFloat(e.target.value) : undefined,
+              })
+            }
             fullWidth
           />
         </Grid>
@@ -379,18 +440,215 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           {imageFile && <Typography variant="body2">{imageFile.name}</Typography>}
         </Grid>
 
-        {/* التبويبات */}
-        <Grid item xs={12}>
-          <Tabs value={tabValue} onChange={handleTabChange} variant="fullWidth">
-            <Tab label="إضافة سعر" />
-            <Tab label="تعليقات" />
-            <Tab label="منتجات المجموعة" />
-          </Tabs>
+        {/* الأزرار الرئيسية لإضافة الإدخالات المختلفة */}
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleAddEntry(1)} // lineType 1: price
+            fullWidth
+          >
+            إضافة سعر
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleAddEntry(2)} // lineType 2: commentGroup
+            fullWidth
+          >
+            إضافة مجموعة تعليقات
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant="outlined"
+            color="success"
+            onClick={() => handleAddEntry(3)} // lineType 3: groupProduct
+            fullWidth
+          >
+            إضافة منتجات المجموعة
+          </Button>
         </Grid>
 
+        {/* عرض الإدخالات المختلفة باستخدام Accordion و Divider */}
+        {formData.productPrices.map((entry, index) => (
+          <React.Fragment key={entry.productPriceId}>
+            <Accordion>
+              <AccordionSummary
+                expandIcon={<IconChevronDown />} // استخدام IconChevronDown من @tabler/icons-react
+                aria-controls={`panel${index}-content`}
+                id={`panel${index}-header`}
+              >
+                <Typography variant="h6">
+                  {entry.lineType === 1 && `سعر ${index + 1}`}
+                  {entry.lineType === 2 && `مجموعة تعليقات ${index + 1}`}
+                  {entry.lineType === 3 && `منتجات المجموعة ${index + 1}`}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  {/* حقل بناءً على lineType */}
+                  {entry.lineType === 1 && (
+                    <>
+                      {/* اسم السعر */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="اسم السعر"
+                          name="productPriceName"
+                          value={entry.productPriceName || ''}
+                          onChange={(e) => handleEntryChange(index, 'productPriceName', e.target.value)}
+                          fullWidth
+                          required
+                        />
+                      </Grid>
+                      {/* السعر */}
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="السعر"
+                          name="price"
+                          type="number"
+                          value={entry.price ?? ''}
+                          onChange={(e) =>
+                            handleEntryChange(index, 'price', e.target.value ? parseFloat(e.target.value) : undefined)
+                          }
+                          fullWidth
+                          required
+                        />
+                      </Grid>
+                    </>
+                  )}
 
-        {/* أزرار الحفظ والإلغاء */}
-        <Grid item xs={12}>
+                  {entry.lineType === 2 && (
+                    <>
+                      {/* زر إضافة تعليق */}
+                      <Grid item xs={12}>
+                        <Button
+                          variant="outlined"
+                          startIcon={<AddIcon />}
+                          onClick={() => handleAddComment(index)}
+                          fullWidth
+                        >
+                          إضافة تعليق
+                        </Button>
+                      </Grid>
+                      {/* عرض التعليقات */}
+                      {entry.priceComments && entry.priceComments.map((comment, cIndex) => (
+                        <Grid item xs={12} key={comment.commentId}>
+                          <Paper variant="outlined" sx={{ padding: 2, position: 'relative' }}>
+                            <IconButton
+                              aria-label="delete-comment"
+                              onClick={() => handleRemoveComment(index, cIndex)}
+                              color="error"
+                              size="small"
+                              sx={{ position: 'absolute', top: 8, right: 8 }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                            <Typography variant="subtitle1" color="textSecondary">
+                              تعليق {cIndex + 1}
+                            </Typography>
+                            <TextField
+                              label="اسم التعليق *"
+                              name={`commentName-${cIndex}`}
+                              value={comment.name}
+                              onChange={(e) => handleCommentChange(index, cIndex, 'name', e.target.value)}
+                              fullWidth
+                              required
+                              variant="outlined"
+                              size="small"
+                              sx={{ mt: 1 }}
+                            />
+                            <TextField
+                              label="الوصف *"
+                              name={`commentDescription-${cIndex}`}
+                              value={comment.description || ''}
+                              onChange={(e) => handleCommentChange(index, cIndex, 'description', e.target.value)}
+                              fullWidth
+                              required
+                              variant="outlined"
+                              size="small"
+                              sx={{ mt: 2 }}
+                            />
+                          </Paper>
+                        </Grid>
+                      ))}
+                    </>
+                  )}
+
+                  {entry.lineType === 3 && (
+                    <>
+                      {/* كمية الاختيار */}
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          label="كمية الاختيار"
+                          name="qtyToSelect"
+                          type="number"
+                          value={entry.qtyToSelect || ''}
+                          onChange={(e) =>
+                            handleEntryChange(index, 'qtyToSelect', e.target.value ? parseFloat(e.target.value) : undefined)
+                          }
+                          fullWidth
+                          required
+                        />
+                      </Grid>
+                      {/* نوع سعر المجموعة */}
+                      <Grid item xs={12} sm={4}>
+                        <TextField
+                          select
+                          label="نوع سعر المجموعة"
+                          name="groupPriceType"
+                          value={entry.groupPriceType || ''}
+                          onChange={(e) =>
+                            handleEntryChange(index, 'groupPriceType', e.target.value ? parseInt(e.target.value as string) : undefined)
+                          }
+                          fullWidth
+                          required
+                        >
+                          <MenuItem value={1}>zero</MenuItem>
+                          <MenuItem value={2}>asproduct</MenuItem>
+                          <MenuItem value={3}>manual</MenuItem>
+                        </TextField>
+                      </Grid>
+                      {/* سعر المجموعة فقط إذا كان النوع 'manual' */}
+                      {entry.groupPriceType === 3 && (
+                        <Grid item xs={12} sm={4}>
+                          <TextField
+                            label="سعر المجموعة"
+                            name="groupPrice"
+                            type="number"
+                            value={entry.groupPrice || ''}
+                            onChange={(e) =>
+                              handleEntryChange(index, 'groupPrice', e.target.value ? parseFloat(e.target.value) : undefined)
+                            }
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                      )}
+                    </>
+                  )}
+
+                  {/* زر حذف الإدخال */}
+                  <Grid item xs={12}>
+                    <IconButton
+                      aria-label="delete-entry"
+                      onClick={() => handleRemoveEntry(index)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+            <Divider />
+          </React.Fragment>
+        ))}
+
+        {/* أزرار حفظ وإلغاء */}
+        <Grid item xs={12} sm={6}>
           <Button
             onClick={handleSubmit}
             color="primary"
@@ -401,7 +659,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             {loading ? <CircularProgress size={24} /> : 'حفظ التغييرات'}
           </Button>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <Button
             onClick={onCancel}
             color="secondary"

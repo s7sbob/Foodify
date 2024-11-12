@@ -15,17 +15,17 @@ import {
   IconButton,
   Paper,
 } from '@mui/material';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../../store/Store';
-import { Product } from '../../../types/productTypes';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddProductForm from './AddProductForm';
 import EditProductForm from './EditProductForm';
 import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
-import { getProductGroups, getPosScreens } from '../../../services/apiService';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../store/Store';
+import { Product } from '../../../types/productTypes';
+import axios from 'axios';
+import { getProductGroups, getPosScreens, deleteProduct } from '../../../services/apiService';
 
 const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -83,7 +83,7 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     fetchProducts();
     fetchAdditionalData();
-  }, [token]);
+  }, [token]); // تحديث عند تغيير token
 
   // التعامل مع تعديل المنتج
   const handleEditProduct = (product: Product) => {
@@ -109,9 +109,7 @@ const ProductsPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await axios.delete(`${baseurl}/Product/DeleteProduct/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await deleteProduct(baseurl, token, productId);
       showNotification('تم حذف المنتج بنجاح!', 'success', 'نجاح');
       fetchProducts();
     } catch (err) {
@@ -129,7 +127,7 @@ const ProductsPage: React.FC = () => {
       </Typography>
 
       <Grid container spacing={2}>
-        {/* الجزء الأيسر: نموذج إضافة المنتج الجديد */}
+        {/* الجزء الأيسر: نموذج إضافة أو تحرير المنتج */}
         <Grid item xs={12} md={4}>
           {productToEdit ? (
             <EditProductForm
@@ -164,22 +162,49 @@ const ProductsPage: React.FC = () => {
                     <TableCell>ضريبة القيمة المضافة</TableCell>
                     <TableCell>شاشة نقاط البيع</TableCell>
                     <TableCell>مجموعة المنتج</TableCell>
-                    <TableCell>نوع سعر المجموعة</TableCell>
                     <TableCell>الإجراءات</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {products.map((product) => (
-                    product.productId ? ( // Ensure productId is defined
+                    product.productId ? (
                       <TableRow key={product.productId}>
                         <TableCell>{product.productName}</TableCell>
                         <TableCell>
                           {/* عرض جميع الأسعار */}
                           {product.productPrices && product.productPrices.length > 0 ? (
                             product.productPrices.map((price, index) => (
-                              <Typography key={index}>
-                                {price.productPriceName}: {price.price}
-                              </Typography>
+                              price.lineType === 1 ? (
+                                <Typography key={index}>
+                                  {price.productPriceName}: {price.price}
+                                </Typography>
+                              ) : price.lineType === 2 ? (
+                                <Box key={index} sx={{ mt: 1 }}>
+                                  <Typography variant="subtitle2" color="textSecondary">
+                                    مجموعة تعليقات:
+                                  </Typography>
+                                  {price.priceComments && price.priceComments.length > 0 ? (
+                                    price.priceComments.map((comment, cIndex) => (
+                                      <Typography key={cIndex} variant="body2" sx={{ ml: 2 }}>
+                                        - {comment.name}: {comment.description}
+                                      </Typography>
+                                    ))
+                                  ) : (
+                                    <Typography variant="body2" sx={{ ml: 2 }}>
+                                      لا توجد تعليقات
+                                    </Typography>
+                                  )}
+                                </Box>
+                              ) : price.lineType === 3 ? (
+                                <Box key={index} sx={{ mt: 1 }}>
+                                  <Typography variant="subtitle2" color="textSecondary">
+                                    منتجات المجموعة:
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ ml: 2 }}>
+                                    كمية الاختيار: {price.qtyToSelect}, نوع السعر: {price.groupPriceType}, سعر المجموعة: {price.groupPrice}
+                                  </Typography>
+                                </Box>
+                              ) : null
                             ))
                           ) : (
                             '-'
@@ -194,19 +219,6 @@ const ProductsPage: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           {allProductGroups.find(group => group.groupId === product.productGroupId)?.groupName || 'غير معروف'}
-                        </TableCell>
-                        <TableCell>
-                          {product.productPrices && product.productPrices.length > 0 ? (
-                            product.productPrices.map((price, index) => (
-                              <Typography key={index}>
-                                {price.lineType === 3
-                                  ? `GroupPriceType: ${price.groupPriceType ?? 'غير محدد'}`
-                                  : 'GroupPriceType: 1'}
-                              </Typography>
-                            ))
-                          ) : (
-                            '-'
-                          )}
                         </TableCell>
                         <TableCell>
                           <IconButton
@@ -228,15 +240,16 @@ const ProductsPage: React.FC = () => {
                     ) : (
                       // Handle case where productId is undefined
                       <TableRow key={`undefined-${Math.random()}`}>
-                        <TableCell colSpan={8} align="center">
+                        <TableCell colSpan={7} align="center">
                           بيانات منتج غير صحيحة (معرف المنتج مفقود).
                         </TableCell>
                       </TableRow>
                     )
                   ))}
+
                   {products.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={8} align="center">
+                      <TableCell colSpan={7} align="center">
                         لا توجد منتجات لعرضها.
                       </TableCell>
                     </TableRow>
