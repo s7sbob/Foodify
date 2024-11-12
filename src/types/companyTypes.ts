@@ -30,3 +30,4 @@ export interface CompanyData {
   errors: any[];
 }
 
+

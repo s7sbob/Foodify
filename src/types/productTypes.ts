@@ -10,15 +10,6 @@ export interface PriceComment {
   errors?: any[];
 }
 
-export interface PriceGroup {
-  productPriceGroupId?: string;
-  productPriceId?: string;
-  branchId: string;
-  companyId: string;
-  status: boolean;
-  errors?: any[];
-}
-
 export interface ProductPrice {
   productPriceId?: string;
   productPriceName: string;
@@ -30,7 +21,7 @@ export interface ProductPrice {
   priceComments: PriceComment[];
   branchId: string;
   companyId: string;
-  priceGroups: PriceGroup[];
+  priceGroups: any[]; // يمكن تحديد الواجهة حسب الحاجة
   status: boolean;
   errors?: any[];
 }

@@ -13,7 +13,7 @@ const Treeview = Loadable(lazy(() => import('../views/pages/treeview/Treeview'))
 const POSScreen = Loadable(lazy(() => import('../views/pages/treeview/POSScreen.tsx')));
 const Company = Loadable(lazy(() => import('../views/pages/Company/CompanyManagementPage')));
 const ProductsPage = Loadable(lazy(() => import('../views/pages/ProductsPage/ProductsPage')));
-const Products = Loadable(lazy(() => import('../views/pages/Products/ProductsPage')));
+const Products = Loadable(lazy(() => import('../views/pages/Products/ProductsPage.tsx')));
 
 const ReactColumnVisibilityTable = Loadable(
   lazy(() => import('../views/react-tables/columnvisibility/page')),
