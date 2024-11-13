@@ -33,8 +33,7 @@ const ProductPricesForm: React.FC<ProductPricesFormProps> = ({ productPrices, se
       branchId: '',
       companyId: '',
       status: true,
-      errors: [],
-    };
+        };
     setProductPrices([...productPrices, newPrice]);
   };
 

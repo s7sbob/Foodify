@@ -9,14 +9,11 @@ import {
   CircularProgress,
   MenuItem,
   IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Divider,
   Paper,
   Box,
 } from '@mui/material';
-import { IconChevronDown } from '@tabler/icons-react'; // تحديث الاستيراد
+import { IconChevronDown } from '@tabler/icons-react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
@@ -24,9 +21,16 @@ import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
 import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
-import { Product, ProductPrice, PriceComment, GroupProduct } from '../../../types/productTypes';
+import { Product, ProductPrice, PriceComment } from '../../../types/productTypes';
 import { v4 as uuidv4 } from 'uuid';
-import { getCompanyData, getProductGroups, getPosScreens, updateProduct } from '../../../services/apiService';
+import {
+  getCompanyData,
+  getProductGroups,
+  getPosScreens,
+  updateProduct,
+  createProduct,
+} from '../../../services/apiService';
+import StyledAccordion from './StyledAccordion'; // Import the styled Accordion
 
 interface EditProductFormProps {
   productData: Product;
@@ -100,8 +104,6 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
         newEntry.price = 0.0;
         break;
       case 2: // commentGroup
-        newEntry.comment = '';
-        newEntry.description = '';
         newEntry.priceComments = [];
         break;
       case 3: // groupProduct
@@ -204,13 +206,13 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
       return;
     }
 
-    // Validate required fields
+    // التحقق من الحقول المطلوبة
     if (!formData.productName || !formData.productGroupId || !formData.branchId) {
       showNotification('يرجى ملء جميع الحقول المطلوبة.', 'warning', 'بيانات غير مكتملة');
       return;
     }
 
-    // Additional validations based on lineType
+    // التحقق الإضافي بناءً على lineType
     for (const [index, entry] of formData.productPrices.entries()) {
       if (entry.lineType === 1) { // price
         if (!entry.productPriceName || entry.price === undefined || entry.price <= 0) {
@@ -218,7 +220,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           return;
         }
       } else if (entry.lineType === 2) { // commentGroup
-        // Validate each comment
+        // التحقق من كل تعليق داخل مجموعة التعليقات
         if (entry.priceComments) {
           for (const [cIndex, comment] of entry.priceComments.entries()) {
             if (!comment.name || !comment.description) {
@@ -243,7 +245,6 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
     try {
       // بناء FormData
       const formPayload = new FormData();
-      formPayload.append('productId', formData.productId || '');
       formPayload.append('productName', formData.productName);
       formPayload.append('productName2', formData.productName2 || '');
       formPayload.append('productGroupId', formData.productGroupId);
@@ -261,8 +262,6 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName!);
           formPayload.append(`productPrices[${priceIndex}].price`, entry.price!.toString());
         } else if (entry.lineType === 2) { // commentGroup
-          formPayload.append(`productPrices[${priceIndex}].comment`, entry.comment!);
-          formPayload.append(`productPrices[${priceIndex}].description`, entry.description!);
           // إضافة التعليقات
           if (entry.priceComments) {
             entry.priceComments.forEach((comment, commentIndex) => {
@@ -295,14 +294,27 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      // إرسال طلب POST باستخدام وظيفة updateProduct من apiService
-      await updateProduct(baseurl, token, formPayload);
+      // إرسال طلب POST باستخدام وظيفة createProduct من apiService
+      await createProduct(baseurl, token, formPayload);
 
-      showNotification('تم تحديث المنتج بنجاح!', 'success', 'نجاح');
+      showNotification('تم إضافة المنتج بنجاح!', 'success', 'نجاح');
       onProductUpdated();
+
+      // إعادة تعيين النموذج
+      setFormData({
+        productId: '',
+        productName: '',
+        productGroupId: '',
+        productPrices: [],
+        branchId: '',
+        companyId: formData.companyId, // الاحتفاظ بـ companyId
+        posScreenId: '',
+        status: true,
+      });
+      setImageFile(null);
     } catch (err) {
-      console.error('Error updating product:', err);
-      showNotification('فشل في تحديث المنتج.', 'error', 'خطأ');
+      console.error('Error adding product:', err);
+      showNotification('فشل في إضافة المنتج.', 'error', 'خطأ');
     } finally {
       setLoading(false);
     }
@@ -311,7 +323,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        تعديل المنتج
+        إضافة منتج جديد
       </Typography>
       <Grid container spacing={2}>
         {/* اسم المنتج */}
@@ -472,69 +484,66 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           </Button>
         </Grid>
 
-        {/* عرض الإدخالات المختلفة باستخدام Accordion و Divider */}
+        {/* عرض الإدخالات المختلفة باستخدام StyledAccordion و Divider */}
         {formData.productPrices.map((entry, index) => (
           <React.Fragment key={entry.productPriceId}>
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<IconChevronDown />} // استخدام IconChevronDown من @tabler/icons-react
-                aria-controls={`panel${index}-content`}
-                id={`panel${index}-header`}
-              >
-                <Typography variant="h6">
-                  {entry.lineType === 1 && `سعر ${index + 1}`}
-                  {entry.lineType === 2 && `مجموعة تعليقات ${index + 1}`}
-                  {entry.lineType === 3 && `منتجات المجموعة ${index + 1}`}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container spacing={2}>
-                  {/* حقل بناءً على lineType */}
-                  {entry.lineType === 1 && (
-                    <>
-                      {/* اسم السعر */}
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          label="اسم السعر"
-                          name="productPriceName"
-                          value={entry.productPriceName || ''}
-                          onChange={(e) => handleEntryChange(index, 'productPriceName', e.target.value)}
-                          fullWidth
-                          required
-                        />
-                      </Grid>
-                      {/* السعر */}
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          label="السعر"
-                          name="price"
-                          type="number"
-                          value={entry.price ?? ''}
-                          onChange={(e) =>
-                            handleEntryChange(index, 'price', e.target.value ? parseFloat(e.target.value) : undefined)
-                          }
-                          fullWidth
-                          required
-                        />
-                      </Grid>
-                    </>
-                  )}
+            <StyledAccordion
+              title={
+                entry.lineType === 1
+                  ? `سعر ${index + 1}`
+                  : entry.lineType === 2
+                  ? `مجموعة تعليقات ${index + 1}`
+                  : `منتجات المجموعة ${index + 1}`
+              }
+            >
+              <Grid container spacing={2}>
+                {/* حقل بناءً على lineType */}
+                {entry.lineType === 1 && (
+                  <>
+                    {/* اسم السعر */}
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="اسم السعر"
+                        name="productPriceName"
+                        value={entry.productPriceName || ''}
+                        onChange={(e) => handleEntryChange(index, 'productPriceName', e.target.value)}
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                    {/* السعر */}
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="السعر"
+                        name="price"
+                        type="number"
+                        value={entry.price ?? ''}
+                        onChange={(e) =>
+                          handleEntryChange(index, 'price', e.target.value ? parseFloat(e.target.value) : undefined)
+                        }
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                  </>
+                )}
 
-                  {entry.lineType === 2 && (
-                    <>
-                      {/* زر إضافة تعليق */}
-                      <Grid item xs={12}>
-                        <Button
-                          variant="outlined"
-                          startIcon={<AddIcon />}
-                          onClick={() => handleAddComment(index)}
-                          fullWidth
-                        >
-                          إضافة تعليق
-                        </Button>
-                      </Grid>
-                      {/* عرض التعليقات */}
-                      {entry.priceComments && entry.priceComments.map((comment, cIndex) => (
+                {entry.lineType === 2 && (
+                  <>
+                    {/* زر إضافة تعليق */}
+                    <Grid item xs={12}>
+                      <Button
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleAddComment(index)}
+                        fullWidth
+                      >
+                        إضافة تعليق
+                      </Button>
+                    </Grid>
+                    {/* عرض التعليقات */}
+                    {entry.priceComments &&
+                      entry.priceComments.map((comment, cIndex) => (
                         <Grid item xs={12} key={comment.commentId}>
                           <Paper variant="outlined" sx={{ padding: 2, position: 'relative' }}>
                             <IconButton
@@ -551,7 +560,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
                             </Typography>
                             <TextField
                               label="اسم التعليق *"
-                              name={`commentName-${cIndex}`}
+                              name={`name-${cIndex}`}
                               value={comment.name}
                               onChange={(e) => handleCommentChange(index, cIndex, 'name', e.target.value)}
                               fullWidth
@@ -562,7 +571,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
                             />
                             <TextField
                               label="الوصف *"
-                              name={`commentDescription-${cIndex}`}
+                              name={`description-${cIndex}`}
                               value={comment.description || ''}
                               onChange={(e) => handleCommentChange(index, cIndex, 'description', e.target.value)}
                               fullWidth
@@ -574,75 +583,74 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
                           </Paper>
                         </Grid>
                       ))}
-                    </>
-                  )}
+                  </>
+                )}
 
-                  {entry.lineType === 3 && (
-                    <>
-                      {/* كمية الاختيار */}
+                {entry.lineType === 3 && (
+                  <>
+                    {/* كمية الاختيار */}
+                    <Grid item xs={12} sm={4}>
+                      <TextField
+                        label="كمية الاختيار"
+                        name="qtyToSelect"
+                        type="number"
+                        value={entry.qtyToSelect || ''}
+                        onChange={(e) =>
+                          handleEntryChange(index, 'qtyToSelect', e.target.value ? parseFloat(e.target.value) : undefined)
+                        }
+                        fullWidth
+                        required
+                      />
+                    </Grid>
+                    {/* نوع سعر المجموعة */}
+                    <Grid item xs={12} sm={4}>
+                      <TextField
+                        select
+                        label="نوع سعر المجموعة"
+                        name="groupPriceType"
+                        value={entry.groupPriceType || ''}
+                        onChange={(e) =>
+                          handleEntryChange(index, 'groupPriceType', e.target.value ? parseInt(e.target.value as string) : undefined)
+                        }
+                        fullWidth
+                        required
+                      >
+                        <MenuItem value={1}>zero</MenuItem>
+                        <MenuItem value={2}>asproduct</MenuItem>
+                        <MenuItem value={3}>manual</MenuItem>
+                      </TextField>
+                    </Grid>
+                    {/* سعر المجموعة فقط إذا كان النوع 'manual' */}
+                    {entry.groupPriceType === 3 && (
                       <Grid item xs={12} sm={4}>
                         <TextField
-                          label="كمية الاختيار"
-                          name="qtyToSelect"
+                          label="سعر المجموعة"
+                          name="groupPrice"
                           type="number"
-                          value={entry.qtyToSelect || ''}
+                          value={entry.groupPrice || ''}
                           onChange={(e) =>
-                            handleEntryChange(index, 'qtyToSelect', e.target.value ? parseFloat(e.target.value) : undefined)
+                            handleEntryChange(index, 'groupPrice', e.target.value ? parseFloat(e.target.value) : undefined)
                           }
                           fullWidth
                           required
                         />
                       </Grid>
-                      {/* نوع سعر المجموعة */}
-                      <Grid item xs={12} sm={4}>
-                        <TextField
-                          select
-                          label="نوع سعر المجموعة"
-                          name="groupPriceType"
-                          value={entry.groupPriceType || ''}
-                          onChange={(e) =>
-                            handleEntryChange(index, 'groupPriceType', e.target.value ? parseInt(e.target.value as string) : undefined)
-                          }
-                          fullWidth
-                          required
-                        >
-                          <MenuItem value={1}>zero</MenuItem>
-                          <MenuItem value={2}>asproduct</MenuItem>
-                          <MenuItem value={3}>manual</MenuItem>
-                        </TextField>
-                      </Grid>
-                      {/* سعر المجموعة فقط إذا كان النوع 'manual' */}
-                      {entry.groupPriceType === 3 && (
-                        <Grid item xs={12} sm={4}>
-                          <TextField
-                            label="سعر المجموعة"
-                            name="groupPrice"
-                            type="number"
-                            value={entry.groupPrice || ''}
-                            onChange={(e) =>
-                              handleEntryChange(index, 'groupPrice', e.target.value ? parseFloat(e.target.value) : undefined)
-                            }
-                            fullWidth
-                            required
-                          />
-                        </Grid>
-                      )}
-                    </>
-                  )}
+                    )}
+                  </>
+                )}
 
-                  {/* زر حذف الإدخال */}
-                  <Grid item xs={12}>
-                    <IconButton
-                      aria-label="delete-entry"
-                      onClick={() => handleRemoveEntry(index)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid>
+                {/* زر حذف الإدخال */}
+                <Grid item xs={12}>
+                  <IconButton
+                    aria-label="delete-entry"
+                    onClick={() => handleRemoveEntry(index)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </Grid>
-              </AccordionDetails>
-            </Accordion>
+              </Grid>
+            </StyledAccordion>
             <Divider />
           </React.Fragment>
         ))}
