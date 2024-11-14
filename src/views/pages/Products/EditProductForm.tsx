@@ -1,6 +1,4 @@
-// src/components/Product/EditProductForm.tsx
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Typography,
   TextField,
@@ -12,11 +10,10 @@ import {
   Divider,
   Paper,
   Box,
+  Autocomplete, // Import Autocomplete
 } from '@mui/material';
-import { IconChevronDown } from '@tabler/icons-react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
 import { useNotification } from '../../../context/NotificationContext';
@@ -27,8 +24,7 @@ import {
   getCompanyData,
   getProductGroups,
   getPosScreens,
-  updateProduct,
-  createProduct,
+  updateProduct, // Changed from createProduct to updateProduct
 } from '../../../services/apiService';
 import StyledAccordion from './StyledAccordion'; // Import the styled Accordion
 
@@ -245,6 +241,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
     try {
       // بناء FormData
       const formPayload = new FormData();
+      formPayload.append('productId', formData.productId || ''); // Ensure productId is sent for update
       formPayload.append('productName', formData.productName);
       formPayload.append('productName2', formData.productName2 || '');
       formPayload.append('productGroupId', formData.productGroupId);
@@ -294,36 +291,42 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      // إرسال طلب POST باستخدام وظيفة createProduct من apiService
-      await createProduct(baseurl, token, formPayload);
+      // إرسال طلب POST باستخدام وظيفة updateProduct من apiService
+      await updateProduct(baseurl, token, formData.productId!, formPayload); // Changed to updateProduct and included productId
 
-      showNotification('تم إضافة المنتج بنجاح!', 'success', 'نجاح');
+      showNotification('تم تحديث المنتج بنجاح!', 'success', 'نجاح'); // Updated message
       onProductUpdated();
 
-      // إعادة تعيين النموذج
-      setFormData({
-        productId: '',
-        productName: '',
-        productGroupId: '',
-        productPrices: [],
-        branchId: '',
-        companyId: formData.companyId, // الاحتفاظ بـ companyId
-        posScreenId: '',
-        status: true,
-      });
+      // إعادة تعيين النموذج (optional)
       setImageFile(null);
     } catch (err) {
-      console.error('Error adding product:', err);
-      showNotification('فشل في إضافة المنتج.', 'error', 'خطأ');
+      console.error('Error updating product:', err);
+      showNotification('فشل في تحديث المنتج.', 'error', 'خطأ'); // Updated message
     } finally {
       setLoading(false);
     }
   };
 
+  // Derived selected options for Autocomplete
+  const selectedProductGroup = useMemo(
+    () => productGroups.find((group) => group.groupId === formData.productGroupId) || null,
+    [productGroups, formData.productGroupId]
+  );
+
+  const selectedBranch = useMemo(
+    () => branches.find((branch) => branch.branchId === formData.branchId) || null,
+    [branches, formData.branchId]
+  );
+
+  const selectedPosScreen = useMemo(
+    () => posScreens.find((screen) => screen.screenId === formData.posScreenId) || null,
+    [posScreens, formData.posScreenId]
+  );
+
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        إضافة منتج جديد
+        تحرير المنتج
       </Typography>
       <Grid container spacing={2}>
         {/* اسم المنتج */}
@@ -347,59 +350,73 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             fullWidth
           />
         </Grid>
-        {/* مجموعة المنتج */}
+        {/* مجموعة المنتج باستخدام Autocomplete */}
         <Grid item xs={12}>
-          <TextField
-            select
-            label="مجموعة المنتج"
-            name="productGroupId"
-            value={formData.productGroupId}
-            onChange={(e) => setFormData({ ...formData, productGroupId: e.target.value })}
-            fullWidth
-            required
-          >
-            {productGroups.map((group) => (
-              <MenuItem key={group.groupId} value={group.groupId}>
-                {group.groupName}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Autocomplete
+            options={productGroups}
+            getOptionLabel={(option) => option.groupName}
+            value={selectedProductGroup}
+            onChange={(event, newValue) => {
+              setFormData({
+                ...formData,
+                productGroupId: newValue ? newValue.groupId : '',
+              });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="مجموعة المنتج"
+                required
+                fullWidth
+              />
+            )}
+            isOptionEqualToValue={(option, value) => option.groupId === value.groupId}
+          />
         </Grid>
-        {/* الفرع */}
+        {/* الفرع باستخدام Autocomplete */}
         <Grid item xs={12}>
-          <TextField
-            select
-            label="الفرع"
-            name="branchId"
-            value={formData.branchId}
-            onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
-            fullWidth
-            required
-          >
-            {branches.map((branch) => (
-              <MenuItem key={branch.branchId} value={branch.branchId}>
-                {branch.branchName}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Autocomplete
+            options={branches}
+            getOptionLabel={(option) => option.branchName}
+            value={selectedBranch}
+            onChange={(event, newValue) => {
+              setFormData({
+                ...formData,
+                branchId: newValue ? newValue.branchId : '',
+              });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="الفرع"
+                required
+                fullWidth
+              />
+            )}
+            isOptionEqualToValue={(option, value) => option.branchId === value.branchId}
+          />
         </Grid>
-        {/* شاشة نقاط البيع (اختياري) */}
+        {/* شاشة نقاط البيع (اختياري) باستخدام Autocomplete */}
         <Grid item xs={12}>
-          <TextField
-            select
-            label="شاشة نقاط البيع"
-            name="posScreenId"
-            value={formData.posScreenId || ''}
-            onChange={(e) => setFormData({ ...formData, posScreenId: e.target.value })}
-            fullWidth
-          >
-            <MenuItem value="">لا شيء</MenuItem>
-            {posScreens.map((screen) => (
-              <MenuItem key={screen.screenId} value={screen.screenId}>
-                {screen.screenName}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Autocomplete
+            options={posScreens}
+            getOptionLabel={(option) => option.screenName}
+            value={selectedPosScreen}
+            onChange={(event, newValue) => {
+              setFormData({
+                ...formData,
+                posScreenId: newValue ? newValue.screenId : '',
+              });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="شاشة نقاط البيع"
+                fullWidth
+              />
+            )}
+            isOptionEqualToValue={(option, value) => option.screenId === value.screenId}
+          />
         </Grid>
         {/* الخصم */}
         <Grid item xs={12} sm={6}>
@@ -411,7 +428,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             onChange={(e) =>
               setFormData({
                 ...formData,
-                discount: e.target.value ? parseFloat(e.target.value) : undefined,
+                discount: e.target.value ? parseFloat(e.target.value) : 0,
               })
             }
             fullWidth
@@ -427,7 +444,7 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
             onChange={(e) =>
               setFormData({
                 ...formData,
-                vat: e.target.value ? parseFloat(e.target.value) : undefined,
+                vat: e.target.value ? parseFloat(e.target.value) : 0,
               })
             }
             fullWidth
@@ -484,174 +501,188 @@ const EditProductForm: React.FC<EditProductFormProps> = ({
           </Button>
         </Grid>
 
-        {/* عرض الإدخالات المختلفة باستخدام StyledAccordion و Divider */}
+        {/* عرض الإدخالات المختلفة */}
         {formData.productPrices.map((entry, index) => (
           <React.Fragment key={entry.productPriceId}>
-            <StyledAccordion
-              title={
-                entry.lineType === 1
-                  ? `سعر ${index + 1}`
-                  : entry.lineType === 2
-                  ? `مجموعة تعليقات ${index + 1}`
-                  : `منتجات المجموعة ${index + 1}`
-              }
-            >
-              <Grid container spacing={2}>
-                {/* حقل بناءً على lineType */}
-                {entry.lineType === 1 && (
-                  <>
-                    {/* اسم السعر */}
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="اسم السعر"
-                        name="productPriceName"
-                        value={entry.productPriceName || ''}
-                        onChange={(e) => handleEntryChange(index, 'productPriceName', e.target.value)}
-                        fullWidth
-                        required
-                      />
-                    </Grid>
-                    {/* السعر */}
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="السعر"
-                        name="price"
-                        type="number"
-                        value={entry.price ?? ''}
-                        onChange={(e) =>
-                          handleEntryChange(index, 'price', e.target.value ? parseFloat(e.target.value) : undefined)
-                        }
-                        fullWidth
-                        required
-                      />
-                    </Grid>
-                  </>
-                )}
-
-                {entry.lineType === 2 && (
-                  <>
-                    {/* زر إضافة تعليق */}
-                    <Grid item xs={12}>
-                      <Button
-                        variant="outlined"
-                        startIcon={<AddIcon />}
-                        onClick={() => handleAddComment(index)}
-                        fullWidth
-                      >
-                        إضافة تعليق
-                      </Button>
-                    </Grid>
-                    {/* عرض التعليقات */}
-                    {entry.priceComments &&
-                      entry.priceComments.map((comment, cIndex) => (
-                        <Grid item xs={12} key={comment.commentId}>
-                          <Paper variant="outlined" sx={{ padding: 2, position: 'relative' }}>
-                            <IconButton
-                              aria-label="delete-comment"
-                              onClick={() => handleRemoveComment(index, cIndex)}
-                              color="error"
-                              size="small"
-                              sx={{ position: 'absolute', top: 8, right: 8 }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                            <Typography variant="subtitle1" color="textSecondary">
-                              تعليق {cIndex + 1}
-                            </Typography>
-                            <TextField
-                              label="اسم التعليق *"
-                              name={`name-${cIndex}`}
-                              value={comment.name}
-                              onChange={(e) => handleCommentChange(index, cIndex, 'name', e.target.value)}
-                              fullWidth
-                              required
-                              variant="outlined"
-                              size="small"
-                              sx={{ mt: 1 }}
-                            />
-                            <TextField
-                              label="الوصف *"
-                              name={`description-${cIndex}`}
-                              value={comment.description || ''}
-                              onChange={(e) => handleCommentChange(index, cIndex, 'description', e.target.value)}
-                              fullWidth
-                              required
-                              variant="outlined"
-                              size="small"
-                              sx={{ mt: 2 }}
-                            />
-                          </Paper>
-                        </Grid>
-                      ))}
-                  </>
-                )}
-
-                {entry.lineType === 3 && (
-                  <>
-                    {/* كمية الاختيار */}
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        label="كمية الاختيار"
-                        name="qtyToSelect"
-                        type="number"
-                        value={entry.qtyToSelect || ''}
-                        onChange={(e) =>
-                          handleEntryChange(index, 'qtyToSelect', e.target.value ? parseFloat(e.target.value) : undefined)
-                        }
-                        fullWidth
-                        required
-                      />
-                    </Grid>
-                    {/* نوع سعر المجموعة */}
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        select
-                        label="نوع سعر المجموعة"
-                        name="groupPriceType"
-                        value={entry.groupPriceType || ''}
-                        onChange={(e) =>
-                          handleEntryChange(index, 'groupPriceType', e.target.value ? parseInt(e.target.value as string) : undefined)
-                        }
-                        fullWidth
-                        required
-                      >
-                        <MenuItem value={1}>zero</MenuItem>
-                        <MenuItem value={2}>asproduct</MenuItem>
-                        <MenuItem value={3}>manual</MenuItem>
-                      </TextField>
-                    </Grid>
-                    {/* سعر المجموعة فقط إذا كان النوع 'manual' */}
-                    {entry.groupPriceType === 3 && (
-                      <Grid item xs={12} sm={4}>
-                        <TextField
-                          label="سعر المجموعة"
-                          name="groupPrice"
-                          type="number"
-                          value={entry.groupPrice || ''}
-                          onChange={(e) =>
-                            handleEntryChange(index, 'groupPrice', e.target.value ? parseFloat(e.target.value) : undefined)
-                          }
-                          fullWidth
-                          required
-                        />
-                      </Grid>
-                    )}
-                  </>
-                )}
-
-                {/* زر حذف الإدخال */}
-                <Grid item xs={12}>
-                  <IconButton
-                    aria-label="delete-entry"
-                    onClick={() => handleRemoveEntry(index)}
-                    color="error"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
+            {entry.lineType === 1 ? (
+              // Fixed form for lineType 1 (Price)
+              <Paper variant="outlined" sx={{ padding: 2, marginTop: 2 }}>
+                <Grid container spacing={2} alignItems="center">
+                  {/* اسم السعر */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label={`اسم السعر ${index + 1}`}
+                      name="productPriceName"
+                      value={entry.productPriceName || ''}
+                      onChange={(e) => handleEntryChange(index, 'productPriceName', e.target.value)}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  {/* السعر */}
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      label={`السعر ${index + 1}`}
+                      name="price"
+                      type="number"
+                      value={entry.price ?? ''}
+                      onChange={(e) =>
+                        handleEntryChange(index, 'price', e.target.value ? parseFloat(e.target.value) : 0)
+                      }
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  {/* زر حذف الإدخال */}
+                  <Grid item xs={12} sm={2}>
+                    <IconButton
+                      aria-label="delete-entry"
+                      onClick={() => handleRemoveEntry(index)}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </StyledAccordion>
-            <Divider />
+              </Paper>
+            ) : (
+              // StyledAccordion for other lineTypes
+              <>
+                <StyledAccordion
+                  title={
+                    entry.lineType === 2
+                      ? `مجموعة تعليقات ${index + 1}`
+                      : `منتجات المجموعة ${index + 1}`
+                  }
+                >
+                  <Grid container spacing={2}>
+                    {/* حقل بناءً على lineType */}
+                    {entry.lineType === 2 && (
+                      <>
+                        {/* زر إضافة تعليق */}
+                        <Grid item xs={12}>
+                          <Button
+                            variant="outlined"
+                            startIcon={<AddIcon />}
+                            onClick={() => handleAddComment(index)}
+                            fullWidth
+                          >
+                            إضافة تعليق
+                          </Button>
+                        </Grid>
+                        {/* عرض التعليقات */}
+                        {entry.priceComments &&
+                          entry.priceComments.map((comment, cIndex) => (
+                            <Grid item xs={12} key={comment.commentId}>
+                              <Paper variant="outlined" sx={{ padding: 2, position: 'relative' }}>
+                                <IconButton
+                                  aria-label="delete-comment"
+                                  onClick={() => handleRemoveComment(index, cIndex)}
+                                  color="error"
+                                  size="small"
+                                  sx={{ position: 'absolute', top: 8, right: 8 }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                                <Typography variant="subtitle1" color="textSecondary">
+                                  تعليق {cIndex + 1}
+                                </Typography>
+                                <TextField
+                                  label="اسم التعليق *"
+                                  name={`name-${cIndex}`}
+                                  value={comment.name}
+                                  onChange={(e) => handleCommentChange(index, cIndex, 'name', e.target.value)}
+                                  fullWidth
+                                  required
+                                  variant="outlined"
+                                  size="small"
+                                  sx={{ mt: 1 }}
+                                />
+                                <TextField
+                                  label="الوصف *"
+                                  name={`description-${cIndex}`}
+                                  value={comment.description || ''}
+                                  onChange={(e) => handleCommentChange(index, cIndex, 'description', e.target.value)}
+                                  fullWidth
+                                  required
+                                  variant="outlined"
+                                  size="small"
+                                  sx={{ mt: 2 }}
+                                />
+                              </Paper>
+                            </Grid>
+                          ))}
+                      </>
+                    )}
+
+                    {entry.lineType === 3 && (
+                      <>
+                        {/* كمية الاختيار */}
+                        <Grid item xs={12} sm={4}>
+                          <TextField
+                            label="كمية الاختيار"
+                            name="qtyToSelect"
+                            type="number"
+                            value={entry.qtyToSelect || ''}
+                            onChange={(e) =>
+                              handleEntryChange(index, 'qtyToSelect', e.target.value ? parseFloat(e.target.value) : 0)
+                            }
+                            fullWidth
+                            required
+                          />
+                        </Grid>
+                        {/* نوع سعر المجموعة */}
+                        <Grid item xs={12} sm={4}>
+                          <TextField
+                            select
+                            label="نوع سعر المجموعة"
+                            name="groupPriceType"
+                            value={entry.groupPriceType || ''}
+                            onChange={(e) =>
+                              handleEntryChange(index, 'groupPriceType', e.target.value ? parseInt(e.target.value as string) : 1)
+                            }
+                            fullWidth
+                            required
+                          >
+                            <MenuItem value={1}>zero</MenuItem>
+                            <MenuItem value={2}>asproduct</MenuItem>
+                            <MenuItem value={3}>manual</MenuItem>
+                          </TextField>
+                        </Grid>
+                        {/* سعر المجموعة فقط إذا كان النوع 'manual' */}
+                        {entry.groupPriceType === 3 && (
+                          <Grid item xs={12} sm={4}>
+                            <TextField
+                              label="سعر المجموعة"
+                              name="groupPrice"
+                              type="number"
+                              value={entry.groupPrice || ''}
+                              onChange={(e) =>
+                                handleEntryChange(index, 'groupPrice', e.target.value ? parseFloat(e.target.value) : 0)
+                              }
+                              fullWidth
+                              required
+                            />
+                          </Grid>
+                        )}
+                      </>
+                    )}
+
+                    {/* زر حذف الإدخال */}
+                    <Grid item xs={12}>
+                      <IconButton
+                        aria-label="delete-entry"
+                        onClick={() => handleRemoveEntry(index)}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                </StyledAccordion>
+                <Divider />
+              </>
+            )}
           </React.Fragment>
         ))}
 

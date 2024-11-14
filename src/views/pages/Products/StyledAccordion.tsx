@@ -1,5 +1,3 @@
-// src/components/StyledAccordion.tsx
-
 import React from 'react';
 import {
   Accordion,
@@ -10,7 +8,6 @@ import {
   Grid,
 } from '@mui/material';
 import { IconChevronDown } from '@tabler/icons-react';
-import { WidthFull } from '@mui/icons-material';
 
 interface StyledAccordionProps extends Omit<AccordionProps, 'children'> {
   title: string;
@@ -24,18 +21,18 @@ const StyledAccordion: React.FC<StyledAccordionProps> = ({
 }) => {
   return (
     <Grid container spacing={3} item xs={12} display="unset" alignItems="stretch" marginTop={3}>
-    <Accordion {...props}>
-      <AccordionSummary
-        expandIcon={<IconChevronDown />}
-        aria-controls={`${title}-content`}
-        id={`${title}-header`}
-      >
-        <Typography variant="h6">{title}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        {children}
-      </AccordionDetails>
-    </Accordion>
+      <Accordion {...props}>
+        <AccordionSummary
+          expandIcon={<IconChevronDown />}
+          aria-controls={`${title}-content`}
+          id={`${title}-header`}
+        >
+          <Typography variant="h6">{title}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {children}
+        </AccordionDetails>
+      </Accordion>
     </Grid>
   );
 };

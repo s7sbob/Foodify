@@ -1,4 +1,4 @@
-// src/components/Product/ProductPricesForm.tsx
+// src\views\pages\Products\ProductPricesForm.tsx
 
 import React from 'react';
 import { ProductPrice } from '../../../types/productTypes';

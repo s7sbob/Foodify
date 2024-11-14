@@ -46,25 +46,17 @@ export const createProduct = async (baseurl: string, token: string | null, formD
   return response.data;
 };
 
-// إضافة وظيفة لتحديث منتج
-export const updateProduct = async (baseurl: string, token: string | null, formData: FormData) => {
-  if (!token) {
-    throw new Error('No authentication token provided.');
-  }
+export const updateProduct = async (baseurl: string, token: string, productId: string, formData: FormData) => {
   const response = await axios.post(`${baseurl}/Product/UpdateProduct`, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
-      // 'Content-Type' سيتم تحديده تلقائيًا بواسطة Axios عند استخدام FormData
+      'Content-Type': 'multipart/form-data',
     },
   });
   return response.data;
 };
 
-// إضافة وظيفة لحذف منتج
-export const deleteProduct = async (baseurl: string, token: string | null, productId: string) => {
-  if (!token) {
-    throw new Error('No authentication token provided.');
-  }
+export const deleteProduct = async (baseurl: string, token: string, productId: string) => {
   const response = await axios.delete(`${baseurl}/Product/DeleteProduct/${productId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
