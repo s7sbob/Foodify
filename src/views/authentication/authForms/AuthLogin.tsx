@@ -25,14 +25,12 @@ import { loginType } from 'src/types/auth/auth';
 import CustomCheckbox from '../../../components/forms/theme-elements/CustomCheckbox';
 import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
-import axios from 'axios';
+import CustomAxios from '../../../utils/CustomAxios'; // استخدم CustomAxios بدلاً من axios مباشرة
 import { useDispatch, useSelector } from 'react-redux';
 import { setToken } from '../../../store/apps/auth/AuthSlice';
 import { useNotification } from '../../../context/NotificationContext'; // Ensure correct path
 import { AppState } from 'src/store/Store'; // Import AppState for type safety
 import { useTranslation } from 'react-i18next'; // Import useTranslation for i18n
-
-const baseurl = 'https://erp.ts-egy.com/api';
 
 const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
   const { t } = useTranslation();
@@ -103,8 +101,9 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         setIsLoading(true);
         setError(null);
 
-        const res = await axios.post(
-          `${baseurl}/account/loginjwt`,
+        // استخدم CustomAxios بدلاً من axios مباشرة
+        const res = await CustomAxios.post(
+          '/account/loginjwt',
           {},
           {
             params: {
@@ -113,21 +112,39 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
             },
           }
         );
+
         console.log('res:', res);
+
         if (res.status === 200) {
           console.log('User logged in successfully');
-          dispatch(setToken(res.data.token));
-          showNotification(t('notifications.loggedIn') || 'Logged in successfully!', 'success', t('notifications.success') || 'Success'); // Show success notification
+
+          const { token, tokenExpiration } = res.data;
+
+          // تأكد من أن `tokenExpiration` يتم تحويله إلى ميلي ثانية إذا كان بالثواني
+          const tokenExpirationMs = tokenExpiration ? tokenExpiration * 1000 : Date.now() + 60 * 60 * 1000; // 1 ساعة من الآن إذا لم يكن موجوداً
+
+          dispatch(setToken({ token, tokenExpiration: tokenExpirationMs }));
+
+          showNotification(
+            t('notifications.loggedIn') || 'تم تسجيل الدخول بنجاح!',
+            'success',
+            t('notifications.success') || 'نجاح'
+          );
+
           navigate('/');
         } else {
           const unexpectedError = 'Unexpected response from the server.';
           setError(unexpectedError);
-          showNotification(t('notifications.error') || 'Unexpected error.', 'error', t('notifications.error') || 'Error'); // Show error notification
+          showNotification(
+            t('notifications.error') || 'حدث خطأ غير متوقع.',
+            'error',
+            t('notifications.error') || 'خطأ'
+          );
         }
       } catch (error: any) {
-        const message = error.response?.data?.message || t('notifications.loginFaild') || 'Incorrect username or password.';
+        const message = error.response?.data?.message || t('notifications.loginFaild') || 'اسم المستخدم أو كلمة المرور غير صحيحة.';
         setError(message);
-        showNotification(message, 'error', t('notifications.error') || 'Error'); // Show error notification
+        showNotification(message, 'error', t('notifications.error') || 'خطأ');
       } finally {
         setIsLoading(false);
       }
@@ -149,7 +166,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
       <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
           <Box>
-            <CustomFormLabel htmlFor="username">{t('addUserForm.username') || 'Username'}</CustomFormLabel>
+            <CustomFormLabel htmlFor="username">{t('addUserForm.username') || 'اسم المستخدم'}</CustomFormLabel>
             <CustomTextField
               id="username"
               variant="outlined"
@@ -159,7 +176,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
             />
           </Box>
           <Box>
-            <CustomFormLabel htmlFor="password">{t('addUserForm.password') || 'Password'}</CustomFormLabel>
+            <CustomFormLabel htmlFor="password">{t('addUserForm.password') || 'كلمة المرور'}</CustomFormLabel>
             <CustomTextField
               id="password"
               type="password"
@@ -181,7 +198,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
             <FormGroup>
               <FormControlLabel
                 control={<CustomCheckbox defaultChecked />}
-                label={t('addUserForm.rememberDevice') || 'Remember this Device'}
+                label={t('addUserForm.rememberDevice') || 'تذكر هذا الجهاز'}
               />
             </FormGroup>
             <Typography
@@ -202,7 +219,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
                 }
               }}
             >
-              {t('auth.forgotPassword') || 'Forgot Password?'}
+              {t('auth.forgotPassword') || 'نسيت كلمة المرور؟'}
             </Typography>
           </Stack>
 
@@ -215,7 +232,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
               type="submit"
               disabled={isLoading}
             >
-              {isLoading ? t('authLogin.signingIn') || 'Signing In...' : t('authLogin.signIn') || 'Sign In'}
+              {isLoading ? t('authLogin.signingIn') || 'جارٍ تسجيل الدخول...' : t('authLogin.signIn') || 'تسجيل الدخول'}
             </Button>
           </Box>
         </Stack>
@@ -237,7 +254,7 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         >
           <Box display="flex" alignItems="center">
             <SupportAgentIcon color="primary" sx={{ mr: 1 }} />
-            {t('auth.forgotPassword') || 'Forgot Password'}
+            {t('auth.forgotPassword') || 'نسيت كلمة المرور'}
           </Box>
           <IconButton
             aria-label="close"
@@ -251,14 +268,14 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="forgot-password-dialog-description">
-            {t('auth.forgotPasswordInfo') || 'If you forgot your password, please contact our technical support team at '}
-            <a href="mailto:support@yourdomain.com">support@yourdomain.com</a> {t('auth.orCall') || 'or call us at '}
+            {t('auth.forgotPasswordInfo') || 'إذا نسيت كلمة المرور، يرجى الاتصال بفريق الدعم الفني لدينا على '}
+            <a href="mailto:support@yourdomain.com">support@yourdomain.com</a> {t('auth.orCall') || 'أو الاتصال بنا على '}
             <strong>+1 (800) 123-4567</strong>.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary" autoFocus>
-            {t('buttons.close') || 'Close'}
+            {t('buttons.close') || 'إغلاق'}
           </Button>
         </DialogActions>
       </Dialog>

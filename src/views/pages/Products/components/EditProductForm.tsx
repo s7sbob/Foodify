@@ -1,6 +1,7 @@
-// src/views/pages/Products/EditProductForm.tsx
+// src/views/pages/Products/components/EditProductForm.tsx
 
 import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
+
 import {
   Typography,
   TextField,
@@ -28,7 +29,6 @@ interface EditProductFormProps {
   onCancel: () => void;
   productPrices: ProductPrice[];
   setProductPrices: React.Dispatch<React.SetStateAction<ProductPrice[]>>;
-  handleAddEntry: (lineType: number) => void;
 }
 
 export interface EditProductFormRef {
@@ -42,7 +42,7 @@ export interface EditProductFormRef {
  */
 const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
   (
-    { productData, onProductUpdated, onCancel, productPrices, setProductPrices, handleAddEntry },
+    { productData, onProductUpdated, onCancel, productPrices, setProductPrices },
     ref
   ) => {
     const { t } = useTranslation();
@@ -124,10 +124,10 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
           // Comment group validation
           if (entry.priceComments) {
             for (const [cIndex, comment] of entry.priceComments.entries()) {
-              if (!comment.name || !comment.description) {
+              if (!comment.name ) {
                 showNotification(
                   `${t('productPriceList.comment')} ${cIndex + 1} in ${t('productPriceList.commentGroup')} ${index + 1}: ${t('notifications.incompleteData')}`,
-                'warning'  
+                  'warning'  
                 );
                 return;
               }
@@ -191,10 +191,6 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
                 formPayload.append(
                   `productPrices[${priceIndex}].priceComments[${commentIndex}].name`,
                   comment.name
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].description`,
-                  comment.description || ''
                 );
                 formPayload.append(
                   `productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`,
@@ -267,18 +263,36 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         // Submit the form data using updateProduct API
         await updateProduct(baseurl, token, formData.productId!, formPayload);
 
-        showNotification(t('notifications.productUpdatedSuccess'),  'success');
+        showNotification(t('notifications.productUpdatedSuccess'), 'success');
         onProductUpdated();
 
         // Reset the form (optional)
-        resetForm();
+        resetFormInternal();
         setImageFile(null);
       } catch (err) {
         console.error('Error updating product:', err);
-        showNotification(t('notifications.saveProductFailed'),  'error');
+        showNotification(t('notifications.saveProductFailed'), 'error');
       } finally {
         setLoading(false);
       }
+    };
+
+    const resetFormInternal = () => {
+      setFormData({
+        productId: productData.productId,
+        productName: productData.productName,
+        productName2: productData.productName2 || '',
+        productGroupId: productData.productGroupId,
+        productPrices: productData.productPrices || [],
+        branchId: productData.branchId,
+        companyId: productData.companyId,
+        posScreenId: productData.posScreenId || '',
+        discount: productData.discount || 0,
+        vat: productData.vat || 0,
+        status: productData.status,
+      });
+      setImageFile(null);
+      setProductPrices(productData.productPrices || []); // Reset productPrices
     };
 
     // Derived selected options for Autocomplete fields
@@ -300,21 +314,7 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
     // Expose resetForm and submitForm via ref
     useImperativeHandle(ref, () => ({
       resetForm: () => {
-        setFormData({
-          productId: productData.productId,
-          productName: productData.productName,
-          productName2: productData.productName2 || '',
-          productGroupId: productData.productGroupId,
-          productPrices: productData.productPrices || [],
-          branchId: productData.branchId,
-          companyId: productData.companyId,
-          posScreenId: productData.posScreenId || '',
-          discount: productData.discount || 0,
-          vat: productData.vat || 0,
-          status: productData.status,
-        });
-        setImageFile(null);
-        setProductPrices(productData.productPrices || []); // Reset productPrices
+        resetFormInternal();
       },
       submitForm: handleSubmit,
     }));
@@ -460,46 +460,12 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
           </Grid>
         </Grid>
 
-        {/* Main Buttons */}
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleAddEntry(1)} // lineType 1: price
-              fullWidth
-            >
-              {t('buttons.addPrice')}
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleAddEntry(2)} // lineType 2: commentGroup
-              fullWidth
-            >
-              {t('buttons.addCommentGroup')}
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={() => handleAddEntry(3)} // lineType 3: groupProduct
-              fullWidth
-            >
-              {t('buttons.addGroupProducts')}
-            </Button>
-          </Grid>
-        </Grid>
+        {/* The Main Buttons have been removed from here */}
       </Box>
     );
   }
 );
 
 export default EditProductForm;
-function resetForm() {
-  throw new Error('Function not implemented.');
-}
 
+// Remove the extraneous resetForm function

@@ -1,6 +1,6 @@
-// src/components/ProductPriceList.tsx
+// src/views/pages/Products/components/ProductPriceList.tsx
 
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   Grid,
   Paper,
@@ -49,68 +49,90 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const inputRefs = useRef<{ [key: number]: React.RefObject<HTMLInputElement> }>({});
+
+  // تتبع الطول السابق لاكتشاف إضافة إدخالات جديدة
+  const prevLengthRef = useRef<number>(productPrices.length);
+
+  useEffect(() => {
+    if (productPrices.length > prevLengthRef.current) {
+      const newIndex = productPrices.length - 1;
+      setExpandedIndex(newIndex);
+    }
+    prevLengthRef.current = productPrices.length;
+  }, [productPrices.length]);
+
+  useEffect(() => {
+    if (expandedIndex !== null) {
+      const ref = inputRefs.current[expandedIndex];
+      if (ref && ref.current) {
+        ref.current.focus();
+      }
+    }
+  }, [expandedIndex]);
+
+  const handleAccordionChange = (index: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpandedIndex(isExpanded ? index : null);
+  };
+
   return (
     <>
       {productPrices.map((entry, index) => (
         <React.Fragment key={entry.productPriceId}>
           {entry.lineType === 1 ? (
-            // For lineType 1 (Price), use ProductPriceEntry component
             <ProductPriceEntry
               entry={entry}
               index={index}
               handleEntryChange={handleEntryChange}
               handleRemoveEntry={handleRemoveEntry}
+              autoFocus={index === productPrices.length - 1}
             />
           ) : (
-            // For other lineTypes, use StyledAccordion
             <>
               <StyledAccordion
-                title={
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="flex-end"
-                    width="100%"
-                  >
-                    <IconButton
-                      aria-label={t('buttons.delete') as string}
-                      onClick={() => handleRemoveEntry(index)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <Typography variant="subtitle1" sx={{ mr: 1 }}>
+                accordionTitle={
+                  <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                    <Typography variant="subtitle1">
                       {entry.lineType === 2
                         ? `${t('productPriceList.commentGroup')} ${index + 1}`
                         : `${t('productPriceList.groupProduct')} ${index + 1}`}
                     </Typography>
+                    <Box>
+                      {entry.lineType === 2 && (
+                        <Button
+                          variant="text"
+                          size="small"
+                          startIcon={<AddIcon />}
+                          onClick={() => handleAddComment(index)}
+                          sx={{ mr: 1 }}
+                        >
+                          {t('buttons.addComment')}
+                        </Button>
+                      )}
+                      <IconButton
+                        aria-label={t('buttons.delete') as string}
+                        onClick={() => handleRemoveEntry(index)}
+                        color="error"
+                        size="small"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
                   </Box>
                 }
+                isExpanded={expandedIndex === index}
+                onChange={handleAccordionChange(index)}
               >
-                {/* Content based on lineType */}
+                {/* المحتويات بناءً على lineType */}
                 <Grid container spacing={2}>
                   {entry.lineType === 2 && (
                     <>
-                      {/* Add Comment Button */}
-                      <Grid item xs={12}>
-                        <Button
-                          variant="outlined"
-                          startIcon={<AddIcon />}
-                          onClick={() => handleAddComment(index)}
-                          fullWidth
-                        >
-                          {t('productPriceList.addComment')}
-                        </Button>
-                      </Grid>
-
-                      {/* Display Comments */}
+                      {/* عرض التعليقات */}
                       {entry.priceComments &&
                         entry.priceComments.map((comment, cIndex) => (
                           <Grid item xs={12} key={comment.commentId}>
-                            <Paper
-                              variant="outlined"
-                              sx={{ padding: 2, position: 'relative' }}
-                            >
+                            <Paper variant="outlined" sx={{ padding: 2, position: 'relative' }}>
                               <IconButton
                                 aria-label={t('buttons.delete') as string}
                                 onClick={() => handleRemoveComment(index, cIndex)}
@@ -124,7 +146,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                                 {`${t('productPriceList.comment')} ${cIndex + 1}`}
                               </Typography>
                               <TextField
-                                label={`${t('productPriceList.commentName')} *`}
+                                label={`${t('productPriceList.commentName')}`}
                                 name={`name-${cIndex}`}
                                 value={comment.name}
                                 onChange={(e) =>
@@ -135,24 +157,11 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                                 variant="outlined"
                                 size="small"
                                 sx={{ mt: 1 }}
-                              />
-                              <TextField
-                                label={`${t('fields.description')} *`} // Ensure "description" is defined under "fields"
-                                name={`description-${cIndex}`}
-                                value={comment.description || ''}
-                                onChange={(e) =>
-                                  handleCommentChange(
-                                    index,
-                                    cIndex,
-                                    'description',
-                                    e.target.value
-                                  )
+                                inputRef={
+                                  cIndex === 0 && index === productPrices.length - 1
+                                    ? (inputRefs.current[index] = inputRefs.current[index] || React.createRef<HTMLInputElement>())
+                                    : undefined
                                 }
-                                fullWidth
-                                required
-                                variant="outlined"
-                                size="small"
-                                sx={{ mt: 2 }}
                               />
                             </Paper>
                           </Grid>
@@ -162,7 +171,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
 
                   {entry.lineType === 3 && (
                     <>
-                      {/* Quantity to Select */}
+                      {/* الكمية المراد تحديدها */}
                       <Grid item xs={12} sm={4}>
                         <TextField
                           label={t('productPriceList.qtyToSelect')}
@@ -178,10 +187,15 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                           }
                           fullWidth
                           required
+                          inputRef={
+                            index === productPrices.length - 1
+                              ? (inputRefs.current[index] = inputRefs.current[index] || React.createRef<HTMLInputElement>())
+                              : undefined
+                          }
                         />
                       </Grid>
 
-                      {/* Group Price Type */}
+                      {/* نوع سعر المجموعة */}
                       <Grid item xs={12} sm={4}>
                         <TextField
                           select
@@ -204,7 +218,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </TextField>
                       </Grid>
 
-                      {/* Select Products Button */}
+                      {/* زر اختيار المنتجات */}
                       <Grid item xs={12} sm={4}>
                         <Button
                           variant="outlined"
@@ -216,7 +230,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </Button>
                       </Grid>
 
-                      {/* Group Price (if groupPriceType is 'manual') */}
+                      {/* سعر المجموعة (إذا كان نوع السعر 'يدوي') */}
                       {entry.groupPriceType === 3 && (
                         <Grid item xs={12} sm={4}>
                           <TextField
@@ -245,6 +259,8 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
           )}
         </React.Fragment>
       ))}
+
+      {/* يمكنك إضافة معالجة عندما لا تكون هناك productPrices */}
     </>
   );
 };

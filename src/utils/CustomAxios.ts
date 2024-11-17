@@ -1,34 +1,35 @@
 // src/utils/CustomAxios.ts
 
 import axios from 'axios';
-import { store } from '../store/Store';
+import { store } from '../store/Store'; // تأكد من المسار الصحيح
 import { clearToken } from '../store/apps/auth/AuthSlice';
 import { isTokenExpired } from './auth';
 
-// Create Axios instance
+// إنشاء نسخة من Axios
 const CustomAxios = axios.create({
   baseURL: 'https://erp.ts-egy.com/api',
 });
 
-// Request Interceptor
+// اعتراض الطلبات
 CustomAxios.interceptors.request.use(
   (config) => {
     const state = store.getState();
     const token = state.auth.token;
     const tokenExpiration = state.auth.tokenExpiration;
 
-    if (token && !isTokenExpired(tokenExpiration)) {
-      // Initialize headers if undefined
-      if (!config.headers) {
-        config.headers = {} as any; // Type assertion
-      }
+    console.log('Axios Interceptor - Token:', token);
+    console.log('Axios Interceptor - Token Expiration:', tokenExpiration);
 
-      // Set Authorization header
+    if (token && !isTokenExpired(tokenExpiration)) {
+      if (!config.headers) {
+        config.headers = {} as any;
+      }
       (config.headers as any)['Authorization'] = `Bearer ${token}`;
+      console.log('Axios Interceptor - Authorization header set');
     } else if (token && isTokenExpired(tokenExpiration)) {
-      // Token expired
+      console.log('Axios Interceptor - Token expired, clearing token');
       store.dispatch(clearToken());
-      window.location.href = '/auth/login'; // Redirect to login
+      window.location.href = '/auth/login';
     }
 
     return config;
@@ -36,13 +37,14 @@ CustomAxios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor
+// اعتراض الردود
 CustomAxios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      console.log('Axios Interceptor - 401 Unauthorized, clearing token');
       store.dispatch(clearToken());
-      window.location.href = '/auth/login'; // Redirect to login page
+      window.location.href = '/auth/login';
     }
     return Promise.reject(error);
   }

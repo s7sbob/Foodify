@@ -12,16 +12,20 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const location = useLocation();
   const dispatch = useDispatch();
 
+  console.log('PrivateRoute - Token:', token);
+  console.log('PrivateRoute - Token Expiration:', tokenExpiration);
+
   if (token) {
+    console.log('PrivateRoute - Token exists:', token);
     if (isTokenExpired(tokenExpiration)) {
-      // Token is expired
+      console.log('PrivateRoute - Token expired');
       dispatch(clearToken());
       return <Navigate to="/auth/login" state={{ from: location }} replace />;
     }
     return children;
   }
 
-  // No token
+  console.log('PrivateRoute - No token found');
   return <Navigate to="/auth/login" state={{ from: location }} replace />;
 };
 

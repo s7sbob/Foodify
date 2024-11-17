@@ -1,39 +1,39 @@
-// src/apps/auth/AuthSlice.tsx
+// src/store/apps/auth/AuthSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
   token: string | null;
-  tokenExpiration: number | null; // Unix timestamp in milliseconds
+  tokenExpiration: number | null;
 }
 
-const initialState: AuthState = {
-  token: localStorage.getItem('token'),
-  tokenExpiration: localStorage.getItem('tokenExpiration')
-    ? Number(localStorage.getItem('tokenExpiration'))
-    : null,
-};
+const getInitialState = (): AuthState => ({
+  token: sessionStorage.getItem('token') || null,
+  tokenExpiration: sessionStorage.getItem('tokenExpiration') ? Number(sessionStorage.getItem('tokenExpiration')) : null,
+});
 
-const authSlice = createSlice({
+const initialState: AuthState = getInitialState();
+
+const AuthSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setToken: (state, action: PayloadAction<string>) => {
-      state.token = action.payload;
-      const expiration = Date.now() + 2 * 24 * 60 * 60 * 1000; // 2 days in ms
-      state.tokenExpiration = expiration;
-      localStorage.setItem('token', action.payload);
-      localStorage.setItem('tokenExpiration', expiration.toString());
+    setToken: (state, action: PayloadAction<{ token: string; tokenExpiration: number }>) => {
+      state.token = action.payload.token;
+      state.tokenExpiration = action.payload.tokenExpiration;
+      sessionStorage.setItem('token', action.payload.token);
+      sessionStorage.setItem('tokenExpiration', action.payload.tokenExpiration.toString());
+      console.log('Token set:', action.payload.token);
     },
     clearToken: (state) => {
       state.token = null;
       state.tokenExpiration = null;
-      localStorage.removeItem('token');
-      localStorage.removeItem('tokenExpiration');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('tokenExpiration');
+      console.log('Token cleared');
     },
   },
 });
 
-export const { setToken, clearToken } = authSlice.actions;
-
-export default authSlice.reducer;
+export const { setToken, clearToken } = AuthSlice.actions;
+export default AuthSlice.reducer;

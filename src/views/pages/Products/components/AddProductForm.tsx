@@ -1,6 +1,7 @@
-// src/views/pages/Products/AddProductForm.tsx
+// src/views/pages/Products/components/AddProductForm.tsx
 
 import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
+
 import {
   Typography,
   TextField,
@@ -26,7 +27,6 @@ interface AddProductFormProps {
   onProductAdded: () => void;
   productPrices: ProductPrice[];
   setProductPrices: React.Dispatch<React.SetStateAction<ProductPrice[]>>;
-  handleAddEntry: (lineType: number) => void;
 }
 
 export interface AddProductFormRef {
@@ -39,7 +39,7 @@ export interface AddProductFormRef {
  * It includes form fields for product details and buttons to add price entries.
  */
 const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
-  ({ onProductAdded, productPrices, setProductPrices, handleAddEntry }, ref) => {
+  ({ onProductAdded, productPrices, setProductPrices }, ref) => {
     const { t } = useTranslation();
 
     // State variables for form data and loading state
@@ -109,7 +109,7 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
 
       // Validate required fields
       if (!formData.productName || !formData.productGroupId || !formData.branchId) {
-        showNotification(t('notifications.incompleteData'),  'warning');
+        showNotification(t('notifications.incompleteData'), 'warning');
         return;
       }
 
@@ -128,7 +128,7 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
           // Comment group validation
           if (entry.priceComments) {
             for (const [cIndex, comment] of entry.priceComments.entries()) {
-              if (!comment.name || !comment.description) {
+              if (!comment.name ) {
                 showNotification(
                   `${t('productPriceList.comment')} ${cIndex + 1} in ${t('productPriceList.commentGroup')} ${index + 1}: ${t('notifications.incompleteData')}`,
                   'warning'
@@ -194,10 +194,6 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
                 formPayload.append(
                   `productPrices[${priceIndex}].priceComments[${commentIndex}].name`,
                   comment.name
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].description`,
-                  comment.description || ''
                 );
                 formPayload.append(
                   `productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`,
@@ -270,18 +266,36 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
         // Submit the form data using createProduct API
         await createProduct(baseurl, token, formPayload);
 
-        showNotification(t('notifications.productAddedSuccess'),  'success');
+        showNotification(t('notifications.productAddedSuccess'), 'success');
         onProductAdded();
 
         // Reset the form
-        resetForm();
+        resetFormInternal();
         setImageFile(null);
       } catch (err) {
         console.error('Error adding product:', err);
-        showNotification(t('notifications.saveProductFailed'),  'error');
+        showNotification(t('notifications.saveProductFailed'), 'error');
       } finally {
         setLoading(false);
       }
+    };
+
+    const resetFormInternal = () => {
+      setFormData({
+        productId: '',
+        productName: '',
+        productName2: '',
+        productGroupId: '',
+        productPrices: [],
+        branchId: '',
+        companyId: formData.companyId, // Retain companyId
+        posScreenId: '',
+        discount: 0,
+        vat: 0,
+        status: true,
+      });
+      setImageFile(null);
+      setProductPrices([]); // Reset productPrices
     };
 
     // Derived selected options for Autocomplete fields
@@ -303,21 +317,7 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
     // Expose resetForm and submitForm via ref
     useImperativeHandle(ref, () => ({
       resetForm: () => {
-        setFormData({
-          productId: '',
-          productName: '',
-          productName2: '',
-          productGroupId: '',
-          productPrices: [],
-          branchId: '',
-          companyId: formData.companyId, // Retain companyId
-          posScreenId: '',
-          discount: 0,
-          vat: 0,
-          status: true,
-        });
-        setImageFile(null);
-        setProductPrices([]); // Reset productPrices
+        resetFormInternal();
       },
       submitForm: handleSubmit,
     }));
@@ -463,46 +463,10 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
           </Grid>
         </Grid>
 
-        {/* Main Buttons */}
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => handleAddEntry(1)} // lineType 1: price
-              fullWidth
-            >
-              {t('buttons.addPrice')}
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleAddEntry(2)} // lineType 2: commentGroup
-              fullWidth
-            >
-              {t('buttons.addCommentGroup')}
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={() => handleAddEntry(3)} // lineType 3: groupProduct
-              fullWidth
-            >
-              {t('buttons.addGroupProducts')}
-            </Button>
-          </Grid>
-        </Grid>
+        {/* The Main Buttons have been removed from here */}
       </Box>
     );
   }
 );
 
 export default AddProductForm;
-function resetForm() {
-  throw new Error('Function not implemented.');
-}
-

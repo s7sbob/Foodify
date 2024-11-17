@@ -3,7 +3,6 @@
 export interface PriceComment {
   commentId: string;
   name: string;
-  description: string;
   productPriceId: string;
   branchId: string;
   companyId: string;

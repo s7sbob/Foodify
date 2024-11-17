@@ -241,7 +241,8 @@
       "english": "English",
       "arabic": "Arabic",
       "cancelSelection": "Cancel Selection",
-      "confirmSelection": "Confirm Selection"
+      "confirmSelection": "Confirm Selection",
+      "addComment":"Add Comment"
     },
     "alerts": {
       "fetchWaitersFailed": "Failed to fetch waiters.",

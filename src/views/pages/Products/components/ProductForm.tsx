@@ -1,4 +1,4 @@
-// src/components/ProductForm.tsx
+// src/views/pages/Products/components/ProductForm.tsx
 
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
 import { Grid } from '@mui/material';
@@ -15,7 +15,6 @@ interface ProductFormProps {
   onCancelEdit: () => void;
   productPrices: ProductPrice[];
   setProductPrices: React.Dispatch<React.SetStateAction<ProductPrice[]>>;
-  handleAddEntry: (lineType: number) => void;
 }
 
 export interface ProductFormRef {
@@ -37,7 +36,6 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
       onCancelEdit,
       productPrices,
       setProductPrices,
-      handleAddEntry,
     },
     ref
   ) => {
@@ -82,7 +80,6 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
               ref={editProductFormRef}
               productPrices={productPrices}
               setProductPrices={setProductPrices}
-              handleAddEntry={handleAddEntry}
             />
           ) : (
             <AddProductForm
@@ -90,7 +87,6 @@ const ProductForm = forwardRef<ProductFormRef, ProductFormProps>(
               ref={addProductFormRef}
               productPrices={productPrices}
               setProductPrices={setProductPrices}
-              handleAddEntry={handleAddEntry}
             />
           )}
         </Grid>

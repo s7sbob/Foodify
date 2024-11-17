@@ -162,20 +162,30 @@ const ProductsPage: React.FC = () => {
     let newEntry: ProductPrice = {
       productPriceId: uuidv4(),
       lineType,
-      branchId: '', // Will be set from the form
-      companyId: '', // Will be set from the form
+      branchId: '', // سيتم تعيينها من النموذج
+      companyId: '', // سيتم تعيينها من النموذج
       status: true,
     };
 
     switch (lineType) {
-      case 1: // Price
+      case 1: // السعر
         newEntry.productPriceName = '';
         newEntry.price = 0.0;
         break;
-      case 2: // Comment Group
-        newEntry.priceComments = [];
+      case 2: // مجموعة تعليقات
+        newEntry.priceComments = [
+          {
+            commentId: uuidv4(),
+            name: '',
+            productPriceId: newEntry.productPriceId,
+            branchId: '', // سيتم تعيينها من النموذج
+            companyId: '', // سيتم تعيينها من النموذج
+            status: true,
+            errors: [],
+          },
+        ];
         break;
-      case 3: // Group Product
+      case 3: // مجموعة منتجات
         newEntry.qtyToSelect = 1.0;
         newEntry.groupPriceType = 1;
         newEntry.groupPrice = 0.0;
@@ -214,10 +224,9 @@ const ProductsPage: React.FC = () => {
     const newComment: PriceComment = {
       commentId: uuidv4(),
       name: '',
-      description: '',
       productPriceId: productPrices[priceIndex].productPriceId,
-      branchId: '', // Will be set from the form
-      companyId: '', // Will be set from the form
+      branchId: '', // سيتم تعيينها من النموذج
+      companyId: '', // سيتم تعيينها من النموذج
       status: true,
       errors: [],
     };
@@ -300,7 +309,7 @@ const ProductsPage: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item>
-          {/* Save Product Button */}
+          {/* زر حفظ المنتج */}
           <Button
             variant="contained"
             color="primary"
@@ -312,7 +321,7 @@ const ProductsPage: React.FC = () => {
           >
             {productToEdit ? t('buttons.saveChanges') : t('buttons.saveProduct')}
           </Button>
-          {/* Reset Button */}
+          {/* زر إعادة الضبط */}
           <Button
             variant="outlined"
             color="error"
@@ -360,7 +369,7 @@ const ProductsPage: React.FC = () => {
 
       {/* Main Content */}
       <Grid container spacing={2}>
-        {/* Left Side: Add/Edit Form */}
+        {/* الجانب الأيسر: نموذج إضافة/تعديل المنتج */}
         <Grid item xs={12} md={6}>
           <ProductForm
             ref={productFormRef}
@@ -381,12 +390,48 @@ const ProductsPage: React.FC = () => {
             }}
             productPrices={productPrices}
             setProductPrices={setProductPrices}
-            handleAddEntry={handleAddEntry}
           />
         </Grid>
 
-        {/* Right Side: Display Entries */}
+        {/* الجانب الأيمن: عرض الإدخالات */}
         <Grid item xs={12} md={6}>
+          {/* الأزرار الثلاثة */}
+          <Grid container spacing={2} mb={2}>
+            <Grid item xs={4}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => handleAddEntry(1)} // lineType 1: سعر
+                fullWidth
+                startIcon={<AddIcon />}
+              >
+                {t('buttons.addPrice')}
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => handleAddEntry(2)} // lineType 2: مجموعة تعليقات
+                fullWidth
+                startIcon={<AddIcon />}
+              >
+                {t('buttons.addCommentGroup')}
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button
+                variant="outlined"
+                color="success"
+                onClick={() => handleAddEntry(3)} // lineType 3: مجموعة منتجات
+                fullWidth
+                startIcon={<AddIcon />}
+              >
+                {t('buttons.addGroupProducts')}
+              </Button>
+            </Grid>
+          </Grid>
+
           <ProductPriceList
             productPrices={productPrices}
             handleEntryChange={handleEntryChange}

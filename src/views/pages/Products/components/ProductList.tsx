@@ -1,4 +1,4 @@
-// src/components/ProductList.tsx
+// src/views/pages/Products/components/ProductList.tsx
 
 import React from 'react';
 import {

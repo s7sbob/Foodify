@@ -1,4 +1,4 @@
-// routes/Router.tsx
+// src/routes/Router.tsx
 
 import { lazy } from 'react';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
@@ -14,25 +14,12 @@ const POSScreen = Loadable(lazy(() => import('../views/pages/treeview/POSScreen.
 const Company = Loadable(lazy(() => import('../views/pages/Company/CompanyManagementPage')));
 const ProductsPage = Loadable(lazy(() => import('../views/pages/ProductsPage/ProductsPage')));
 const Products = Loadable(lazy(() => import('../views/pages/Products/ProductsPage.tsx')));
-
-const ReactColumnVisibilityTable = Loadable(
-  lazy(() => import('../views/react-tables/columnvisibility/page')),
-);
-const PilotListTable = Loadable(
-  lazy(() => import('../components/react-tables/PilotListTable/PilotListTable')),
-);
-const WaitersTable = Loadable(
-  lazy(() => import('../components/react-tables/WaitersTable/WaitersPage')),
-);
-const ZoneListTable = Loadable(
-  lazy(() => import('../components/react-tables/ZoneListTable/ZoneListTable')),
-);
-const TablesListTable = Loadable(
-  lazy(() => import('../components/react-tables/TablesListTable/TableListTable')),
-);
-const TablesSectionTable = Loadable(
-  lazy(() => import('../components/react-tables/TablesSectionTable/TableSectionListTable')),
-);
+const ReactColumnVisibilityTable = Loadable(lazy(() => import('../views/react-tables/columnvisibility/page')));
+const PilotListTable = Loadable(lazy(() => import('../components/react-tables/PilotListTable/PilotListTable')));
+const WaitersTable = Loadable(lazy(() => import('../components/react-tables/WaitersTable/WaitersPage')));
+const ZoneListTable = Loadable(lazy(() => import('../components/react-tables/ZoneListTable/ZoneListTable')));
+const TablesListTable = Loadable(lazy(() => import('../components/react-tables/TablesListTable/TableListTable')));
+const TablesSectionTable = Loadable(lazy(() => import('../components/react-tables/TablesSectionTable/TableSectionListTable')));
 
 // Authentication
 const Login = Loadable(lazy(() => import('../views/authentication/auth1/Login')));
@@ -48,7 +35,6 @@ const Router = [
       </PrivateRoute>
     ),
     children: [
-      // Protected routes within FullLayout
       { index: true, element: <HomePage /> },
       {
         path: 'HomePage',
@@ -56,7 +42,7 @@ const Router = [
       },
       {
         path: 'products',
-        element:  <Products />
+        element: <Products />
       },
       {
         path: 'pages',
@@ -73,7 +59,6 @@ const Router = [
             path: 'Company',
             element: <Company />,
           },
-
         ],
       },
       {
@@ -108,28 +93,13 @@ const Router = [
       { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
-  // Separate route for ProductsPage
   {
-    path: '/productsPage',
-    element: (
-      <PrivateRoute>
-        <ProductsPage />
-      </PrivateRoute>
-    ),
-  },
-
-  {
-    path: '/',
+    path: '/auth/*',
     element: <BlankLayout />,
     children: [
-      {
-        path: 'auth',
-        children: [
-          { path: '404', element: <Error /> },
-          { path: 'login', element: <Login /> },
-          { path: '*', element: <Navigate to="/auth/404" replace /> },
-        ],
-      },
+      { path: '404', element: <Error /> },
+      { path: 'login', element: <Login /> },
+      { path: '*', element: <Navigate to="/auth/404" replace /> },
     ],
   },
 ];

@@ -238,7 +238,8 @@
           "english": "الإنجليزية",
           "arabic": "العربية",
           "cancelSelection": "إلغاء التحديد",
-          "confirmSelection": "تأكيد التحديد"
+          "confirmSelection": "تأكيد التحديد",
+          "addComment":"إضافة تعليق"
         },
 
         "products": {

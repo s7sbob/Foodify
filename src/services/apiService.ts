@@ -32,7 +32,7 @@ export const getPosScreens = async (baseurl: string, token: string | null) => {
   return response.data;
 };
 
-// إضافة وظيفة لإنشاء منتج جديد
+// Function to create a new product
 export const createProduct = async (baseurl: string, token: string | null, formData: FormData) => {
   if (!token) {
     throw new Error('No authentication token provided.');
@@ -40,13 +40,13 @@ export const createProduct = async (baseurl: string, token: string | null, formD
   const response = await axios.post(`${baseurl}/Product/CreateProduct`, formData, {
     headers: {
       Authorization: `Bearer ${token}`,
-      // 'Content-Type' سيتم تحديده تلقائيًا بواسطة Axios عند استخدام FormData
+      // 'Content-Type' will be set automatically by Axios when using FormData
     },
   });
   return response.data;
 };
 
-// إضافة وظيفة لتحديث منتج
+// Function to update a product
 export const updateProduct = async (baseurl: string, token: string, productId: string, formData: FormData) => {
   const response = await axios.post(`${baseurl}/Product/UpdateProduct`, formData, {
     headers: {
@@ -57,7 +57,7 @@ export const updateProduct = async (baseurl: string, token: string, productId: s
   return response.data;
 };
 
-// إضافة وظيفة لحذف منتج
+// Function to delete a product
 export const deleteProduct = async (baseurl: string, token: string, productId: string) => {
   const response = await axios.delete(`${baseurl}/Product/DeleteProduct`, {
     headers: { Authorization: `Bearer ${token}` },
