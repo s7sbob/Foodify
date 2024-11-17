@@ -98,7 +98,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         ? `${t('productPriceList.commentGroup')} ${index + 1}`
                         : `${t('productPriceList.groupProduct')} ${index + 1}`}
                     </Typography>
-                    <Box>
+                    <Box display="flex" alignItems="center">
                       {entry.lineType === 2 && (
                         <Button
                           variant="text"
@@ -132,37 +132,36 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                       {entry.priceComments &&
                         entry.priceComments.map((comment, cIndex) => (
                           <Grid item xs={12} key={comment.commentId}>
-                            <Paper variant="outlined" sx={{ padding: 2, position: 'relative' }}>
-                              <IconButton
-                                aria-label={t('buttons.delete') as string}
-                                onClick={() => handleRemoveComment(index, cIndex)}
-                                color="error"
-                                size="small"
-                                sx={{ position: 'absolute', top: 8, right: 8 }}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                              <Typography variant="subtitle1" color="textSecondary">
-                                {`${t('productPriceList.comment')} ${cIndex + 1}`}
-                              </Typography>
-                              <TextField
-                                label={`${t('productPriceList.commentName')}`}
-                                name={`name-${cIndex}`}
-                                value={comment.name}
-                                onChange={(e) =>
-                                  handleCommentChange(index, cIndex, 'name', e.target.value)
-                                }
-                                fullWidth
-                                required
-                                variant="outlined"
-                                size="small"
-                                sx={{ mt: 1 }}
-                                inputRef={
-                                  cIndex === 0 && index === productPrices.length - 1
-                                    ? (inputRefs.current[index] = inputRefs.current[index] || React.createRef<HTMLInputElement>())
-                                    : undefined
-                                }
-                              />
+                            <Paper variant="outlined" sx={{ padding: 2 }}>
+                              <Box display="flex" alignItems="center" justifyContent="space-between">
+                                <TextField
+                                  label={`${t('productPriceList.commentName')} ${cIndex + 1}`}
+                                  name={`name-${cIndex}`}
+                                  value={comment.name}
+                                  onChange={(e) =>
+                                    handleCommentChange(index, cIndex, 'name', e.target.value)
+                                  }
+                                  fullWidth
+                                  required
+                                  variant="outlined"
+                                  size="small"
+                                  sx={{ mr: 1 }}
+                                  inputRef={
+                                    cIndex === 0 && index === productPrices.length - 1
+                                      ? (inputRefs.current[index] =
+                                          inputRefs.current[index] || React.createRef<HTMLInputElement>())
+                                      : undefined
+                                  }
+                                />
+                                <IconButton
+                                  aria-label={t('buttons.delete') as string}
+                                  onClick={() => handleRemoveComment(index, cIndex)}
+                                  color="error"
+                                  size="small"
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Box>
                             </Paper>
                           </Grid>
                         ))}
@@ -189,7 +188,8 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                           required
                           inputRef={
                             index === productPrices.length - 1
-                              ? (inputRefs.current[index] = inputRefs.current[index] || React.createRef<HTMLInputElement>())
+                              ? (inputRefs.current[index] =
+                                  inputRefs.current[index] || React.createRef<HTMLInputElement>())
                               : undefined
                           }
                         />
@@ -257,9 +257,8 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
               <Divider />
             </>
           )}
-        </React.Fragment>
+      </React.Fragment>
       ))}
-
       {/* يمكنك إضافة معالجة عندما لا تكون هناك productPrices */}
     </>
   );

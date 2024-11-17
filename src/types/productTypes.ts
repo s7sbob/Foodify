@@ -25,6 +25,7 @@ export interface ProductPrice {
   status: boolean;
 }
 
+
 export interface PriceGroup {
   productId: string;
   productPriceId: string;

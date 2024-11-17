@@ -5,35 +5,39 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Typography,
   AccordionProps,
   Grid,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface StyledAccordionProps extends Omit<AccordionProps, 'children'> {
-  accordionTitle: React.ReactNode; // إعادة تسمية الخاصية
+  accordionTitle: React.ReactNode; // Re-named prop
   children: NonNullable<React.ReactNode>;
   isExpanded?: boolean;
   onChange?: (event: React.SyntheticEvent, expanded: boolean) => void;
 }
 
 const StyledAccordion: React.FC<StyledAccordionProps> = ({
-  accordionTitle, // استخدام الاسم الجديد
+  accordionTitle, // use the new name
   children,
   isExpanded = false,
   onChange,
   ...props
 }) => {
+  // Generate a unique ID using React's key or other unique properties if available
+  // For demonstration, we'll use a simple unique identifier
+  const uniqueId = React.useMemo(() => Math.random().toString(36).substr(2, 9), []);
+
   return (
-    <Grid container spacing={3} item xs={12} display="unset" alignItems="stretch" marginTop={3}>
+    <Grid container item xs={12} display="block" alignItems="stretch" marginTop={3}>
       <Accordion expanded={isExpanded} onChange={onChange} {...props}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
-          aria-controls={`${accordionTitle}-content`}
-          id={`${accordionTitle}-header`}
+          aria-controls={`${uniqueId}-content`}
+          id={`${uniqueId}-header`}
         >
-          <Typography variant="h6">{accordionTitle}</Typography>
+          {/* Removed Typography wrapper to allow flexible layout */}
+          {accordionTitle}
         </AccordionSummary>
         <AccordionDetails>
           {children}
