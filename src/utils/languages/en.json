@@ -57,8 +57,38 @@
     "actions": {
       "edit": "Edit",
       "windows": "Windows",
-      "permissions": "Permissions"
+      "permissions": "Permissions",
+      "delete": "Delete",
+      "actions":"Actions"
+
     },
+
+    "dialog": {
+      "selectProducts": "Select Products",
+      "close": "Close",
+      "confirm": "Confirm"
+    },
+    "productPriceList": {
+      "commentGroup": "Comment Group",
+      "groupProduct": "Group Product",
+      "price": "Price",
+      "qtyToSelect": "Quantity to Select",
+      "groupPriceType": "Group Price Type",
+      "groupPrice": "Group Price",
+      "addComment": "Add Comment",
+      "deleteComment": "Delete Comment",
+      "priceName": "Price Name",
+      "comment": "Comment",
+      "commentName": "Comment Name",
+      "zero": "Zero",
+      "asProduct": "As Product",
+      "manual": "Manual",
+      "addCommentGroup": "Add Comment Group",
+      "addGroupProducts": "Add Group Products",
+      "selectProducts": "Select Products"
+    },
+
+
     "addUserForm": {
       "userCodePlaceholder": "User Code",
       "usernamePlaceholder": "Username",
@@ -197,7 +227,21 @@
       "saveChanges": "Save Changes",
       "edit":"Edit",
       "addNewBranch":"Add New Branch",
-      "add": "Add"
+      "add": "Add",
+      "saveProduct": "Save Product",
+      "reset": "Reset",
+      "showProducts": "Show Products",
+      "hideProducts": "Hide Products",
+      "addPrice": "Add Price",
+      "addCommentGroup": "Add Comment Group",
+      "addGroupProducts": "Add Group Products",
+      "deleteEntry": "Delete Entry",
+      "select": "Select...",
+      "selectLanguage": "Select Language",
+      "english": "English",
+      "arabic": "Arabic",
+      "cancelSelection": "Cancel Selection",
+      "confirmSelection": "Confirm Selection"
     },
     "alerts": {
       "fetchWaitersFailed": "Failed to fetch waiters.",
@@ -276,8 +320,22 @@
       "incompleteData": "Incomplete Data",
       "color": "Color",
       "image": "Image",
-      "group": "Group"
+      "group": "Group",
+      "loading": "Loading...",
+      "unknown": "Unknown",
+      "save": "Save",
+      "cancel": "Cancel",
+      "none": "None"
+
     },
+
+    "products": {
+      "title": "Products",
+      "addNewProduct": "Add New Product",
+      "editProduct": "Edit Product",
+      "productsList": "Products List"
+    },
+
 
     "zones": {
       "addZoneForm": {
@@ -352,26 +410,72 @@
       "userAddFailed": "Failed to add user.",
       "userEditFailed": "Failed to edit user.",
       "userRegistrationFailed": "Failed to register user. Please try again.",
-      "loggedIn":"Logged in successfully!",
+      "loggedIn": "Logged in successfully!",
       "loginFaild": "Invalid username or password",
       "fetchProductGroupsFailed": "Failed to fetch Product Groups.",
-    "productGroupAddedSuccess": "Product Group added successfully!",
-    "productGroupUpdatedSuccess": "Product Group updated successfully!",
-    "productGroupAddFailed": "Failed to add Product Group.",
-    "productGroupUpdateFailed": "Failed to update Product Group.",
-    "groupNameRequired": "Group name is required.",
-    "tokenMissing": "Authentication token missing. Please log in.",
-    "onlyImageFilesAllowed": "Only image files are allowed.",
-    "imageSizeLimit": "Image size should be less than 2MB.",
-    "selectGroupToAddSubGroup": "Please select a group to add a sub-group.",
-    "fetchPOSScreensFailed": "Failed to fetch POS Screens.",
-    "posScreenAddedSuccess": "POS Screen added successfully!",
-    "posScreenUpdatedSuccess": "POS Screen updated successfully!",
-    "posScreenAddFailed": "Failed to add POS Screen.",
-    "posScreenUpdateFailed": "Failed to update POS Screen.",
-    "screenNameRequired": "Screen name is required.",
-    "selectScreenToAddSubScreen": "Please select a screen to add a sub-screen."
+      "productGroupAddedSuccess": "Product Group added successfully!",
+      "productGroupUpdatedSuccess": "Product Group updated successfully!",
+      "productGroupAddFailed": "Failed to add Product Group.",
+      "productGroupUpdateFailed": "Failed to update Product Group.",
+      "groupNameRequired": "Group name is required.",
+      "tokenMissing": "Authentication token missing. Please log in.",
+      "onlyImageFilesAllowed": "Only image files are allowed.",
+      "imageSizeLimit": "Image size should be less than 2MB.",
+      "selectGroupToAddSubGroup": "Please select a group to add a sub-group.",
+      "fetchPOSScreensFailed": "Failed to fetch POS Screens.",
+      "posScreenAddedSuccess": "POS Screen added successfully!",
+      "posScreenUpdatedSuccess": "POS Screen updated successfully!",
+      "posScreenAddFailed": "Failed to add POS Screen.",
+      "posScreenUpdateFailed": "Failed to update POS Screen.",
+      "screenNameRequired": "Screen name is required.",
+      "selectScreenToAddSubScreen": "Please select a screen to add a sub-screen.",
+      "productIdMissing": "Product ID is missing.",
+      "productDeletedSuccess": "Product deleted successfully!",
+      "productDeleteFailed": "Failed to delete product.",
+      "fetchProductsFailed": "Failed to fetch products.",
+      "submitProductSuccess": "Product submitted successfully!",
+      "submitProductFailed": "Failed to submit product.",
+      "productAddedSuccess": "Product added successfully!",
+      "productUpdatedSuccess": "Product updated successfully!",
+      "saveProductFailed": "Failed to save product.",
+      "none": "None",
+      "fetchProductPricesFailed": "Failed to fetch product prices."
+
     },
+
+    "selectProductPriceDialog": {
+      "title": "Select Products",
+      "content": "Please implement the product selection interface here.",
+      "noData": "No product prices available.",
+      "selectAll": "Select all product prices"
+    },
+
+
+    "confirmations": {
+      "deleteProduct": "Are you sure you want to delete this product?"
+    },
+
+    "fields": {
+      "productName": "Product Name",
+      "productName2": "Product Name 2",
+      "productGroup": "Product Group",
+      "branch": "Branch",
+      "posScreen": "POS Screen",
+      "discount": "Discount",
+      "vat": "VAT",
+      "uploadImage": "Upload Image",
+      "description": "Description",
+      "priceName": "Price Name",
+      "price": "Price",
+      "quantity": "Quantity",
+      "searchPlaceholder": "Search..."
+    },
+
+    "placeholders": {
+      "select": "Select...",
+      "enterValue": "Enter value..."
+    },
+
     "tables": {
       "tableName": "Table Name",
       "tableSection": "Table Section",

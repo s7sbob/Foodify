@@ -99,8 +99,43 @@
         "actions": {
           "edit": "تعديل",
           "windows": "نوافذ",
-          "permissions": "أذونات"
+          "permissions": "أذونات",
+          "delete": "حذف",
+          "actions":"الإجراءات"
+
         },
+        "dialog": {
+          "selectProducts": "اختر المنتجات",
+          "close": "إغلاق",
+          "confirm": "تأكيد"
+        },
+
+        "selectProductPriceDialog": {
+          "title": "اختيار أسعار المنتجات",
+          "noData": "لا توجد أسعار منتجات متاحة.",
+          "selectAll": "تحديد جميع أسعار المنتجات"
+        },
+
+        "productPriceList": {
+          "commentGroup": "مجموعة تعليق",
+          "groupProduct": "مجموعة منتجات",
+          "price": "السعر",
+          "qtyToSelect": "الكمية للاختيار",
+          "groupPriceType": "نوع سعر المجموعة",
+          "groupPrice": "سعر المجموعة",
+          "addComment": "إضافة تعليق",
+          "deleteComment": "حذف تعليق",
+          "priceName": "اسم السعر",
+          "comment": "تعليق",
+          "commentName": "اسم التعليق",
+          "zero": "صفر",
+          "asProduct": "كمنتج",
+          "manual": "يدوي",
+          "addCommentGroup": "إضافة مجموعة تعليق",
+          "addGroupProducts": "إضافة مجموعة منتجات",
+          "selectProducts": "اختر المنتجات"
+        },
+
         "addUserForm": {
           "username": "اسم المستخدم" ,
           "userCode":"رمز المستخدم",
@@ -188,8 +223,33 @@
           "saveChanges":"حفظ التغييرات",
           "edit":"تعديل",
           "addNewBranch":"إضافة فرع جديد",
-          "add": "إضافة"
+          "add": "إضافة",
+          "select": "اختر...",
+          "enterValue": "أدخل القيمة...",
+          "saveProduct": "حفظ المنتج",
+          "reset": "إعادة تعيين",
+          "showProducts": "عرض المنتجات",
+          "hideProducts": "إخفاء المنتجات",
+          "addPrice": "إضافة سعر",
+          "addCommentGroup": "إضافة مجموعة تعليق",
+          "addGroupProducts": "إضافة مجموعة منتجات",
+          "deleteEntry": "حذف السطر",
+          "selectLanguage": "اختر اللغة",
+          "english": "الإنجليزية",
+          "arabic": "العربية",
+          "cancelSelection": "إلغاء التحديد",
+          "confirmSelection": "تأكيد التحديد"
         },
+
+        "products": {
+          "title": "المنتجات",
+          "addNewProduct": "إضافة منتج جديد",
+          "editProduct": "تعديل المنتج",
+          "productsList": "قائمة المنتجات",
+          "noProducts": "لا يوجد منتجات للعرض."
+        },
+
+
         "alerts": {
           "fetchWaitersFailed": "فشل في جلب الويتر.",
           "waiterAddedSuccess": "تم إضافة الويتر بنجاح!",
@@ -273,7 +333,11 @@
           "incompleteData": "بيانات غير مكتملة",
           "color": "اللون",
           "image": "صورة",
-          "group": "مجموعة"
+          "group": "مجموعة",
+          "loading": "جارٍ التحميل...",
+          "unknown": "غير معروف",
+          "save": "حفظ",
+          "cancel": "إلغاء"
         },
         "addWaiterForm":{
           "waiterName":"اسم الويتر",
@@ -349,10 +413,48 @@
           "posScreenAddFailed": "فشل في إضافة شاشة نقطة البيع.",
           "posScreenUpdateFailed": "فشل في تحديث شاشة نقطة البيع.",
           "screenNameRequired": "اسم الشاشة مطلوب.",
-          "selectScreenToAddSubScreen": "يرجى اختيار شاشة لإضافة شاشة فرعية."
-
+          "selectScreenToAddSubScreen": "يرجى اختيار شاشة لإضافة شاشة فرعية.",
+          "productIdMissing": "معرف المنتج مفقود.",
+          "productDeletedSuccess": "تم حذف المنتج بنجاح!",
+          "productDeleteFailed": "فشل في حذف المنتج.",
+          "fetchProductsFailed": "فشل في جلب المنتجات.",
+          "submitProductSuccess": "تم إرسال المنتج بنجاح!",
+          "submitProductFailed": "فشل في إرسال المنتج.",
+          "productAddedSuccess": "تم إضافة المنتج بنجاح!",
+          "productUpdatedSuccess": "تم تحديث المنتج بنجاح!",
+          "saveProductFailed": "فشل في حفظ المنتج.",
+          "saveAndViewAll": "حفظ وعرض الكل",
+          "saveAndStartNew": "حفظ وبدء جديد",
+          "saveChanges": "حفظ التغييرات",
+          "unknown": "غير معروف",
+          "none": "لا شيء" ,
+          "fetchProductPricesFailed": "فشل في جلب أسعار المنتجات."
 
         },
+
+        "confirmations": {
+          "deleteProduct": "هل أنت متأكد أنك تريد حذف هذا المنتج؟"
+        },
+        "fields": {
+          "productName": "اسم المنتج",
+          "productName2": "اسم المنتج 2",
+          "productGroup": "مجموعة المنتج",
+          "branch": "الفرع",
+          "posScreen": "شاشة نقطة البيع",
+          "discount": "الخصم",
+          "vat": "ضريبة القيمة المضافة",
+          "uploadImage": "تحميل صورة",
+          "priceName": "اسم السعر",
+          "price": "السعر",
+          "quantity": "الكمية",
+          "searchPlaceholder": "بحث..."
+        },
+        "placeholders": {
+          "select": "اختر...",
+          "enterValue": "أدخل القيمة..."
+        },
+
+
         "header": {
           "toggleSidebar": "تبديل الشريط الجانبي",
           "toggleTheme": "تبديل الوضع",

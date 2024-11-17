@@ -1,35 +1,40 @@
-import React, { useEffect, useState } from 'react';
+// src/views/pages/Products/ProductsPage.tsx
+
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Typography,
   CircularProgress,
   Grid,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  IconButton,
-  Paper,
-  TextField,
-  InputAdornment,
+  Button,
+  Collapse,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddProductForm from './AddProductForm';
-import EditProductForm from './EditProductForm';
 import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
-import { Product } from '../../../types/productTypes';
+import { Product, ProductPrice, PriceComment } from '../../../types/productTypes';
 import axios from 'axios';
 import { getProductGroups, getPosScreens, deleteProduct } from '../../../services/apiService';
+import { v4 as uuidv4 } from 'uuid';
+import ProductList from './components/ProductList';
+import ProductForm, { ProductFormRef } from './components/ProductForm';
+import ProductPriceList from './components/ProductPriceList';
+import SelectProductPriceDialog from './SelectProductPriceDialog';
+import { useTranslation } from 'react-i18next';
 
+/**
+ * ProductsPage component is the main page for managing products.
+ * It includes product listing, adding, editing, and deleting functionalities.
+ */
 const ProductsPage: React.FC = () => {
+  const { t } = useTranslation(); // Initialize the translation hook
+
+  // State variables and hooks
   const [products, setProducts] = useState<Product[]>([]);
+  const [productPrices, setProductPrices] = useState<ProductPrice[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { showNotification } = useNotification();
@@ -42,9 +47,19 @@ const ProductsPage: React.FC = () => {
   const [allProductGroups, setAllProductGroups] = useState<any[]>([]);
   const [allPosScreens, setAllPosScreens] = useState<any[]>([]);
 
-  // Search State
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  // Toggle Products Table visibility
+  const [showProductsTable, setShowProductsTable] = useState<boolean>(false);
 
+  // State for SelectProductPriceDialog
+  const [openSelectDialog, setOpenSelectDialog] = useState<boolean>(false);
+  const [currentGroupPriceIndex, setCurrentGroupPriceIndex] = useState<number | null>(null);
+
+  // Create a ref to ProductForm to control form actions from this component
+  const productFormRef = useRef<ProductFormRef>(null);
+
+  /**
+   * Fetch additional data required for the page, such as product groups and POS screens.
+   */
   const fetchAdditionalData = async () => {
     if (!token) return;
     try {
@@ -55,13 +70,16 @@ const ProductsPage: React.FC = () => {
       setAllPosScreens(screens);
     } catch (error) {
       console.error('Error fetching additional data:', error);
-      showNotification('فشل في جلب البيانات الإضافية.', 'error', 'خطأ');
+      showNotification(t('notifications.fetchDataFailed'), 'error');
     }
   };
 
+  /**
+   * Fetch products from the API and update the state.
+   */
   const fetchProducts = async () => {
     if (!token) {
-      showNotification('يجب تسجيل الدخول لعرض المنتجات.', 'error', 'غير مصرح');
+      showNotification(t('notifications.tokenMissing'), 'error');
       navigate('/login');
       return;
     }
@@ -74,173 +92,317 @@ const ProductsPage: React.FC = () => {
       setProducts(response.data);
     } catch (err) {
       console.error('Error fetching products:', err);
-      setError('فشل في جلب المنتجات.');
-      showNotification('فشل في جلب المنتجات.', 'error', 'خطأ');
+      setError(t('notifications.fetchProductsFailed'));
+      showNotification(t('notifications.fetchProductsFailed'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch products and additional data on component mount
   useEffect(() => {
     fetchProducts();
     fetchAdditionalData();
   }, [token]);
 
-  // Handle Edit Product
+  /**
+   * Handle editing a product by setting the product to edit and its prices.
+   */
   const handleEditProduct = (product: Product) => {
     setProductToEdit(product);
+    setProductPrices(product.productPrices || []);
   };
 
-  // Handle Delete Product
+  /**
+   * Handle deleting a product after confirmation.
+   */
   const handleDeleteProduct = async (productId?: string) => {
     if (!token) {
-      showNotification('يجب تسجيل الدخول لإجراء هذه العملية.', 'error', 'غير مصرح');
+      showNotification(t('notifications.tokenMissing'), 'error');
       navigate('/login');
       return;
     }
 
     if (!productId) {
-      showNotification('معرف المنتج غير موجود.', 'error', 'خطأ');
+      showNotification(t('notifications.productIdMissing'), 'error');
       return;
     }
 
-    if (!window.confirm('هل أنت متأكد أنك تريد حذف هذا المنتج؟')) {
+    if (!window.confirm(t('confirmations.deleteProduct') as string)) {
       return;
     }
 
     setLoading(true);
     try {
       await deleteProduct(baseurl, token, productId);
-      showNotification('تم حذف المنتج بنجاح!', 'success', 'نجاح');
+      showNotification(t('notifications.productDeletedSuccess'), 'success');
       fetchProducts();
     } catch (err) {
       console.error('Error deleting product:', err);
-      showNotification('فشل في حذف المنتج.', 'error', 'خطأ');
+      showNotification(t('notifications.productDeleteFailed'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Filtered Products based on Search Query
-  const filteredProducts = products.filter((product) =>
-    product.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    allProductGroups.find(group => group.groupId === product.productGroupId)?.groupName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (product.posScreenId 
-      ? allPosScreens.find(screen => screen.screenId === product.posScreenId)?.screenName.toLowerCase().includes(searchQuery.toLowerCase()) 
-      : 'لا يوجد'.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  /**
+   * Reset forms and state related to product editing.
+   */
+  const handleResetForm = () => {
+    setProductToEdit(null);
+    setProductPrices([]);
+  };
+
+  // Handlers for managing productPrices state
+
+  /**
+   * Add a new product price entry based on the specified lineType.
+   */
+  const handleAddEntry = (lineType: number) => {
+    let newEntry: ProductPrice = {
+      productPriceId: uuidv4(),
+      lineType,
+      branchId: '', // Will be set from the form
+      companyId: '', // Will be set from the form
+      status: true,
+    };
+
+    switch (lineType) {
+      case 1: // Price
+        newEntry.productPriceName = '';
+        newEntry.price = 0.0;
+        break;
+      case 2: // Comment Group
+        newEntry.priceComments = [];
+        break;
+      case 3: // Group Product
+        newEntry.qtyToSelect = 1.0;
+        newEntry.groupPriceType = 1;
+        newEntry.groupPrice = 0.0;
+        newEntry.priceGroups = [];
+        break;
+      default:
+        break;
+    }
+
+    setProductPrices((prev) => [...prev, newEntry]);
+  };
+
+  /**
+   * Remove a product price entry at the specified index.
+   */
+  const handleRemoveEntry = (index: number) => {
+    setProductPrices((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  /**
+   * Handle changes to a product price entry.
+   */
+  const handleEntryChange = (index: number, field: keyof ProductPrice, value: any) => {
+    const updatedPrices = [...productPrices];
+    updatedPrices[index] = {
+      ...updatedPrices[index],
+      [field]: value,
+    };
+    setProductPrices(updatedPrices);
+  };
+
+  /**
+   * Add a comment to a comment group at the specified index.
+   */
+  const handleAddComment = (priceIndex: number) => {
+    const newComment: PriceComment = {
+      commentId: uuidv4(),
+      name: '',
+      description: '',
+      productPriceId: productPrices[priceIndex].productPriceId,
+      branchId: '', // Will be set from the form
+      companyId: '', // Will be set from the form
+      status: true,
+      errors: [],
+    };
+    const updatedPrices = [...productPrices];
+    updatedPrices[priceIndex].priceComments = [
+      ...(updatedPrices[priceIndex].priceComments || []),
+      newComment,
+    ];
+    setProductPrices(updatedPrices);
+  };
+
+  /**
+   * Remove a comment from a comment group.
+   */
+  const handleRemoveComment = (priceIndex: number, commentIndex: number) => {
+    const updatedPrices = [...productPrices];
+    updatedPrices[priceIndex].priceComments = updatedPrices[priceIndex].priceComments?.filter(
+      (_, i) => i !== commentIndex
+    );
+    setProductPrices(updatedPrices);
+  };
+
+  /**
+   * Handle changes to a comment within a comment group.
+   */
+  const handleCommentChange = (
+    priceIndex: number,
+    commentIndex: number,
+    field: keyof PriceComment,
+    value: string
+  ) => {
+    const updatedPrices = [...productPrices];
+    const updatedComments = updatedPrices[priceIndex].priceComments?.map((comment, i) =>
+      i === commentIndex ? { ...comment, [field]: value } : comment
+    );
+    updatedPrices[priceIndex].priceComments = updatedComments;
+    setProductPrices(updatedPrices);
+  };
+
+  /**
+   * Open the SelectProductPriceDialog to select products for a group.
+   */
+  const handleOpenSelectDialog = (index: number) => {
+    setCurrentGroupPriceIndex(index);
+    setOpenSelectDialog(true);
+  };
+
+  /**
+   * Close the SelectProductPriceDialog.
+   */
+  const handleCloseSelectDialog = () => {
+    setOpenSelectDialog(false);
+    setCurrentGroupPriceIndex(null);
+  };
+
+  /**
+   * Handle the selection of product prices in the dialog.
+   */
+  const handleSelectProductPrices = (selectedProducts: any[]) => {
+    if (currentGroupPriceIndex === null) return;
+
+    const updatedPrices = [...productPrices];
+    updatedPrices[currentGroupPriceIndex].priceGroups = selectedProducts.map((product: any) => ({
+      productId: product.productId,
+      productPriceId: product.productPriceId,
+      quantity: product.quantity,
+    }));
+
+    setProductPrices(updatedPrices);
+    handleCloseSelectDialog();
+  };
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Typography variant="h4" gutterBottom>
-        المنتجات
-      </Typography>
+      {/* Header with Title and Action Buttons */}
+      <Grid container alignItems="center" justifyContent="space-between" spacing={2} mb={2}>
+        <Grid item>
+          <Typography variant="h4" gutterBottom>
+            {t('products.title')}
+          </Typography>
+        </Grid>
+        <Grid item>
+          {/* Save Product Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              productFormRef.current?.submitForm();
+            }}
+            sx={{ mr: 2 }}
+          >
+            {productToEdit ? t('buttons.saveChanges') : t('buttons.saveProduct')}
+          </Button>
+          {/* Reset Button */}
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              productFormRef.current?.resetForm();
+              handleResetForm();
+            }}
+            startIcon={<DeleteIcon />}
+          >
+            {t('buttons.reset')}
+          </Button>
+        </Grid>
+      </Grid>
 
+      {/* Toggle Products Table Visibility */}
+      <Box mb={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setShowProductsTable(!showProductsTable)}
+        >
+          {showProductsTable ? t('buttons.hideProducts') : t('buttons.showProducts')}
+        </Button>
+        <Collapse in={showProductsTable}>
+          {/* Products Table */}
+          <Box mt={2}>
+            {loading ? (
+              <Box display="flex" justifyContent="center" my={4}>
+                <CircularProgress />
+              </Box>
+            ) : error ? (
+              <Typography color="error">{error}</Typography>
+            ) : (
+              <ProductList
+                products={products}
+                productGroups={allProductGroups}
+                posScreens={allPosScreens}
+                onEdit={handleEditProduct}
+                onDelete={handleDeleteProduct}
+              />
+            )}
+          </Box>
+        </Collapse>
+      </Box>
+
+      {/* Main Content */}
       <Grid container spacing={2}>
-        {/* Left Side: Add or Edit Product Form */}
-        <Grid item xs={12} md={8}>
-          {productToEdit ? (
-            <EditProductForm
-              productData={productToEdit}
-              onProductUpdated={() => {
-                fetchProducts();
-                setProductToEdit(null);
-              }}
-              onCancel={() => setProductToEdit(null)}
-            />
-          ) : (
-            <AddProductForm onProductAdded={fetchProducts} />
-          )}
+        {/* Left Side: Add/Edit Form */}
+        <Grid item xs={12} md={6}>
+          <ProductForm
+            ref={productFormRef}
+            isEditing={!!productToEdit}
+            productToEdit={productToEdit}
+            onProductAdded={() => {
+              fetchProducts();
+              setProductPrices([]);
+            }}
+            onProductUpdated={() => {
+              fetchProducts();
+              setProductToEdit(null);
+              setProductPrices([]);
+            }}
+            onCancelEdit={() => {
+              setProductToEdit(null);
+              setProductPrices([]);
+            }}
+            productPrices={productPrices}
+            setProductPrices={setProductPrices}
+            handleAddEntry={handleAddEntry}
+          />
         </Grid>
 
-        {/* Right Side: Search Bar and Products Table */}
-        <Grid item xs={12} md={4}>
-          {/* Search Bar */}
-          <Box mb={2}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="بحث عن منتج..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
+        {/* Right Side: Display Entries */}
+        <Grid item xs={12} md={6}>
+          <ProductPriceList
+            productPrices={productPrices}
+            handleEntryChange={handleEntryChange}
+            handleRemoveEntry={handleRemoveEntry}
+            handleAddComment={handleAddComment}
+            handleRemoveComment={handleRemoveComment}
+            handleCommentChange={handleCommentChange}
+            handleOpenSelectDialog={handleOpenSelectDialog}
+          />
+          {/* SelectProductPriceDialog */}
+          {currentGroupPriceIndex !== null && (
+            <SelectProductPriceDialog
+              open={openSelectDialog}
+              onClose={handleCloseSelectDialog}
+              onSelect={handleSelectProductPrices}
             />
-          </Box>
-
-          {loading ? (
-            <Box display="flex" justifyContent="center" my={4}>
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Typography color="error">{error}</Typography>
-          ) : (
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>اسم المنتج</TableCell>
-                    <TableCell>اسم المجموعة</TableCell>
-                    <TableCell>الشاشة</TableCell>
-                    <TableCell>الإجراءات</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredProducts.map((product) => (
-                    product.productId ? (
-                      <TableRow key={product.productId}>
-                        <TableCell>{product.productName}</TableCell>
-                        <TableCell>
-                          {allProductGroups.find(group => group.groupId === product.productGroupId)?.groupName || 'غير معروف'}
-                        </TableCell>
-                        <TableCell>
-                          {product.posScreenId
-                            ? allPosScreens.find(screen => screen.screenId === product.posScreenId)?.screenName || 'غير معروف'
-                            : 'لا يوجد'}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton
-                            color="primary"
-                            aria-label="Edit"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            color="secondary"
-                            aria-label="Delete"
-                            onClick={() => handleDeleteProduct(product.productId)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      // Handle case where productId is undefined
-                      <TableRow key={`undefined-${Math.random()}`}>
-                        <TableCell colSpan={4} align="center">
-                          بيانات منتج غير صحيحة (معرف المنتج مفقود).
-                        </TableCell>
-                      </TableRow>
-                    )
-                  ))}
-
-                  {filteredProducts.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        لا توجد منتجات لعرضها.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
           )}
         </Grid>
       </Grid>

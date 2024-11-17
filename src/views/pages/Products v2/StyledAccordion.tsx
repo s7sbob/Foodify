@@ -1,3 +1,5 @@
+// src/views/pages/Products/StyledAccordion.tsx
+
 import React from 'react';
 import {
   Accordion,
@@ -7,10 +9,10 @@ import {
   AccordionProps,
   Grid,
 } from '@mui/material';
-import { IconChevronDown } from '@tabler/icons-react';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 interface StyledAccordionProps extends Omit<AccordionProps, 'children'> {
-  title: string;
+  title: any;
   children: NonNullable<React.ReactNode>;
 }
 
@@ -23,7 +25,7 @@ const StyledAccordion: React.FC<StyledAccordionProps> = ({
     <Grid container spacing={3} item xs={12} display="unset" alignItems="stretch" marginTop={3}>
       <Accordion {...props}>
         <AccordionSummary
-          expandIcon={<IconChevronDown />}
+          expandIcon={<ExpandMoreIcon />}
           aria-controls={`${title}-content`}
           id={`${title}-header`}
         >

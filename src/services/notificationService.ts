@@ -1,6 +1,6 @@
 // src/services/notificationService.ts
 
-import EventEmitter from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 
 // Define the shape of a notification
 type Notification = {
