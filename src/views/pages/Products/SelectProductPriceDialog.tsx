@@ -27,6 +27,7 @@ import { AppState } from '../../../store/Store';
 import axios from 'axios';
 import { useNotification } from '../../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
+import { SelectedProduct, ProductPrice } from '../../../types/productTypes';
 
 interface ProductPriceData {
   productId: string;
@@ -38,36 +39,39 @@ interface ProductPriceData {
   errors: any[];
 }
 
+interface ProductPriceDataWithKey extends ProductPriceData {
+  uniqueKey: string;
+}
+
 interface SelectProductPriceDialogProps {
   open: boolean;
   onClose: () => void;
   onSelect: (selectedProducts: SelectedProduct[]) => void;
 }
 
-interface SelectedProduct {
-  productId: string;
-  productPriceId: string;
-  quantity: number;
-}
-
-const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ open, onClose, onSelect }) => {
-  const { t } = useTranslation(); // Initialize the translation hook
-
+const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({
+  open,
+  onClose,
+  onSelect,
+}) => {
+  const { t } = useTranslation();
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
   const token = useSelector((state: AppState) => state.auth.token);
   const { showNotification } = useNotification();
 
-  const [productPrices, setProductPrices] = useState<ProductPriceData[]>([]);
+  const [productPrices, setProductPrices] = useState<ProductPriceDataWithKey[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedQuantities, setSelectedQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (open) {
       fetchProductPrices();
+      setSelectedIds(new Set());
+      setSearchQuery('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const fetchProductPrices = async () => {
@@ -82,7 +86,14 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ ope
       const response = await axios.get<ProductPriceData[]>(`${baseurl}/Product/GetAllProductPrices`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProductPrices(response.data);
+
+      // Assign a uniqueKey to each product price entry
+      const dataWithUniqueKey: ProductPriceDataWithKey[] = response.data.map((pp, index) => ({
+        ...pp,
+        uniqueKey: `${pp.productPriceId}-${index}`,
+      }));
+
+      setProductPrices(dataWithUniqueKey);
     } catch (err) {
       console.error('Error fetching product prices:', err);
       setError(t('notifications.fetchProductPricesFailed'));
@@ -94,57 +105,46 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ ope
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const allIds = productPrices.map((pp) => pp.productPriceId);
-      setSelectedIds(new Set(allIds));
-      const quantities: Record<string, number> = {};
-      allIds.forEach(id => { quantities[id] = 1; });
-      setSelectedQuantities(quantities);
+      const allKeys = filteredProductPrices.map((pp) => pp.uniqueKey);
+      setSelectedIds(new Set(allKeys));
     } else {
       setSelectedIds(new Set());
-      setSelectedQuantities({});
     }
   };
 
-  const handleSelectOne = (id: string) => {
+  const handleSelectOne = (uniqueKey: string) => {
     const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-      const newQuantities = { ...selectedQuantities };
-      delete newQuantities[id];
-      setSelectedQuantities(newQuantities);
+    if (newSelected.has(uniqueKey)) {
+      newSelected.delete(uniqueKey);
     } else {
-      newSelected.add(id);
-      setSelectedQuantities({
-        ...selectedQuantities,
-        [id]: 1,
-      });
+      newSelected.add(uniqueKey);
     }
     setSelectedIds(newSelected);
   };
 
+  const handleRowClick = (uniqueKey: string) => {
+    handleSelectOne(uniqueKey);
+  };
+
   const handleCancelSelection = () => {
     setSelectedIds(new Set());
-    setSelectedQuantities({});
+    setSearchQuery('');
+    onClose(); // Close the dialog
   };
 
   const handleConfirmSelection = () => {
-    const selectedProducts = Array.from(selectedIds).map((id) => {
-      const pp = productPrices.find((pp) => pp.productPriceId === id);
+    const selectedProducts: SelectedProduct[] = Array.from(selectedIds).map((key) => {
+      const pp = productPrices.find((pp) => pp.uniqueKey === key);
       return {
         productId: pp?.productId || '',
         productPriceId: pp?.productPriceId || '',
-        quantity: selectedQuantities[id] || 1,
+        productName: pp?.productName || '',
+        priceName: pp?.priceName || '',
+        price: pp?.price || 0,
       };
     });
     onSelect(selectedProducts);
     onClose();
-  };
-
-  const handleQuantityChange = (id: string, quantity: number) => {
-    setSelectedQuantities({
-      ...selectedQuantities,
-      [id]: quantity >= 1 ? quantity : 1,
-    });
   };
 
   // Filtered Product Prices based on search query
@@ -154,6 +154,13 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ ope
       pp.priceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pp.price.toString().includes(searchQuery)
   );
+
+  const isAllSelected =
+    filteredProductPrices.length > 0 &&
+    filteredProductPrices.every((pp) => selectedIds.has(pp.uniqueKey));
+
+  const isIndeterminate =
+    selectedIds.size > 0 && selectedIds.size < filteredProductPrices.length;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -191,8 +198,8 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ ope
                   <TableRow>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        indeterminate={selectedIds.size > 0 && selectedIds.size < productPrices.length}
-                        checked={productPrices.length > 0 && selectedIds.size === productPrices.length}
+                        indeterminate={isIndeterminate}
+                        checked={isAllSelected}
                         onChange={handleSelectAll}
                         inputProps={{ 'aria-label': t('selectProductPriceDialog.selectAll') as string }} // "Select All"
                       />
@@ -200,42 +207,44 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ ope
                     <TableCell>{t('fields.productName')}</TableCell>
                     <TableCell>{t('fields.priceName')}</TableCell>
                     <TableCell>{t('fields.price')}</TableCell>
-                    <TableCell>{t('fields.quantity')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredProductPrices.map((pp) => (
-                    <TableRow key={pp.productPriceId} hover>
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={selectedIds.has(pp.productPriceId)}
-                          onChange={() => handleSelectOne(pp.productPriceId)}
-                          inputProps={{ 'aria-labelledby': `checkbox-${pp.productPriceId}` }}
-                        />
-                      </TableCell>
-                      <TableCell>{pp.productName}</TableCell>
-                      <TableCell>{pp.priceName}</TableCell>
-                      <TableCell>{pp.price.toFixed(2)}</TableCell>
-                      <TableCell>
-                        {selectedIds.has(pp.productPriceId) && (
-                          <TextField
-                            type="number"
-                            variant="outlined"
-                            size="small"
-                            value={selectedQuantities[pp.productPriceId] || 1}
-                            onChange={(e) => handleQuantityChange(pp.productPriceId, parseInt(e.target.value))}
-                            inputProps={{ min: 1 }}
-                            sx={{ width: '80px' }}
-                            label={t('fields.quantity')}
+                  {filteredProductPrices.map((pp) => {
+                    const isItemSelected = selectedIds.has(pp.uniqueKey);
+                    return (
+                      <TableRow
+                        key={pp.uniqueKey}
+                        hover
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        selected={isItemSelected}
+                        onClick={(event) => {
+                          // Prevent triggering row click when clicking on the checkbox
+                          if ((event.target as HTMLElement).nodeName !== 'INPUT') {
+                            handleRowClick(pp.uniqueKey);
+                          }
+                        }}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={isItemSelected}
+                            onChange={() => handleSelectOne(pp.uniqueKey)}
+                            onClick={(e) => e.stopPropagation()} // Prevent row click when clicking checkbox
+                            inputProps={{ 'aria-labelledby': `checkbox-${pp.uniqueKey}` }}
                           />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>{pp.productName}</TableCell>
+                        <TableCell>{pp.priceName}</TableCell>
+                        <TableCell>{pp.price.toFixed(2)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
 
                   {filteredProductPrices.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} align="center">
+                      <TableCell colSpan={4} align="center">
                         {t('selectProductPriceDialog.noData')}
                       </TableCell>
                     </TableRow>
@@ -262,5 +271,5 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({ ope
     </Dialog>
   );
 };
+  export default SelectProductPriceDialog;
 
-export default SelectProductPriceDialog;

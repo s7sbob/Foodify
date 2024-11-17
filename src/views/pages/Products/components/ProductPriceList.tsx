@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { ProductPrice, PriceComment } from '../../../../types/productTypes';
+import { ProductPrice, PriceComment, SelectedProduct } from '../../../../types/productTypes';
 import ProductPriceEntry from './ProductPriceEntry';
 import StyledAccordion from './StyledAccordion';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const inputRefs = useRef<{ [key: number]: React.RefObject<HTMLInputElement> }>({});
 
-  // تتبع الطول السابق لاكتشاف إضافة إدخالات جديدة
+  // Track previous length to detect additions
   const prevLengthRef = useRef<number>(productPrices.length);
 
   useEffect(() => {
@@ -79,7 +79,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
   return (
     <>
       {productPrices.map((entry, index) => (
-        <React.Fragment key={entry.productPriceId}>
+        <React.Fragment key={`${entry.productPriceId}-${index}`}>
           {entry.lineType === 1 ? (
             <ProductPriceEntry
               entry={entry}
@@ -124,11 +124,11 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                 isExpanded={expandedIndex === index}
                 onChange={handleAccordionChange(index)}
               >
-                {/* المحتويات بناءً على lineType */}
+                {/* Content based on lineType */}
                 <Grid container spacing={2}>
                   {entry.lineType === 2 && (
                     <>
-                      {/* عرض التعليقات */}
+                      {/* Display Comments */}
                       {entry.priceComments &&
                         entry.priceComments.map((comment, cIndex) => (
                           <Grid item xs={12} key={comment.commentId}>
@@ -170,7 +170,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
 
                   {entry.lineType === 3 && (
                     <>
-                      {/* الكمية المراد تحديدها */}
+                      {/* Quantity to Select */}
                       <Grid item xs={12} sm={4}>
                         <TextField
                           label={t('productPriceList.qtyToSelect')}
@@ -195,7 +195,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         />
                       </Grid>
 
-                      {/* نوع سعر المجموعة */}
+                      {/* Group Price Type */}
                       <Grid item xs={12} sm={4}>
                         <TextField
                           select
@@ -218,7 +218,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </TextField>
                       </Grid>
 
-                      {/* زر اختيار المنتجات */}
+                      {/* Button to Open Select Product Price Dialog */}
                       <Grid item xs={12} sm={4}>
                         <Button
                           variant="outlined"
@@ -230,7 +230,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </Button>
                       </Grid>
 
-                      {/* سعر المجموعة (إذا كان نوع السعر 'يدوي') */}
+                      {/* Group Price (if price type is manual) */}
                       {entry.groupPriceType === 3 && (
                         <Grid item xs={12} sm={4}>
                           <TextField
@@ -250,6 +250,30 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                           />
                         </Grid>
                       )}
+
+                      {/* Display Selected Products */}
+                      {entry.priceGroups && entry.priceGroups.length > 0 && (
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            {t('productPriceList.selectedProducts')} {/* e.g., "Selected Products" */}
+                          </Typography>
+                          <Paper variant="outlined" sx={{ padding: 2 }}>
+                            <Grid container spacing={2}>
+                              {entry.priceGroups.map((sp: SelectedProduct, spIndex: number) => (
+                                <Grid item xs={12} sm={6} md={4} key={`${sp.productPriceId}-${spIndex}`}>
+                                  <Typography>
+                                    <strong>{t('fields.productName')}:</strong> {sp.productName}
+                                  </Typography>
+                                  <Typography>
+                                    <strong>{t('fields.priceName')}:</strong> {sp.priceName}
+                                  </Typography>
+
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </Paper>
+                        </Grid>
+                      )}
                     </>
                   )}
                 </Grid>
@@ -257,9 +281,8 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
               <Divider />
             </>
           )}
-      </React.Fragment>
+        </React.Fragment>
       ))}
-      {/* يمكنك إضافة معالجة عندما لا تكون هناك productPrices */}
     </>
   );
 };

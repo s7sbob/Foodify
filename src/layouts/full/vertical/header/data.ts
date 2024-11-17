@@ -108,135 +108,135 @@ const messages: messageType[] = [
   },
 ];
 
-//
-// Profile dropdown
-//
-interface ProfileType {
-  href: string;
-  title: string;
-  subtitle: string;
-  icon: any;
-}
-const profile: ProfileType[] = [
-  {
-    href: '/user-profile',
-    title: 'My Profile',
-    subtitle: 'Account Settings',
-    icon: icon1,
-  },
-  {
-    href: '/apps/email',
-    title: 'My Inbox',
-    subtitle: 'Messages & Emails',
-    icon: icon2,
-  },
-  {
-    href: '/apps/notes',
-    title: 'My Tasks',
-    subtitle: 'To-do and Daily Tasks',
-    icon: icon3,
-  },
-];
+// //
+// // Profile dropdown
+// //
+// interface ProfileType {
+//   href: string;
+//   title: string;
+//   subtitle: string;
+//   icon: any;
+// }
+// const profile: ProfileType[] = [
+//   {
+//     href: '/user-profile',
+//     title: 'My Profile',
+//     subtitle: 'Account Settings',
+//     icon: icon1,
+//   },
+//   {
+//     href: '/apps/email',
+//     title: 'My Inbox',
+//     subtitle: 'Messages & Emails',
+//     icon: icon2,
+//   },
+//   {
+//     href: '/apps/notes',
+//     title: 'My Tasks',
+//     subtitle: 'To-do and Daily Tasks',
+//     icon: icon3,
+//   },
+// ];
 
 // apps dropdown
 
-interface appsLinkType {
-  href: string;
-  title : string;
-  subtext: string;
-  avatar: string;
-}
+// interface appsLinkType {
+//   href: string;
+//   title : string;
+//   subtext: string;
+//   avatar: string;
+// }
 
-const appsLink:appsLinkType[] = [
-  {
-    href: '/apps/chats',
-    title: 'Chat Application',
-    subtext: 'New messages arrived',
-    avatar: ddIcon1
-  },
-  {
-    href: '/apps/ecommerce/shop',
-    title: 'eCommerce App',
-    subtext: 'New stock available',
-    avatar: ddIcon2
-  },
-  {
-    href: '/apps/notes',
-    title: 'Notes App',
-    subtext: 'To-do and Daily tasks',
-    avatar: ddIcon3
-  },
-  {
-    href: '/apps/calendar',
-    title: 'Calendar App',
-    subtext: 'Get dates',
-    avatar: ddIcon4
-  },
-  {
-    href: '/apps/contacts',
-    title: 'Contact Application',
-    subtext: '2 Unsaved Contacts',
-    avatar: ddIcon5
-  },
-  {
-    href: '/apps/tickets',
-    title: 'Tickets App',
-    subtext: 'Submit tickets',
-    avatar: ddIcon6
-  },
-  {
-    href: '/apps/email',
-    title: 'Email App',
-    subtext: 'Get new emails',
-    avatar: ddIcon7
-  },
-  {
-    href: '/apps/blog/posts',
-    title: 'Blog App',
-    subtext: 'added new blog',
-    avatar: ddIcon8
-  },
-]
+// const appsLink:appsLinkType[] = [
+//   {
+//     href: '/apps/chats',
+//     title: 'Chat Application',
+//     subtext: 'New messages arrived',
+//     avatar: ddIcon1
+//   },
+//   {
+//     href: '/apps/ecommerce/shop',
+//     title: 'eCommerce App',
+//     subtext: 'New stock available',
+//     avatar: ddIcon2
+//   },
+//   {
+//     href: '/apps/notes',
+//     title: 'Notes App',
+//     subtext: 'To-do and Daily tasks',
+//     avatar: ddIcon3
+//   },
+//   {
+//     href: '/apps/calendar',
+//     title: 'Calendar App',
+//     subtext: 'Get dates',
+//     avatar: ddIcon4
+//   },
+//   {
+//     href: '/apps/contacts',
+//     title: 'Contact Application',
+//     subtext: '2 Unsaved Contacts',
+//     avatar: ddIcon5
+//   },
+//   {
+//     href: '/apps/tickets',
+//     title: 'Tickets App',
+//     subtext: 'Submit tickets',
+//     avatar: ddIcon6
+//   },
+//   {
+//     href: '/apps/email',
+//     title: 'Email App',
+//     subtext: 'Get new emails',
+//     avatar: ddIcon7
+//   },
+//   {
+//     href: '/apps/blog/posts',
+//     title: 'Blog App',
+//     subtext: 'added new blog',
+//     avatar: ddIcon8
+//   },
+// ]
 
 
-interface LinkType {
-  href: string;
-  title: string;
-}
+// interface LinkType {
+//   href: string;
+//   title: string;
+// }
 
-const pageLinks:LinkType[] = [
-  {
-    href: '/pricing',
-    title: 'Pricing Page'
-  },
-  {
-    href: '/auth/login',
-    title: 'Authentication Design'
-  },
-  {
-    href: '/auth/register',
-    title: 'Register Now'
-  },
-  {
-    href: '/404',
-    title: '404 Error Page'
-  },
-  {
-    href: '/auth/login',
-    title: 'Login Page'
-  },
-  {
-    href: '/user-profile',
-    title: 'User Application'
-  },
-  {
-    href: '/apps/blog/posts',
-    title: 'Blog Design'
-  },
-  {
-    href: '/apps/ecommerce/eco-checkout',
-    title: 'Shopping Cart'
-  },
-]
+// const pageLinks:LinkType[] = [
+//   {
+//     href: '/pricing',
+//     title: 'Pricing Page'
+//   },
+//   {
+//     href: '/auth/login',
+//     title: 'Authentication Design'
+//   },
+//   {
+//     href: '/auth/register',
+//     title: 'Register Now'
+//   },
+//   {
+//     href: '/404',
+//     title: '404 Error Page'
+//   },
+//   {
+//     href: '/auth/login',
+//     title: 'Login Page'
+//   },
+//   {
+//     href: '/user-profile',
+//     title: 'User Application'
+//   },
+//   {
+//     href: '/apps/blog/posts',
+//     title: 'Blog Design'
+//   },
+//   {
+//     href: '/apps/ecommerce/eco-checkout',
+//     title: 'Shopping Cart'
+//   },
+// ]
 
-export { notifications, messages, profile, pageLinks, appsLink };
+export { notifications, messages };

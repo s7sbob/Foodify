@@ -118,10 +118,14 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         if (res.status === 200) {
           console.log('User logged in successfully');
 
-          const { token, tokenExpiration } = res.data;
+          const { token, expiration } = res.data;
 
-          // تأكد من أن `tokenExpiration` يتم تحويله إلى ميلي ثانية إذا كان بالثواني
-          const tokenExpirationMs = tokenExpiration ? tokenExpiration * 1000 : Date.now() + 60 * 60 * 1000; // 1 ساعة من الآن إذا لم يكن موجوداً
+          // تحويل `expiration` من سلسلة زمنية إلى ميلي ثانية
+          const tokenExpirationMs = new Date(expiration).getTime();
+
+          if (isNaN(tokenExpirationMs)) {
+            throw new Error('Invalid expiration date format.');
+          }
 
           dispatch(setToken({ token, tokenExpiration: tokenExpirationMs }));
 
@@ -142,7 +146,10 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
           );
         }
       } catch (error: any) {
-        const message = error.response?.data?.message || t('notifications.loginFaild') || 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+        const message =
+          error.response?.data?.message ||
+          t('notifications.loginFaild') ||
+          'اسم المستخدم أو كلمة المرور غير صحيحة.';
         setError(message);
         showNotification(message, 'error', t('notifications.error') || 'خطأ');
       } finally {
@@ -166,7 +173,9 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
       <form onSubmit={handleSubmit}>
         <Stack spacing={2}>
           <Box>
-            <CustomFormLabel htmlFor="username">{t('addUserForm.username') || 'اسم المستخدم'}</CustomFormLabel>
+            <CustomFormLabel htmlFor="username">
+              {t('addUserForm.username') || 'اسم المستخدم'}
+            </CustomFormLabel>
             <CustomTextField
               id="username"
               variant="outlined"
@@ -176,7 +185,9 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
             />
           </Box>
           <Box>
-            <CustomFormLabel htmlFor="password">{t('addUserForm.password') || 'كلمة المرور'}</CustomFormLabel>
+            <CustomFormLabel htmlFor="password">
+              {t('addUserForm.password') || 'كلمة المرور'}
+            </CustomFormLabel>
             <CustomTextField
               id="password"
               type="password"
@@ -268,7 +279,8 @@ const AuthLogin: React.FC<loginType> = ({ title, subtitle, subtext }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="forgot-password-dialog-description">
-            {t('auth.forgotPasswordInfo') || 'إذا نسيت كلمة المرور، يرجى الاتصال بفريق الدعم الفني لدينا على '}
+            {t('auth.forgotPasswordInfo') ||
+              'إذا نسيت كلمة المرور، يرجى الاتصال بفريق الدعم الفني لدينا على '}
             <a href="mailto:support@yourdomain.com">support@yourdomain.com</a> {t('auth.orCall') || 'أو الاتصال بنا على '}
             <strong>+1 (800) 123-4567</strong>.
           </DialogContentText>

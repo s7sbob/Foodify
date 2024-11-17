@@ -236,10 +236,6 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
                   `productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`,
                   pg.productPriceId
                 );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceGroups[${pgIndex}].quantity`,
-                  pg.quantity.toString()
-                );
               });
             }
           }

@@ -23,7 +23,7 @@ const AuthSlice = createSlice({
       state.tokenExpiration = action.payload.tokenExpiration;
       sessionStorage.setItem('token', action.payload.token);
       sessionStorage.setItem('tokenExpiration', action.payload.tokenExpiration.toString());
-      console.log('Token set:', action.payload.token);
+      console.log('Token set:', action.payload.token, 'Token Expiration:', action.payload.tokenExpiration);
     },
     clearToken: (state) => {
       state.token = null;

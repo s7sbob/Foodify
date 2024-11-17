@@ -239,10 +239,7 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
                   `productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`,
                   pg.productPriceId
                 );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceGroups[${pgIndex}].quantity`,
-                  pg.quantity.toString()
-                );
+
               });
             }
           }

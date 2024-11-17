@@ -33,7 +33,9 @@
         "posDataZoneList": "Zone List",
         "posDataWaitersList": "Waiters List",
         "posDataTablesSectionList": "Tables Section List",
-        "posDataTablesList": "Tables List"
+        "posDataTablesList": "Tables List",
+        "products": "Products"
+
       },
     "table": {
       "userCode": "User Code",
@@ -85,7 +87,8 @@
       "manual": "Manual",
       "addCommentGroup": "Add Comment Group",
       "addGroupProducts": "Add Group Products",
-      "selectProducts": "Select Products"
+      "selectProducts": "Select Products",
+      "selectedProducts": "Selected Products"
     },
 
 

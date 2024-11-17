@@ -64,12 +64,6 @@ const Menuitems: MenuitemsType[] = [
     href: '/productsPage', // Updated path to match the new route
   },
 
-  {
-    id: 'products', // Changed from 'ProductsPage' to 'products' for consistency
-    title: 'menu.products', // Ensure this translation key exists
-    icon: IconApps,
-    href: '/products', // Updated path to match the new route
-  },
 
   // Menu group: POS
   {
@@ -95,6 +89,12 @@ const Menuitems: MenuitemsType[] = [
             title: 'menu.posDataPOSScreens', // Translation key
             icon: IconSquare,
             href: '/pages/POSScreen',
+          },
+          {
+            id: 'pos-data-products', // Changed from 'ProductsPage' to 'products' for consistency
+            title: 'menu.products', // Ensure this translation key exists
+            icon: IconApps,
+            href: '/products', // Updated path to match the new route
           },
           {
             id: 'pos-data-pilot-list',

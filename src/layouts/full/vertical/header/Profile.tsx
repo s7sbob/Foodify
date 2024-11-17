@@ -111,7 +111,7 @@ const ProfileComponent: React.FC = () => {
         </Stack>
         <Divider />
 
-        {/* Profile Links */}
+        {/* Profile Links
         {dropdownData.profile.map((profileItem) => (
           <Box key={profileItem.title} sx={{ py: 2 }}>
             <Link to={profileItem.href} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -161,33 +161,10 @@ const ProfileComponent: React.FC = () => {
               </Stack>
             </Link>
           </Box>
-        ))}
+        ))} */}
 
         {/* Upgrade Section */}
-        <Box mt={2}>
-          <Box bgcolor="primary.light" p={3} mb={3} overflow="hidden" position="relative" borderRadius={2}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Box>
-                <Typography variant="h5" mb={2}>
-                  Unlimited <br />
-                  Access
-                </Typography>
-                <Button variant="contained" color="primary">
-                  Upgrade
-                </Button>
-              </Box>
-              <Box
-                component="img"
-                src={unlimitedImg}
-                alt="Unlimited Access"
-                className="signup-bg"
-                sx={{
-                  width: '100px',
-                  height: 'auto',
-                }}
-              />
-            </Box>
-          </Box>
+  <Box>
           <Button
             variant="outlined"
             color="primary"

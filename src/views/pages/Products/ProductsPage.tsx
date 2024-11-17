@@ -15,7 +15,7 @@ import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
-import { Product, ProductPrice, PriceComment } from '../../../types/productTypes';
+import { Product, ProductPrice, PriceComment, SelectedProduct } from '../../../types/productTypes';
 import axios from 'axios';
 import { getProductGroups, getPosScreens, deleteProduct } from '../../../services/apiService';
 import { v4 as uuidv4 } from 'uuid';
@@ -103,6 +103,7 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     fetchProducts();
     fetchAdditionalData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   /**
@@ -165,6 +166,10 @@ const ProductsPage: React.FC = () => {
       branchId: '', // سيتم تعيينها من النموذج
       companyId: '', // سيتم تعيينها من النموذج
       status: true,
+      productId: '',
+      productName: '',
+      priceName: '',
+      errors: []
     };
 
     switch (lineType) {
@@ -189,7 +194,7 @@ const ProductsPage: React.FC = () => {
         newEntry.qtyToSelect = 1.0;
         newEntry.groupPriceType = 1;
         newEntry.groupPrice = 0.0;
-        newEntry.priceGroups = [];
+        newEntry.priceGroups = []; // Initialize priceGroups
         break;
       default:
         break;
@@ -285,14 +290,17 @@ const ProductsPage: React.FC = () => {
   /**
    * Handle the selection of product prices in the dialog.
    */
-  const handleSelectProductPrices = (selectedProducts: any[]) => {
+  const handleSelectProductPrices = (selectedProducts: SelectedProduct[]) => {
     if (currentGroupPriceIndex === null) return;
 
     const updatedPrices = [...productPrices];
-    updatedPrices[currentGroupPriceIndex].priceGroups = selectedProducts.map((product: any) => ({
+    updatedPrices[currentGroupPriceIndex].priceGroups = selectedProducts.map((product) => ({
       productId: product.productId,
       productPriceId: product.productPriceId,
-      quantity: product.quantity,
+      productName: product.productName,
+      priceName: product.priceName,
+      price: product.price,
+      quantity: 1, // Default or based on your logic
     }));
 
     setProductPrices(updatedPrices);
@@ -441,6 +449,7 @@ const ProductsPage: React.FC = () => {
             handleCommentChange={handleCommentChange}
             handleOpenSelectDialog={handleOpenSelectDialog}
           />
+
           {/* SelectProductPriceDialog */}
           {currentGroupPriceIndex !== null && (
             <SelectProductPriceDialog
@@ -454,5 +463,4 @@ const ProductsPage: React.FC = () => {
     </Box>
   );
 };
-
-export default ProductsPage;
+  export default ProductsPage;

@@ -34,7 +34,8 @@
           "posDataZoneList": "المناطق",
           "posDataWaitersList": "الويتر",
           "posDataTablesSectionList": "الصالات",
-          "posDataTablesList": "الترابيزات"
+          "posDataTablesList": "الترابيزات",
+          "products": "المنتجات"
         },
 
         "productGroups": {
@@ -133,7 +134,9 @@
           "manual": "يدوي",
           "addCommentGroup": "إضافة مجموعة تعليق",
           "addGroupProducts": "إضافة مجموعة منتجات",
-          "selectProducts": "اختر المنتجات"
+          "selectProducts": "اختر المنتجات",
+          "selectedProducts": "المنتجات المختاره"
+
         },
 
         "addUserForm": {

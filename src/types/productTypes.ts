@@ -10,6 +10,14 @@ export interface PriceComment {
   errors: any[];
 }
 
+export interface SelectedProduct {
+  productId: string;
+  productPriceId: string;
+  productName: string;
+  priceName: string;
+  price: number;
+}
+
 export interface ProductPrice {
   productPriceId: string;
   productPriceName?: string;
@@ -19,17 +27,14 @@ export interface ProductPrice {
   qtyToSelect?: number;
   groupPriceType?: number;
   groupPrice?: number;
-  priceGroups?: PriceGroup[];
+  priceGroups?: SelectedProduct[]; // Changed from PriceGroup[] to SelectedProduct[]
   branchId: string;
   companyId: string;
   status: boolean;
-}
-
-
-export interface PriceGroup {
   productId: string;
-  productPriceId: string;
-  quantity: number;
+  productName: string;
+  priceName: string;
+  errors: any[];
 }
 
 export interface Product {
@@ -44,10 +49,4 @@ export interface Product {
   discount?: number;
   vat?: number;
   status: boolean;
-}
-
-export interface SelectedProduct {
-  productId: string;
-  productPriceId: string;
-  quantity: number;
 }
