@@ -64,7 +64,7 @@ const CompanyManagementPage: React.FC = () => {
   const baseurl = useSelector((state: AppState) => state.customizer.baseurl);
 
   const fetchCompanyData = useCallback(async () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     setLoading(true);
     setError(null);
     try {

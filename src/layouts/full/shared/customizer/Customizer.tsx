@@ -21,7 +21,6 @@ import {
   setDarkMode,
   toggleLayout,
   toggleSidebar,
-  toggleHorizontal,
   setBorderRadius,
   setCardShadow,
 } from 'src/store/customizer/CustomizerSlice';
@@ -54,12 +53,13 @@ const Customizer: FC = () => {
     cursor: 'pointer',
     justifyContent: 'center',
     display: 'flex',
-    transition: '0.1s ease-in',
+    transition: 'transform 0.1s ease-in', // تحديد transition على transform
     border: '1px solid rgba(145, 158, 171, 0.12)',
     '&:hover': {
-      transform: 'scale(1.05)',
+      transform: 'scale(1.05)', // استخدام transform بشكل صحيح
     },
   }));
+  
 
   const thColors: colors[] = [
     {
@@ -184,18 +184,7 @@ const Customizer: FC = () => {
             <Typography variant="h6" gutterBottom>
               Layout Type
             </Typography>
-            <Stack direction={'row'} gap={2} my={2}>
-              <StyledBox onClick={() => dispatch(toggleHorizontal(false))} display="flex" gap={1}>
-                <ViewComfyTwoTone
-                  color={customizer.isHorizontal === false ? 'primary' : 'inherit'}
-                />
-                Vertical
-              </StyledBox>
-              <StyledBox onClick={() => dispatch(toggleHorizontal(true))} display="flex" gap={1}>
-                <PaddingTwoTone color={customizer.isHorizontal === true ? 'primary' : 'inherit'} />
-                Horizontal
-              </StyledBox>
-            </Stack>
+
             <Box pt={4} />
 
             {/* Container Option */}

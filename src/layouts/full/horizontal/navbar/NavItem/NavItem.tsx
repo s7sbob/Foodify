@@ -76,6 +76,8 @@ const NavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
     <List component="li" disablePadding key={item.id}>
       <ListItemStyled2
         {...listItemProps}
+        disabled={item.disabled}
+        selected={pathDirect === item.href}
         onClick={onClick}
       >
         <ListItemIcon

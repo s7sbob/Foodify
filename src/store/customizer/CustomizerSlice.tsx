@@ -112,7 +112,6 @@ export const {
   toggleMobileSidebar,
   toggleLayout,
   setBorderRadius,
-  toggleHorizontal,
   setLanguage,
   setCardShadow,
   setbaseurl,

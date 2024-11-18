@@ -52,10 +52,13 @@ const components: any = (theme: Theme) => {
         '.hover-text-primary:hover .text-hover': {
           color: theme.palette.primary.main,
         },
-        '.hoverCard:hover': {
-          scale: '1.01',
-          transition: ' 0.1s ease-in',
-        },
+'.hoverCard': {
+  transition: 'transform 0.1s ease-in', // تطبيق الانتقال على الحالة الأساسية
+},
+'.hoverCard:hover': {
+  transform: 'scale(1.01)', // استخدام transform بدلاً من scale
+},
+
         '.signup-bg': {
           position: 'absolute',
           top: 0,
