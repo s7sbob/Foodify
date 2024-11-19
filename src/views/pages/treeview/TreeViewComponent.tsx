@@ -13,7 +13,9 @@ type TreeViewComponentProps<T> = {
   onNodeSelect: (nodeId: string) => void;
 };
 
-function TreeViewComponent<T extends { color?: string; img?: string }>({
+function TreeViewComponent<T extends {
+  textColor?: string; color?: string; img?: string 
+}>({
   data,
   onNodeSelect,
 }: TreeViewComponentProps<T>) {
@@ -39,7 +41,7 @@ function TreeViewComponent<T extends { color?: string; img?: string }>({
             )}
             <Typography
               style={{
-                color: node.info.color || 'inherit',
+                color: node.info.textColor || 'inherit',
                 fontSize: '1.2em',
                 fontWeight: 'bold',
               }}

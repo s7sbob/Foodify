@@ -180,70 +180,39 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
         // Add productPrices with different lineTypes
         productPrices.forEach((entry, priceIndex) => {
           formPayload.append(`productPrices[${priceIndex}].lineType`, entry.lineType.toString());
+        
           if (entry.lineType === 1) {
-            // Price entry
-            formPayload.append(
-              `productPrices[${priceIndex}].productPriceName`,
-              entry.productPriceName!
-            );
+            formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName!);
             formPayload.append(`productPrices[${priceIndex}].price`, entry.price!.toString());
           } else if (entry.lineType === 2) {
-            // Comment group entry
             if (entry.priceComments) {
               entry.priceComments.forEach((comment, commentIndex) => {
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].name`,
-                  comment.name
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`,
-                  comment.productPriceId
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`,
-                  formData.branchId
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`,
-                  formData.companyId!
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].status`,
-                  comment.status.toString()
-                );
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].name`, comment.name);
+                // فقط إذا كان productPriceId غير فارغ
+                if (comment.productPriceId) {
+                  formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`, comment.productPriceId);
+                }
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, formData.branchId);
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, formData.companyId!);
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].status`, comment.status.toString());
               });
             }
           } else if (entry.lineType === 3) {
-            // Group product entry
-            formPayload.append(
-              `productPrices[${priceIndex}].qtyToSelect`,
-              entry.qtyToSelect!.toString()
-            );
-            formPayload.append(
-              `productPrices[${priceIndex}].groupPriceType`,
-              entry.groupPriceType!.toString()
-            );
-            formPayload.append(
-              `productPrices[${priceIndex}].groupPrice`,
-              entry.groupPrice!.toString()
-            );
-
-            // Add priceGroups if available
+            formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect!.toString());
+            formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType!.toString());
+            formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice!.toString());
+        
             if (entry.priceGroups && entry.priceGroups.length > 0) {
               entry.priceGroups.forEach((pg, pgIndex) => {
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`,
-                  pg.productId
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`,
-                  pg.productPriceId
-                );
-
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`, pg.productId);
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`, pg.productPriceId);
               });
             }
           }
-
+        
+          // لا تقم بإرسال productId للمنتج الجديد
+          // formPayload.append(`productPrices[${priceIndex}].productId`, formData.productId);
+          
           formPayload.append(`productPrices[${priceIndex}].branchId`, formData.branchId);
           formPayload.append(`productPrices[${priceIndex}].companyId`, formData.companyId!);
           formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());

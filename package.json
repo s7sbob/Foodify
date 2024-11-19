@@ -85,6 +85,7 @@
     "@types/react-redux": "7.1.24",
     "@types/react-router-dom": "5.3.3",
     "@types/react-syntax-highlighter": "15.5.13",
+    "@types/tinycolor2": "^1.4.6",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "6.0.0",
     "@typescript-eslint/parser": "6.0.0",

@@ -19,21 +19,13 @@ import ChildCard from 'src/components/shared/ChildCard';
 import { AppState, useSelector } from 'src/store/Store';
 import TreeViewComponent from './TreeViewComponent';
 import InfoPreviewComponent from './InfoPreviewComponent';
-import { TreeNode, ProductGroupInfo } from './types';
+import { TreeNode, ProductGroupInfo, ProductGroupFormData } from './types';
 import tinycolor from 'tinycolor2';
 import { useNotification } from '../../../context/NotificationContext';
 import api from '../../../axiosConfig';
 import ImageWithFallback from './ImageWithFallback';
 import { normalizeImagePath } from './pathUtils';
-import { useTranslation } from 'react-i18next'; // Import useTranslation
-
-// Updated interface
-interface ProductGroupFormData {
-  groupName: string;
-  groupParentID?: string | null;
-  color: string;
-  file?: File | null; // Changed from imageFile to file
-}
+import { useTranslation } from 'react-i18next';
 
 const Treeview: React.FC = () => {
   const { t } = useTranslation(); // Initialize t function
@@ -44,8 +36,10 @@ const Treeview: React.FC = () => {
   const [formData, setFormData] = useState<ProductGroupFormData>({
     groupName: '',
     groupParentID: null,
-    color: '#000000',
-    file: null, // Changed from imageFile to file
+    color: '#FFFFFF', // Default background color
+    textColor: '#000000', // Default text color (brown)
+    order: 0,
+    file: null,
   });
   const [imageError, setImageError] = useState('');
   const [imagePreview, setImagePreview] = useState('');
@@ -83,7 +77,6 @@ const Treeview: React.FC = () => {
       console.error('Error fetching data:', error);
       showNotification(
         error.message || t('notifications.fetchProductGroupsFailed'),
-        
         t('common.error')
       );
     }
@@ -100,7 +93,7 @@ const Treeview: React.FC = () => {
       setCompanyData(company);
     } catch (error: any) {
       console.error('Error fetching company data:', error);
-      showNotification(t('notifications.fetchCompanyDataFailed'),  t('common.error'));
+      showNotification(t('notifications.fetchCompanyDataFailed'), t('common.error'));
     }
   };
 
@@ -182,8 +175,10 @@ const Treeview: React.FC = () => {
       setFormData({
         groupName: selectedNodeInfo.groupName,
         groupParentID: selectedNodeInfo.groupParentID || null,
-        color: selectedNodeInfo.color || '#000000',
-        file: null, // Changed from imageFile to file
+        color: selectedNodeInfo.color || '#FFFFFF', // Default to white
+        textColor: selectedNodeInfo.textColor || '#000000', // Default to brown
+        order: selectedNodeInfo.order || 0,
+        file: null,
       });
       setImagePreview(selectedNodeInfo.img || '');
       setImageError('');
@@ -195,12 +190,13 @@ const Treeview: React.FC = () => {
   const handleAddSubmit = async (group: Partial<ProductGroupFormData>) => {
     // Validation: Ensure groupName is provided
     if (!group.groupName || group.groupName.trim() === '') {
-      showNotification(t('notifications.groupNameRequired'),  t('common.warning'));
+      showNotification(t('notifications.groupNameRequired'), t('common.warning'));
       return;
     }
 
-    // Ensure color is defined, else set to default
-    const color = group.color ?? '#000000';
+    // Ensure color and textColor are defined, else set to default
+    const color = group.color ?? '#FFFFFF'; // Default to white
+    const textColor = group.textColor ?? '#000000'; // Default to brown
 
     console.log("Submitting group data:", group); // Debug log
 
@@ -209,7 +205,8 @@ const Treeview: React.FC = () => {
 
       const formDataToSend = new FormData();
       formDataToSend.append('groupName', group.groupName);
-      formDataToSend.append('color', color); // Use the ensured color
+      formDataToSend.append('color', color);
+      formDataToSend.append('textColor', textColor); // Append textColor
 
       if (group.groupParentID) {
         formDataToSend.append('groupParentID', group.groupParentID);
@@ -232,13 +229,13 @@ const Treeview: React.FC = () => {
 
       // Refetch the tree data
       fetchTreeData();
-      showNotification(t('notifications.productGroupAddedSuccess'),  t('common.success'));
+      showNotification(t('notifications.productGroupAddedSuccess'), t('common.success'));
     } catch (error: any) {
       console.error('Error adding Product Group:', error);
 
       // Show detailed error message if available
       const errorMessage = error.response?.data?.message || error.message || t('errors.failedToAddProductGroup');
-      showNotification(errorMessage,  t('common.error'));
+      showNotification(errorMessage, t('common.error'));
 
       throw error;
     } finally {
@@ -250,18 +247,21 @@ const Treeview: React.FC = () => {
   const handleEditSubmit = async () => {
     if (!token) {
       console.warn('No token available. Cannot perform edit operation.');
-      showNotification(t('notifications.authTokenMissing'),  t('common.error'));
+      showNotification(t('notifications.authTokenMissing'), t('common.error'));
       return;
     }
 
     try {
       setIsEditLoading(true);
       const hexColor = tinycolor(formData.color).toHexString();
+      const hexTextColor = tinycolor(formData.textColor).toHexString();
 
       const formDataToSend = new FormData();
       formDataToSend.append('groupId', selectedNodeInfo?.groupId || '');
       formDataToSend.append('groupName', formData.groupName);
       formDataToSend.append('color', hexColor);
+      formDataToSend.append('textColor', hexTextColor); // Append textColor
+      formDataToSend.append('order', formData.order.toString());
 
       if (formData.groupParentID) {
         formDataToSend.append('groupParentID', formData.groupParentID);
@@ -285,13 +285,13 @@ const Treeview: React.FC = () => {
       // Refetch the tree data
       fetchTreeData();
       setIsEditDialogOpen(false);
-      showNotification(t('notifications.productGroupUpdatedSuccess'),  t('common.success'));
+      showNotification(t('notifications.productGroupUpdatedSuccess'), t('common.success'));
     } catch (error: any) {
       console.error('Error updating Product Group:', error);
 
       // Show detailed error message if available
       const errorMessage = error.response?.data?.message || error.message || t('errors.failedToUpdateProductGroup');
-      showNotification(errorMessage,  t('common.error'));
+      showNotification(errorMessage, t('common.error'));
     } finally {
       setIsEditLoading(false);
     }
@@ -306,7 +306,6 @@ const Treeview: React.FC = () => {
       // Validate file type (optional)
       if (!file.type.startsWith('image/')) {
         setImageError(t('errors.onlyImageFilesAllowed') as string);
-
         return;
       }
 
@@ -343,8 +342,10 @@ const Treeview: React.FC = () => {
     setFormData({
       groupName: '',
       groupParentID: null,
-      color: '#000000',
-      file: null, // Changed from imageFile to file
+      color: '#FFFFFF', // Default background color
+      textColor: '#000000', // Default text color (brown)
+      order: 0,
+      file: null,
     });
     setImagePreview('');
     setImageError('');
@@ -357,14 +358,16 @@ const Treeview: React.FC = () => {
       setFormData({
         groupName: '',
         groupParentID: selectedNodeInfo.groupId, // Set groupParentID to selected node's id
-        color: '#000000',
-        file: null, // Changed from imageFile to file
+        color: '#FFFFFF', // Default background color
+        textColor: '#000000', // Default text color (brown)
+        order: 0,
+        file: null,
       });
       setImagePreview('');
       setImageError('');
       setIsAddDialogOpen(true);
     } else {
-      showNotification(t('notifications.selectGroupToAddSubGroup'),  t('common.warning'));
+      showNotification(t('notifications.selectGroupToAddSubGroup'), t('common.warning'));
     }
   };
 
@@ -374,8 +377,10 @@ const Treeview: React.FC = () => {
     setFormData({
       groupName: '',
       groupParentID: null,
-      color: '#000000',
-      file: null, // Changed from imageFile to file
+      color: '#FFFFFF', // Default background color
+      textColor: '#000000', // Default text color (brown)
+      order: 0,
+      file: null,
     });
     setImagePreview('');
     setImageError('');
@@ -392,24 +397,24 @@ const Treeview: React.FC = () => {
   };
 
   return (
-    <PageContainer description = {t('productGroups.description')}>
+    <PageContainer description={t('productGroups.description')}>
       <ParentCard title={t('productGroups.title')}>
         <ChildCard>
           {/* Add New Group Button */}
-          <div style={{ marginBottom: '1em' }}>
+          <div style={{ marginBottom: '2em' }}>
             <Button variant="contained" color="primary" onClick={handleAddRootGroup}>
               {t('productGroups.addNewGroup')}
             </Button>
           </div>
-          <div style={{ display: 'flex', height: '400px' }}>
+          <div style={{ display: 'flex', height: '100%' }}>
             {/* TreeView Side */}
-            <div style={{ width: '40%', overflowY: 'auto' }}>
+            <div style={{ width: '50%', overflowY: 'auto' }}>
               <TreeViewComponent<ProductGroupInfo> data={data} onNodeSelect={handleNodeSelect} />
             </div>
             {/* Info Preview Side */}
             <div
               style={{
-                width: '60%',
+                width: '50%',
                 padding: '1em',
                 borderLeft: '1px solid #ccc',
                 overflowY: 'auto',
@@ -455,10 +460,22 @@ const Treeview: React.FC = () => {
                 label={t('productGroups.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
-                value={formData.color || '#000000'}
+                value={formData.color || '#FFFFFF'}
                 onChange={(e) => {
                   setFormData({ ...formData, color: e.target.value });
                   console.log("Updated formData.color:", e.target.value);
+                }}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label={t('productGroups.textColor')}
+                type="color"
+                InputLabelProps={{ shrink: true }}
+                value={formData.textColor || '#000000'}
+                onChange={(e) => {
+                  setFormData({ ...formData, textColor: e.target.value });
+                  console.log("Updated formData.textColor:", e.target.value);
                 }}
                 fullWidth
                 margin="normal"
@@ -534,10 +551,22 @@ const Treeview: React.FC = () => {
                 label={t('productGroups.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
-                value={formData.color || '#000000'}
+                value={formData.color || '#FFFFFF'}
                 onChange={(e) => {
                   setFormData({ ...formData, color: e.target.value });
                   console.log("Updated formData.color:", e.target.value);
+                }}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label={t('productGroups.textColor')}
+                type="color"
+                InputLabelProps={{ shrink: true }}
+                value={formData.textColor || '#000000'}
+                onChange={(e) => {
+                  setFormData({ ...formData, textColor: e.target.value });
+                  console.log("Updated formData.textColor:", e.target.value);
                 }}
                 fullWidth
                 margin="normal"
@@ -585,4 +614,3 @@ const Treeview: React.FC = () => {
 };
 
 export default Treeview;
-

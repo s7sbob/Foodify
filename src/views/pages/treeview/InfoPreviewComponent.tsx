@@ -21,7 +21,7 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
 
   if (!selectedNodeInfo) {
     return (
-      <Typography variant="body1">{t('infoPreview.selectNode')}</Typography>
+      <Typography variant="body1">{t('infoPreview.selectNode') || 'لم يتم اختيار عنصر'}</Typography>
     );
   }
 
@@ -31,65 +31,91 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
 
   // Debugging: Log the image URL
   console.log(
-    `Image URL for node ${
-      selectedNodeInfo.screenName || selectedNodeInfo.groupName
-    }:`,
+    `Image URL for node ${selectedNodeInfo.screenName || selectedNodeInfo.groupName}:`,
     imageUrl
   );
 
+  // تعيين الألوان الافتراضية إذا كانت غير محددة
+  const backgroundColor = selectedNodeInfo.color || '#FFFFFF'; // الأبيض
+  const textColor = selectedNodeInfo.textColor || '#8B4513'; // بني
+
   return (
-    <div>
-      <Typography variant="h6">{t('infoPreview.details')}</Typography>
+    <div
+      style={{
+        backgroundColor: backgroundColor,
+        color: textColor,
+        padding: '1em',
+        borderRadius: '8px',
+      }}
+    >
+      <Typography variant="h6">
+        {selectedNodeInfo.groupName || selectedNodeInfo.screenName}
+      </Typography>
+      {/* عرض معلومات إضافية بناءً على نوع العنصر */}
       {selectedNodeInfo.screenName ? (
         <>
           <Typography>
-            <strong>{t('posScreen.screenName')}:</strong> {selectedNodeInfo.screenName}
+            <strong>{t('posScreen.screenName') || 'اسم الشاشة'}:</strong> {selectedNodeInfo.screenName}
           </Typography>
           {selectedNodeInfo.parentScreenName && (
             <Typography>
-              <strong>{t('posScreen.parentScreen')}:</strong> {selectedNodeInfo.parentScreenName}
+              <strong>{t('posScreen.parentScreen') || 'الشاشة الأم'}:</strong> {selectedNodeInfo.parentScreenName}
             </Typography>
           )}
         </>
       ) : (
         <>
           <Typography>
-            <strong>{t('productGroups.groupName')}:</strong> {selectedNodeInfo.groupName}
+            <strong>{t('productGroups.groupName') || 'اسم المجموعة'}:</strong> {selectedNodeInfo.groupName}
           </Typography>
           {selectedNodeInfo.parentGroupName && (
             <Typography>
-              <strong>{t('productGroups.parentGroup')}:</strong> {selectedNodeInfo.parentGroupName}
+              <strong>{t('productGroups.parentGroup') || 'المجموعة الأم'}:</strong> {selectedNodeInfo.parentGroupName}
             </Typography>
           )}
         </>
       )}
       <Typography>
-        <strong>{t('common.color')}:</strong>{' '}
+        <strong>{t('common.color') || 'لون الخلفية'}:</strong>{' '}
         <span
           style={{
             display: 'inline-block',
             width: '20px',
             height: '20px',
-            backgroundColor: selectedNodeInfo.color,
+            backgroundColor: selectedNodeInfo.color || '#FFFFFF',
             border: '1px solid #000',
             marginLeft: '8px',
           }}
         ></span>
-        {` ${selectedNodeInfo.color}`}
+        {` ${selectedNodeInfo.color || '#FFFFFF'}`}
+      </Typography>
+      <Typography>
+        <strong>{t('productGroups.textColor') || 'لون النص'}:</strong>{' '}
+        <span
+          style={{
+            display: 'inline-block',
+            width: '20px',
+            height: '20px',
+            backgroundColor: selectedNodeInfo.textColor || '#8B4513',
+            border: '1px solid #000',
+            marginLeft: '8px',
+          }}
+        ></span>
+        {` ${selectedNodeInfo.textColor || '#8B4513'}`}
       </Typography>
       {imageUrl && (
         <div>
           <Typography>
-            <strong>{t('common.image')}:</strong>
+            <strong>{t('common.image') || 'الصورة'}:</strong>
           </Typography>
           <ImageWithFallback
             src={imageUrl}
-            alt={selectedNodeInfo.screenName || selectedNodeInfo.groupName || t('common.group')}
+            alt={selectedNodeInfo.screenName || selectedNodeInfo.groupName || t('common.group') || 'مجموعة'}
             style={{ maxWidth: '25%', marginTop: '1em' }}
           />
         </div>
       )}
-      {/* Buttons */}
+      {/* الأزرار */}
       <div style={{ marginTop: '1em' }}>
         <Button
           variant="contained"
@@ -97,10 +123,10 @@ const InfoPreviewComponent: React.FC<InfoPreviewProps> = ({
           onClick={onEdit}
           style={{ marginRight: '1em' }}
         >
-          {t('buttons.edit')}
+          {t('buttons.edit') || 'تعديل'}
         </Button>
         <Button variant="contained" color="secondary" onClick={onAdd}>
-          {t('buttons.addNewBranch')}
+          {t('buttons.addNewSubGroup') }
         </Button>
       </div>
     </div>

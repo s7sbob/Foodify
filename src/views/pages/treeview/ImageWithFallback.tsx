@@ -1,6 +1,6 @@
 // src/components/ImageWithFallback.tsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ImageWithFallbackProps {
   src: string;
@@ -13,9 +13,14 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
   alt,
   style,
-  fallbackSrc = '/placeholder.png', // Ensure this placeholder image exists in your public folder
+  fallbackSrc = '/placeholder.png', // تأكد من وجود صورة بديلة في مجلد public
 }) => {
-  const [imgSrc, setImgSrc] = React.useState(src);
+  const [imgSrc, setImgSrc] = useState(src);
+
+  // تحديث imgSrc عندما يتغير src المرسل من المكون الأب
+  useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
 
   const handleError = () => {
     if (imgSrc !== fallbackSrc) {
@@ -27,7 +32,10 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     <img
       src={imgSrc}
       alt={alt}
-      style={style}
+      style={{
+        backgroundColor: '#FFFFFF', // لون الخلفية الافتراضي
+        ...style,
+      }}
       onError={handleError}
     />
   );

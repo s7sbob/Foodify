@@ -15,7 +15,7 @@ import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
-import { Product, ProductPrice, PriceComment, SelectedProduct } from '../../../types/productTypes';
+import { Product, ProductPrice, SelectedProduct } from '../../../types/productTypes';
 import axios from 'axios';
 import { getProductGroups, getPosScreens, deleteProduct } from '../../../services/apiService';
 import { v4 as uuidv4 } from 'uuid';
@@ -62,6 +62,7 @@ const ProductsPage: React.FC = () => {
    */
   const fetchAdditionalData = async () => {
     if (!token) return;
+
     try {
       const groups = await getProductGroups(baseurl, token);
       setAllProductGroups(groups);
@@ -111,7 +112,10 @@ const ProductsPage: React.FC = () => {
    */
   const handleEditProduct = (product: Product) => {
     setProductToEdit(product);
-    setProductPrices(product.productPrices || []);
+    // Deep clone to avoid mutating original data
+    const clonedProductPrices = product.productPrices.map((pp) => ({ ...pp }));
+    setProductPrices(clonedProductPrices);
+    console.log('Editing product:', product);
   };
 
   /**
@@ -158,39 +162,49 @@ const ProductsPage: React.FC = () => {
 
   /**
    * Add a new product price entry based on the specified lineType.
+   * If editing, set productPriceId as '', else use uuidv4()
    */
   const handleAddEntry = (lineType: number) => {
+    const isEditing = !!productToEdit;
+
     let newEntry: ProductPrice = {
-      productPriceId: uuidv4(),
+      productPriceId: isEditing ? '' : uuidv4(), // Assign ID based on editing mode
       lineType,
-      branchId: '', // سيتم تعيينها من النموذج
-      companyId: '', // سيتم تعيينها من النموذج
+      branchId: isEditing ? productToEdit?.branchId || '' : '', // Assign branchId from product if editing
+      companyId: isEditing ? productToEdit?.companyId || '' : '', // Assign companyId from product if editing
       status: true,
-      productId: '',
+      productId: isEditing ? productToEdit?.productId || '' : '', // Assign productId only in editing mode
+      productPriceName: '',
+      price: 0.0,
+      priceComments: [],
+      qtyToSelect: 0.0,
+      priceGroups: [],
+      groupPriceType: 0,
+      groupPrice: 0.0,
+      errors: [],
       productName: '',
-      priceName: '',
-      errors: []
+      priceName: ''
     };
 
     switch (lineType) {
-      case 1: // السعر
+      case 1: // Price
         newEntry.productPriceName = '';
         newEntry.price = 0.0;
         break;
-      case 2: // مجموعة تعليقات
+      case 2: // Comment Group
         newEntry.priceComments = [
           {
-            commentId: uuidv4(),
+            commentId: '',
             name: '',
-            productPriceId: newEntry.productPriceId,
-            branchId: '', // سيتم تعيينها من النموذج
-            companyId: '', // سيتم تعيينها من النموذج
+            productPriceId: '',
+            branchId: isEditing ? productToEdit?.branchId || '' : '',
+            companyId: isEditing ? productToEdit?.companyId || '' : '',
             status: true,
             errors: [],
           },
         ];
         break;
-      case 3: // مجموعة منتجات
+      case 3: // Product Group
         newEntry.qtyToSelect = 1.0;
         newEntry.groupPriceType = 1;
         newEntry.groupPrice = 0.0;
@@ -224,17 +238,22 @@ const ProductsPage: React.FC = () => {
 
   /**
    * Add a comment to a comment group at the specified index.
+   * If editing, set commentId as '', else use uuidv4()
    */
   const handleAddComment = (priceIndex: number) => {
-    const newComment: PriceComment = {
-      commentId: uuidv4(),
+    const isEditing = !!productToEdit;
+
+    const newComment = {
+      commentId: isEditing ? '' : uuidv4(), // Assign commentId based on editing mode
       name: '',
-      productPriceId: productPrices[priceIndex].productPriceId,
-      branchId: '', // سيتم تعيينها من النموذج
-      companyId: '', // سيتم تعيينها من النموذج
+      description: '',
+      productPriceId: productPrices[priceIndex].productPriceId || '',
+      branchId: productToEdit ? productToEdit.branchId : '',
+      companyId: productToEdit ? productToEdit.companyId || '' : '',
       status: true,
       errors: [],
     };
+
     const updatedPrices = [...productPrices];
     updatedPrices[priceIndex].priceComments = [
       ...(updatedPrices[priceIndex].priceComments || []),
@@ -260,8 +279,8 @@ const ProductsPage: React.FC = () => {
   const handleCommentChange = (
     priceIndex: number,
     commentIndex: number,
-    field: keyof PriceComment,
-    value: string
+    field: keyof any, // Assuming PriceComment type
+    value: any
   ) => {
     const updatedPrices = [...productPrices];
     const updatedComments = updatedPrices[priceIndex].priceComments?.map((comment, i) =>
@@ -463,4 +482,5 @@ const ProductsPage: React.FC = () => {
     </Box>
   );
 };
-  export default ProductsPage;
+
+export default ProductsPage;

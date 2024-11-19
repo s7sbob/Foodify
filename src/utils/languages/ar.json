@@ -51,7 +51,8 @@
           "selectNode": "اختر عقدة لعرض تفاصيلها.",
           "save": "حفظ",
           "editProductGroup": "تعديل المجموعة",
-          "addNewSubGroup": "إضافة مجموعة فرعية"
+          "addNewSubGroup": "إضافة مجموعة فرعية",
+          "textColor": "لون الخط"
         },
         "posScreen": {
           "title": "شاشة نقطة البيع",
@@ -62,7 +63,9 @@
           "addNewSubScreen": "إضافة شاشة فرعية جديدة",
           "save": "حفظ",
           "color" :"اللون",
-          "image" :"صورة"
+          "image" :"صورة",
+          "textColor": "لون الخط"
+
         },
         "infoPreview": {
           "selectNode": "اختر عقدة لعرض تفاصيلها.",
@@ -242,7 +245,9 @@
           "arabic": "العربية",
           "cancelSelection": "إلغاء التحديد",
           "confirmSelection": "تأكيد التحديد",
-          "addComment":"إضافة تعليق"
+          "addComment":"إضافة تعليق",
+          "Save": "حفظ",
+          "addNewSubGroup":"إضافة مجموعة فرعية"
         },
 
         "products": {
@@ -336,6 +341,7 @@
           "success": "نجاح",
           "incompleteData": "بيانات غير مكتملة",
           "color": "اللون",
+          "textColor": "لون الخط",
           "image": "صورة",
           "group": "مجموعة",
           "loading": "جارٍ التحميل...",

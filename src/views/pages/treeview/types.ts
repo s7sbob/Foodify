@@ -6,8 +6,8 @@ export interface POSScreenInfo {
   parentScreenId?: string;
   parentScreenName?: string; // Added for display purposes
   color: string;
+  textColor?: string; // Added for text color
   img?: string;
-  // Removed 'order' field
   // Add other relevant fields as needed
 }
 
@@ -20,8 +20,8 @@ export interface ProductGroupInfo {
   groupParentID?: string;
   parentGroupName?: string; // Added for display purposes
   color: string;
+  textColor?: string; // Added for text color
   img?: string;
-  // Removed 'order' field
   // Add other relevant fields as needed
 }
 
@@ -33,11 +33,12 @@ export interface TreeNode<T> {
   children: TreeNode<T>[];
 }
 
-// Update the ProductGroupFormData interface to include 'order'
-interface ProductGroupFormData {
+// Update the ProductGroupFormData interface to include 'order' and 'textColor'
+export interface ProductGroupFormData {
   groupName: string;
   groupParentID?: string | null;
   color: string;
+  textColor: string; // Added textColor
   order: number; // Added order
   file?: File | null; // Changed from imageFile to file
 }

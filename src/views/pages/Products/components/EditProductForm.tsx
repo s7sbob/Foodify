@@ -1,7 +1,6 @@
 // src/views/pages/Products/components/EditProductForm.tsx
 
 import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
-
 import {
   Typography,
   TextField,
@@ -102,13 +101,13 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         navigate('/login');
         return;
       }
-
+    
       // Validate required fields
       if (!formData.productName || !formData.productGroupId || !formData.branchId) {
         showNotification(t('notifications.incompleteData'), 'warning');
         return;
       }
-
+    
       // Additional validation based on lineType
       for (const [index, entry] of productPrices.entries()) {
         if (entry.lineType === 1) {
@@ -124,10 +123,10 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
           // Comment group validation
           if (entry.priceComments) {
             for (const [cIndex, comment] of entry.priceComments.entries()) {
-              if (!comment.name ) {
+              if (!comment.name ) { // Ensure description is also provided
                 showNotification(
                   `${t('productPriceList.comment')} ${cIndex + 1} in ${t('productPriceList.commentGroup')} ${index + 1}: ${t('notifications.incompleteData')}`,
-                  'warning'  
+                  'warning'
                 );
                 return;
               }
@@ -158,7 +157,7 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
           }
         }
       }
-
+    
       setLoading(true);
       try {
         // Build FormData for submission
@@ -173,96 +172,69 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         formPayload.append('vat', formData.vat?.toString() || '0');
         formPayload.append('companyId', formData.companyId!);
         formPayload.append('status', formData.status.toString());
-
+    
         // Add productPrices with different lineTypes
         productPrices.forEach((entry, priceIndex) => {
           formPayload.append(`productPrices[${priceIndex}].lineType`, entry.lineType.toString());
+    
           if (entry.lineType === 1) {
             // Price entry
-            formPayload.append(
-              `productPrices[${priceIndex}].productPriceName`,
-              entry.productPriceName!
-            );
+            formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName!);
             formPayload.append(`productPrices[${priceIndex}].price`, entry.price!.toString());
           } else if (entry.lineType === 2) {
             // Comment group entry
             if (entry.priceComments) {
               entry.priceComments.forEach((comment, commentIndex) => {
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].name`,
-                  comment.name
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`,
-                  comment.productPriceId
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`,
-                  formData.branchId
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`,
-                  formData.companyId!
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceComments[${commentIndex}].status`,
-                  comment.status.toString()
-                );
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].name`, comment.name);
+                if (comment.productPriceId) {
+                  formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`, comment.productPriceId);
+                }
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, formData.branchId);
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, formData.companyId!);
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].status`, comment.status.toString());
               });
             }
           } else if (entry.lineType === 3) {
             // Group product entry
-            formPayload.append(
-              `productPrices[${priceIndex}].qtyToSelect`,
-              entry.qtyToSelect!.toString()
-            );
-            formPayload.append(
-              `productPrices[${priceIndex}].groupPriceType`,
-              entry.groupPriceType!.toString()
-            );
-            formPayload.append(
-              `productPrices[${priceIndex}].groupPrice`,
-              entry.groupPrice!.toString()
-            );
-
-            // Add priceGroups if available
+            formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect!.toString());
+            formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType!.toString());
+            formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice!.toString());
+    
             if (entry.priceGroups && entry.priceGroups.length > 0) {
               entry.priceGroups.forEach((pg, pgIndex) => {
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`,
-                  pg.productId
-                );
-                formPayload.append(
-                  `productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`,
-                  pg.productPriceId
-                );
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`, pg.productId);
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`, pg.productPriceId);
               });
             }
           }
-
+    
+          // Append productPriceId (existing or empty)
+          formPayload.append(`productPrices[${priceIndex}].productPriceId`, entry.productPriceId || '');
+    
+          // Append other fields
           formPayload.append(`productPrices[${priceIndex}].branchId`, formData.branchId);
           formPayload.append(`productPrices[${priceIndex}].companyId`, formData.companyId!);
           formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());
         });
-
+    
         // Add image file if available
         if (imageFile) {
           formPayload.append('imageFile', imageFile);
         }
-
+    
         // Debug: Log FormData entries
         console.log('FormData Entries:');
         for (let pair of formPayload.entries()) {
           console.log(pair[0] + ': ' + pair[1]);
         }
-
+    
         // Submit the form data using updateProduct API
         await updateProduct(baseurl, token, formData.productId!, formPayload);
-
+    
         showNotification(t('notifications.productUpdatedSuccess'), 'success');
         onProductUpdated();
-
-        // Reset the form (optional)
+    
+        // Reset the form
         resetFormInternal();
         setImageFile(null);
       } catch (err) {
@@ -272,6 +244,7 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         setLoading(false);
       }
     };
+    
 
     const resetFormInternal = () => {
       setFormData({
@@ -288,7 +261,9 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         status: productData.status,
       });
       setImageFile(null);
-      setProductPrices(productData.productPrices || []); // Reset productPrices
+      // Deep clone to avoid mutating original data
+      const clonedProductPrices = productData.productPrices.map((pp) => ({ ...pp }));
+      setProductPrices(clonedProductPrices); // Reset productPrices
     };
 
     // Derived selected options for Autocomplete fields
@@ -455,13 +430,9 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
             {imageFile && <Typography variant="body2">{imageFile.name}</Typography>}
           </Grid>
         </Grid>
-
-        {/* The Main Buttons have been removed from here */}
       </Box>
     );
   }
 );
 
 export default EditProductForm;
-
-// Remove the extraneous resetForm function

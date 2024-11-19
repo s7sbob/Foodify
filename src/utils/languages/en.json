@@ -151,7 +151,9 @@
         "addNewSubScreen": "Add New Sub-Screen",
         "save": "Save",
         "color" :"Color",
-        "image" :"Image"
+        "image" :"Image",
+        "textColor": "Text Color"
+
       },
       "infoPreview": {
         "selectNode": "Select a node to see its details.",
@@ -171,7 +173,9 @@
         "selectNode": "Select a node to see its details.",
         "save": "Save",
         "editProductGroup": "Edit Product Group",
-        "addNewSubGroup": "Add New SubGroup"
+        "addNewSubGroup": "Add New SubGroup",
+        "textColor": "Text Color"
+
       },
 
     "Download":"Download",
@@ -245,7 +249,9 @@
       "arabic": "Arabic",
       "cancelSelection": "Cancel Selection",
       "confirmSelection": "Confirm Selection",
-      "addComment":"Add Comment"
+      "addComment":"Add Comment",
+      "save": "Save",
+      "addNewSubGroup":"Add New SubGroup"
     },
     "alerts": {
       "fetchWaitersFailed": "Failed to fetch waiters.",
@@ -323,6 +329,7 @@
       "success": "Success",
       "incompleteData": "Incomplete Data",
       "color": "Color",
+      "textColor": "Text Color",
       "image": "Image",
       "group": "Group",
       "loading": "Loading...",

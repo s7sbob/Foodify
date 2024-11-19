@@ -33,7 +33,15 @@ const POSScreen: React.FC = () => {
   const [selectedNodeInfo, setSelectedNodeInfo] = useState<POSScreenInfo | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<any>({
+    screenName: '',
+    parentScreenId: null,
+    parentScreenName: '',
+    color: '#FFFFFF', // Default background color
+    textColor: '#000000', // Default text color (brown)
+    img: '',
+    imageFile: null,
+  });
   const [imageError, setImageError] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [companyData, setCompanyData] = useState<any>(null);
@@ -45,19 +53,24 @@ const POSScreen: React.FC = () => {
   // Use the Notification Context
   const { showNotification } = useNotification();
 
-  // Retrieve baseurl from the Redux store
-  const baseurl = useSelector((state) => state.customizer.baseurl);
+  // Retrieve baseurl and token from the Redux store
+  const baseurl = useSelector((state: any) => state.customizer.baseurl);
+  const token = useSelector((state: any) => state.auth.token);
 
   useEffect(() => {
-    if (baseurl) {
+    if (baseurl && token) {
       fetchTreeData();
       fetchCompanyData();
     }
-  }, [baseurl]);
+  }, [baseurl, token]);
 
   const fetchTreeData = async () => {
     try {
-      const response = await api.get('/PosScreen/GetPosScreens');
+      const response = await api.get('/PosScreen/GetPosScreens', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const apiData: POSScreenInfo[] = response.data;
       const { treeData } = mapApiDataToTreeNodes(apiData);
       setData(treeData);
@@ -65,7 +78,6 @@ const POSScreen: React.FC = () => {
       console.error('Error fetching data:', error);
       showNotification(
         error.message || t('notifications.fetchPOSScreensFailed'),
-        
         t('common.error')
       );
     }
@@ -73,12 +85,16 @@ const POSScreen: React.FC = () => {
 
   const fetchCompanyData = async () => {
     try {
-      const response = await api.get('/Company/GetCompanyData');
+      const response = await api.get('/Company/GetCompanyData', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const company = response.data;
       setCompanyData(company);
     } catch (error: any) {
       console.error('Error fetching company data:', error);
-      showNotification(t('notifications.fetchCompanyDataFailed'),  t('common.error'));
+      showNotification(t('notifications.fetchCompanyDataFailed'), t('common.error'));
     }
   };
 
@@ -162,7 +178,8 @@ const POSScreen: React.FC = () => {
         screenName: selectedNodeInfo.screenName,
         parentScreenName: selectedNodeInfo.parentScreenName || '',
         parentScreenId: selectedNodeInfo.parentScreenId || '',
-        color: selectedNodeInfo.color || '#000000',
+        color: selectedNodeInfo.color || '#FFFFFF', // Default to white
+        textColor: selectedNodeInfo.textColor || '#000000', // Default to brown
         img: selectedNodeInfo.img || '',
         imageFile: null,
       });
@@ -175,18 +192,23 @@ const POSScreen: React.FC = () => {
   const handleAddSubmit = async (screen: Partial<any>) => {
     // Validation: Ensure screenName is provided
     if (!screen.screenName || screen.screenName.trim() === '') {
-      showNotification(t('notifications.screenNameRequired'),  t('common.warning'));
+      showNotification(t('notifications.screenNameRequired'), t('common.warning'));
       return;
     }
 
     console.log('Submitting screen data:', screen);
+
+    // Ensure color and textColor are defined, else set to default
+    const color = screen.color ?? '#FFFFFF'; // Default to white
+    const textColor = screen.textColor ?? '#000000'; // Default to brown
 
     try {
       setIsAddLoading(true);
 
       const formDataToSend = new FormData();
       formDataToSend.append('screenName', screen.screenName);
-      formDataToSend.append('color', screen.color);
+      formDataToSend.append('color', color);
+      formDataToSend.append('textColor', textColor); // Append textColor
 
       if (screen.parentScreenId) {
         formDataToSend.append('parentScreenId', screen.parentScreenId);
@@ -203,18 +225,19 @@ const POSScreen: React.FC = () => {
       await api.post('/PosScreen/CreatePosScreen', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       // Refetch the tree data
       fetchTreeData();
-      showNotification(t('notifications.posScreenAddedSuccess'),  t('common.success'));
+      showNotification(t('notifications.posScreenAddedSuccess'), t('common.success'));
     } catch (error: any) {
       console.error('Error adding POS Screen:', error);
 
       // Show detailed error message if available
       const errorMessage = error.response?.data?.message || error.message || t('notifications.posScreenAddFailed');
-      showNotification(errorMessage,  t('common.error'));
+      showNotification(errorMessage, t('common.error'));
 
       throw error;
     } finally {
@@ -227,11 +250,13 @@ const POSScreen: React.FC = () => {
     try {
       setIsEditLoading(true);
       const hexColor = tinycolor(formData.color).toHexString();
+      const hexTextColor = tinycolor(formData.textColor).toHexString();
 
       const formDataToSend = new FormData();
       formDataToSend.append('screenId', formData.screenId);
       formDataToSend.append('screenName', formData.screenName);
       formDataToSend.append('color', hexColor);
+      formDataToSend.append('textColor', hexTextColor); // Append textColor
 
       if (formData.parentScreenId) {
         formDataToSend.append('parentScreenId', formData.parentScreenId);
@@ -248,19 +273,20 @@ const POSScreen: React.FC = () => {
       await api.post('/PosScreen/UpdatePosScreen', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       // Refetch the tree data
       fetchTreeData();
       setIsEditDialogOpen(false);
-      showNotification(t('notifications.posScreenUpdatedSuccess'),  t('common.success'));
+      showNotification(t('notifications.posScreenUpdatedSuccess'), t('common.success'));
     } catch (error: any) {
       console.error('Error updating POS Screen:', error);
 
       // Show detailed error message if available
       const errorMessage = error.response?.data?.message || error.message || t('notifications.posScreenUpdateFailed');
-      showNotification(errorMessage,  t('common.error'));
+      showNotification(errorMessage, t('common.error'));
     } finally {
       setIsEditLoading(false);
     }
@@ -310,7 +336,8 @@ const POSScreen: React.FC = () => {
       screenName: '',
       parentScreenId: null,
       parentScreenName: '',
-      color: '#000000',
+      color: '#FFFFFF', // Default background color
+      textColor: '#000000', // Default text color (brown)
       img: '',
       imageFile: null,
     });
@@ -326,7 +353,8 @@ const POSScreen: React.FC = () => {
         screenName: '',
         parentScreenId: selectedNodeInfo.screenId,
         parentScreenName: selectedNodeInfo.screenName,
-        color: '#000000',
+        color: '#FFFFFF', // Default background color
+        textColor: '#000000', // Default text color (brown)
         img: '',
         imageFile: null,
       });
@@ -334,14 +362,22 @@ const POSScreen: React.FC = () => {
       setImageError('');
       setIsAddDialogOpen(true);
     } else {
-      showNotification(t('notifications.selectScreenToAddSubScreen'),  t('common.warning'));
+      showNotification(t('notifications.selectScreenToAddSubScreen'), t('common.warning'));
     }
   };
 
   // Handle Add Dialog Close
   const handleAddDialogClose = () => {
     setIsAddDialogOpen(false);
-    setFormData({});
+    setFormData({
+      screenName: '',
+      parentScreenId: null,
+      parentScreenName: '',
+      color: '#FFFFFF', // Default background color
+      textColor: '#000000', // Default text color (brown)
+      img: '',
+      imageFile: null,
+    });
     setImagePreview('');
     setImageError('');
   };
@@ -361,20 +397,20 @@ const POSScreen: React.FC = () => {
       <ParentCard title={t('posScreen.title')}>
         <ChildCard>
           {/* Add New Screen Button */}
-          <div style={{ marginBottom: '1em' }}>
+          <div style={{ marginBottom: '2em' }}>
             <Button variant="contained" color="primary" onClick={handleAddRootScreen}>
               {t('posScreen.addNewScreen')}
             </Button>
           </div>
-          <div style={{ display: 'flex', height: '400px' }}>
+          <div style={{ display: 'flex', height: '100%' }}>
             {/* TreeView Side */}
-            <div style={{ width: '40%', overflowY: 'auto' }}>
+            <div style={{ width: '50%', overflowY: 'auto' }}>
               <TreeViewComponent<POSScreenInfo> data={data} onNodeSelect={handleNodeSelect} />
             </div>
             {/* Info Preview Side */}
             <div
               style={{
-                width: '60%',
+                width: '50%',
                 padding: '1em',
                 borderLeft: '1px solid #ccc',
                 overflowY: 'auto',
@@ -420,10 +456,22 @@ const POSScreen: React.FC = () => {
                 label={t('posScreen.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
-                value={formData.color || '#000000'}
+                value={formData.color || '#FFFFFF'}
                 onChange={(e) => {
                   setFormData({ ...formData, color: e.target.value });
                   console.log('Updated formData.color:', e.target.value);
+                }}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label={t('posScreen.textColor')}
+                type="color"
+                InputLabelProps={{ shrink: true }}
+                value={formData.textColor || '#000000'}
+                onChange={(e) => {
+                  setFormData({ ...formData, textColor: e.target.value });
+                  console.log('Updated formData.textColor:', e.target.value);
                 }}
                 fullWidth
                 margin="normal"
@@ -499,10 +547,22 @@ const POSScreen: React.FC = () => {
                 label={t('posScreen.color')}
                 type="color"
                 InputLabelProps={{ shrink: true }}
-                value={formData.color || '#000000'}
+                value={formData.color || '#FFFFFF'}
                 onChange={(e) => {
                   setFormData({ ...formData, color: e.target.value });
                   console.log('Updated formData.color:', e.target.value);
+                }}
+                fullWidth
+                margin="normal"
+              />
+              <TextField
+                label={t('posScreen.textColor')}
+                type="color"
+                InputLabelProps={{ shrink: true }}
+                value={formData.textColor || '#000000'}
+                onChange={(e) => {
+                  setFormData({ ...formData, textColor: e.target.value });
+                  console.log('Updated formData.textColor:', e.target.value);
                 }}
                 fullWidth
                 margin="normal"
