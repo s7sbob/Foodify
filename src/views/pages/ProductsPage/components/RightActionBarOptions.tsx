@@ -1,3 +1,5 @@
+// src\views\pages\ProductsPage\components\RightActionBarOptions.tsx
+
 import React from 'react';
 import { Button, Box, Typography, useTheme } from '@mui/material';
 import TableRestaurantIcon from '@mui/icons-material/TableRestaurant';

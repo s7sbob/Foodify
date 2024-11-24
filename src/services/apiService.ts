@@ -65,3 +65,25 @@ export const deleteProduct = async (baseurl: string, token: string, productId: s
   });
   return response.data;
 };
+
+
+import { ProductPosScreen } from '../types/productPosScreen';
+import { Product } from '../types/product';
+
+export const getProductPosScreens = async (baseurl: string, token: string): Promise<ProductPosScreen[]> => {
+  const response = await axios.get(`${baseurl}/PosScreen/GetPosScreens`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  console.log('getProductPosScreens response.data:', response.data);
+  return response.data;
+};
+
+export const getAllProducts = async (
+  baseurl: string,
+  token: string
+): Promise<Product[]> => {
+  const response = await axios.get(`${baseurl}/Product/GetProducts`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};

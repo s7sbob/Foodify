@@ -11,6 +11,8 @@ import ecommerceReducer from './apps/eCommerce/ECommerceSlice';
 import ticketReducer from './apps/tickets/TicketSlice';
 import userProfileReducer from './apps/userProfile/UserProfileSlice';
 import authReducer from './apps/auth/AuthSlice'; // Slice الخاص بالمصادقة
+import productPosScreensReducer from './slices/productPosScreensSlice';
+import productsReducer from './slices/productsSlice';
 
 import { setupInterceptors } from '../axiosConfig'; // استيراد إعدادات Axios
 
@@ -21,6 +23,8 @@ const rootReducer = combineReducers({
   tickets: ticketReducer,
   userProfile: userProfileReducer,
   auth: authReducer, // Auth reducer لإدارة التوكن
+  productPosScreens: productPosScreensReducer,
+  products: productsReducer,
 });
 
 // تكوين الـ store

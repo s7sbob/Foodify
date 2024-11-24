@@ -1,12 +1,9 @@
-import React from 'react';
-import { Card, CardContent, Typography, Box } from '@mui/material';
+// src/views/pages/ProductsPage/components/ProductCard.tsx
 
-interface Product {
-  name: string;
-  price: string;
-  image: string;
-  description?: string;
-}
+import React from 'react';
+import { Card, Typography, Box } from '@mui/material';
+import { Product } from '../../../../types/product';
+import { getImageUrl } from '../../../../utils/getImageUrl';
 
 interface ProductCardProps {
   product: Product;
@@ -19,8 +16,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
       onClick={() => onAddToCart(product)}
       sx={{
         position: 'relative',
-        width: '120px', // Adjusted width for a smaller card
-        height: '140px', // Adjusted height for a smaller card
+        width: '120px',
+        height: '140px',
         borderRadius: '10px',
         boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
@@ -32,12 +29,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
         },
       }}
     >
-      {/* Background Image */}
+      {/* صورة الخلفية */}
       <Box
         sx={{
           width: '100%',
-          height: '65%', // Adjusted to fit smaller card
-          backgroundImage: `url(${product.image})`,
+          height: '65%',
+          backgroundImage: `url(${getImageUrl(product.productImage)})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           position: 'absolute',
@@ -45,21 +42,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           left: 0,
         }}
       />
-
-      {/* Transparent Overlay */}
+      {/* تراكب شفاف */}
       <Box
         sx={{
           position: 'absolute',
           bottom: 0,
           width: '100%',
-          height: '35%', // Adjusted overlay to cover text area
+          height: '35%',
           bgcolor: 'rgba(255, 255, 255, 0.7)',
           display: 'flex',
           flexDirection: 'column',
-          padding: '4px', // Padding to fit smaller text content
+          padding: '4px',
         }}
       >
-        {/* Overlay Content */}
+        {/* محتوى التراكب */}
         <Typography
           variant="body2"
           component="div"
@@ -68,7 +64,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
             fontSize: '0.8rem',
           }}
         >
-          {product.name}
+          {product.productName}
         </Typography>
         <Typography
           variant="caption"
@@ -77,7 +73,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
             fontSize: '0.7rem',
           }}
         >
-          {product.price}
+          {product.productPrices[0]?.price
+            ? `${product.productPrices[0].price} LE`
+            : ''}
         </Typography>
       </Box>
     </Card>

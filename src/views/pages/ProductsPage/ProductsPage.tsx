@@ -1,3 +1,5 @@
+// src\views\pages\ProductsPage\ProductsPage.tsx
+
 import React from 'react';
 import TopBar from './components/TopBar';
 import CategoryTabs from './components/CategoryTabs';
