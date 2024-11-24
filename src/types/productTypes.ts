@@ -1,12 +1,13 @@
 // src/types/productTypes.ts
 
 export interface PriceComment {
-  commentId: string;
+  commentId?: string; // جعله اختياريًا
   name: string;
   productPriceId: string;
   branchId: string;
   companyId: string;
   status: boolean;
+  isDeleted?: boolean; // إضافة حقل isDeleted
   errors: any[];
 }
 
@@ -27,13 +28,14 @@ export interface ProductPrice {
   qtyToSelect?: number;
   groupPriceType?: number;
   groupPrice?: number;
-  priceGroups?: SelectedProduct[]; // Changed from PriceGroup[] to SelectedProduct[]
+  priceGroups?: SelectedProduct[];
   branchId: string;
   companyId: string;
   status: boolean;
   productId: string;
   productName: string;
   priceName: string;
+  isDeleted?: boolean; // إضافة حقل isDeleted
   errors: any[];
 }
 
@@ -49,4 +51,6 @@ export interface Product {
   discount?: number;
   vat?: number;
   status: boolean;
+  isDeleted?: boolean; // إضافة حقل isDeleted
+
 }

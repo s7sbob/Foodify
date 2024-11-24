@@ -27,6 +27,12 @@ const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 
 // Define the router with PrivateRoute wrapping protected routes
 const Router = [
+
+  {
+    path: 'productsPage',
+    element: <ProductsPage/>,
+  },
+  
   {
     path: '/',
     element: (

@@ -101,15 +101,17 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         navigate('/login');
         return;
       }
-    
+
       // Validate required fields
       if (!formData.productName || !formData.productGroupId || !formData.branchId) {
         showNotification(t('notifications.incompleteData'), 'warning');
         return;
       }
-    
+
       // Additional validation based on lineType
       for (const [index, entry] of productPrices.entries()) {
+        if (entry.isDeleted) continue; // Ignore deleted entries
+
         if (entry.lineType === 1) {
           // Price entry validation
           if (!entry.productPriceName || entry.price === undefined || entry.price <= 0) {
@@ -123,7 +125,8 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
           // Comment group validation
           if (entry.priceComments) {
             for (const [cIndex, comment] of entry.priceComments.entries()) {
-              if (!comment.name ) { // Ensure description is also provided
+              if (comment.isDeleted) continue; // Ignore deleted comments
+              if (!comment.name) {
                 showNotification(
                   `${t('productPriceList.comment')} ${cIndex + 1} in ${t('productPriceList.commentGroup')} ${index + 1}: ${t('notifications.incompleteData')}`,
                   'warning'
@@ -157,7 +160,7 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
           }
         }
       }
-    
+
       setLoading(true);
       try {
         // Build FormData for submission
@@ -172,68 +175,71 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         formPayload.append('vat', formData.vat?.toString() || '0');
         formPayload.append('companyId', formData.companyId!);
         formPayload.append('status', formData.status.toString());
-    
-        // Add productPrices with different lineTypes
+
+        // Add productPrices with different lineTypes and isDeleted flag
         productPrices.forEach((entry, priceIndex) => {
+          // Append isDeleted
+          formPayload.append(`productPrices[${priceIndex}].isDeleted`, entry.isDeleted ? 'true' : 'false');
+
+          formPayload.append(`productPrices[${priceIndex}].productPriceId`, entry.productPriceId || '');
           formPayload.append(`productPrices[${priceIndex}].lineType`, entry.lineType.toString());
-    
+
           if (entry.lineType === 1) {
             // Price entry
-            formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName!);
-            formPayload.append(`productPrices[${priceIndex}].price`, entry.price!.toString());
+            formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName || '');
+            formPayload.append(`productPrices[${priceIndex}].price`, entry.price?.toString() || '0');
           } else if (entry.lineType === 2) {
-            // Comment group entry
+            // Comment Group
             if (entry.priceComments) {
               entry.priceComments.forEach((comment, commentIndex) => {
+                // Only include comments that are not deleted or existing comments marked as deleted
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].commentId`, comment.commentId || '');
                 formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].name`, comment.name);
-                if (comment.productPriceId) {
-                  formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`, comment.productPriceId);
-                }
-                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, formData.branchId);
-                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, formData.companyId!);
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`, comment.productPriceId || '');
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, comment.branchId);
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, comment.companyId);
                 formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].status`, comment.status.toString());
+
+                // Append isDeleted for comments
+                formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].isDeleted`, comment.isDeleted ? 'true' : 'false');
               });
             }
           } else if (entry.lineType === 3) {
             // Group product entry
-            formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect!.toString());
-            formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType!.toString());
-            formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice!.toString());
-    
-            if (entry.priceGroups && entry.priceGroups.length > 0) {
+            formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect?.toString() || '0');
+            formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType?.toString() || '0');
+            formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice?.toString() || '0');
+
+            if (entry.priceGroups) {
               entry.priceGroups.forEach((pg, pgIndex) => {
                 formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`, pg.productId);
                 formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`, pg.productPriceId);
               });
             }
           }
-    
-          // Append productPriceId (existing or empty)
-          formPayload.append(`productPrices[${priceIndex}].productPriceId`, entry.productPriceId || '');
-    
-          // Append other fields
-          formPayload.append(`productPrices[${priceIndex}].branchId`, formData.branchId);
-          formPayload.append(`productPrices[${priceIndex}].companyId`, formData.companyId!);
+
+          formPayload.append(`productPrices[${priceIndex}].branchId`, entry.branchId);
+          formPayload.append(`productPrices[${priceIndex}].companyId`, entry.companyId);
           formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());
         });
-    
+
         // Add image file if available
         if (imageFile) {
           formPayload.append('imageFile', imageFile);
         }
-    
+
         // Debug: Log FormData entries
         console.log('FormData Entries:');
         for (let pair of formPayload.entries()) {
           console.log(pair[0] + ': ' + pair[1]);
         }
-    
+
         // Submit the form data using updateProduct API
         await updateProduct(baseurl, token, formData.productId!, formPayload);
-    
+
         showNotification(t('notifications.productUpdatedSuccess'), 'success');
         onProductUpdated();
-    
+
         // Reset the form
         resetFormInternal();
         setImageFile(null);
@@ -244,7 +250,6 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
         setLoading(false);
       }
     };
-    
 
     const resetFormInternal = () => {
       setFormData({

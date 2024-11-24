@@ -49,19 +49,22 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  // Filter out entries with isDeleted=true
+  const visibleProductPrices = productPrices.filter((pp) => !pp.isDeleted);
+
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const inputRefs = useRef<{ [key: number]: React.RefObject<HTMLInputElement> }>({});
 
   // Track previous length to detect additions
-  const prevLengthRef = useRef<number>(productPrices.length);
+  const prevLengthRef = useRef<number>(visibleProductPrices.length);
 
   useEffect(() => {
-    if (productPrices.length > prevLengthRef.current) {
-      const newIndex = productPrices.length - 1;
+    if (visibleProductPrices.length > prevLengthRef.current) {
+      const newIndex = visibleProductPrices.length - 1;
       setExpandedIndex(newIndex);
     }
-    prevLengthRef.current = productPrices.length;
-  }, [productPrices.length]);
+    prevLengthRef.current = visibleProductPrices.length;
+  }, [visibleProductPrices.length]);
 
   useEffect(() => {
     if (expandedIndex !== null) {
@@ -78,7 +81,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
 
   return (
     <>
-      {productPrices.map((entry, index) => (
+      {visibleProductPrices.map((entry, index) => (
         <React.Fragment key={`${entry.productPriceId}-${index}`}>
           {entry.lineType === 1 ? (
             <ProductPriceEntry
@@ -86,7 +89,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
               index={index}
               handleEntryChange={handleEntryChange}
               handleRemoveEntry={handleRemoveEntry}
-              autoFocus={index === productPrices.length - 1}
+              autoFocus={index === visibleProductPrices.length - 1}
             />
           ) : (
             <>
@@ -130,41 +133,36 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                     <>
                       {/* Display Comments */}
                       {entry.priceComments &&
-                        entry.priceComments.map((comment, cIndex) => (
-                          <Grid item xs={12} key={comment.commentId}>
-                            <Paper variant="outlined" sx={{ padding: 2 }}>
-                              <Box display="flex" alignItems="center" justifyContent="space-between">
-                                <TextField
-                                  label={`${t('productPriceList.commentName')} ${cIndex + 1}`}
-                                  name={`name-${cIndex}`}
-                                  value={comment.name}
-                                  onChange={(e) =>
-                                    handleCommentChange(index, cIndex, 'name', e.target.value)
-                                  }
-                                  fullWidth
-                                  required
-                                  variant="outlined"
-                                  size="small"
-                                  sx={{ mr: 1 }}
-                                  inputRef={
-                                    cIndex === 0 && index === productPrices.length - 1
-                                      ? (inputRefs.current[index] =
-                                          inputRefs.current[index] || React.createRef<HTMLInputElement>())
-                                      : undefined
-                                  }
-                                />
-                                <IconButton
-                                  aria-label={t('buttons.delete') as string}
-                                  onClick={() => handleRemoveComment(index, cIndex)}
-                                  color="error"
-                                  size="small"
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Box>
-                            </Paper>
-                          </Grid>
-                        ))}
+                        entry.priceComments
+                          .filter((pc) => !pc.isDeleted) // Filter out deleted comments
+                          .map((comment, cIndex) => (
+                            <Grid item xs={12} key={comment.commentId}>
+                              <Paper variant="outlined" sx={{ padding: 2 }}>
+                                <Box display="flex" alignItems="center" justifyContent="space-between">
+                                  <TextField
+                                    label={`${t('productPriceList.commentName')} ${cIndex + 1}`}
+                                    name={`name-${cIndex}`}
+                                    value={comment.name}
+                                    onChange={(e) =>
+                                      handleCommentChange(index, cIndex, 'name', e.target.value)
+                                    }
+                                    fullWidth
+                                    required
+                                    variant="outlined"
+                                    size="small"
+                                  />
+                                  <IconButton
+                                    aria-label={t('buttons.delete') as string}
+                                    onClick={() => handleRemoveComment(index, cIndex)}
+                                    color="error"
+                                    size="small"
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Box>
+                              </Paper>
+                            </Grid>
+                          ))}
                     </>
                   )}
 
@@ -186,12 +184,6 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                           }
                           fullWidth
                           required
-                          inputRef={
-                            index === productPrices.length - 1
-                              ? (inputRefs.current[index] =
-                                  inputRefs.current[index] || React.createRef<HTMLInputElement>())
-                              : undefined
-                          }
                         />
                       </Grid>
 
@@ -255,7 +247,7 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                       {entry.priceGroups && entry.priceGroups.length > 0 && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" gutterBottom>
-                            {t('productPriceList.selectedProducts')} {/* e.g., "Selected Products" */}
+                            {t('productPriceList.selectedProducts')}
                           </Typography>
                           <Paper variant="outlined" sx={{ padding: 2 }}>
                             <Grid container spacing={2}>
@@ -267,7 +259,9 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                                   <Typography>
                                     <strong>{t('fields.priceName')}:</strong> {sp.priceName}
                                   </Typography>
-
+                                  <Typography>
+                                    <strong>{t('fields.price')}:</strong> {sp.price.toFixed(2)}
+                                  </Typography>
                                 </Grid>
                               ))}
                             </Grid>
@@ -283,6 +277,13 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
           )}
         </React.Fragment>
       ))}
+
+      {/* Display message when there are no product price entries */}
+      {visibleProductPrices.length === 0 && (
+        <Typography align="center" mt={2}>
+          {t('products.noProducts')}
+        </Typography>
+      )}
     </>
   );
 };

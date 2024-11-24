@@ -8,6 +8,7 @@ import {
   Grid,
   Button,
   Collapse,
+  Divider,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,9 +16,9 @@ import { useNotification } from '../../../context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
-import { Product, ProductPrice, SelectedProduct } from '../../../types/productTypes';
+import { PriceComment, Product, ProductPrice, SelectedProduct } from '../../../types/productTypes';
 import axios from 'axios';
-import { getProductGroups, getPosScreens, deleteProduct } from '../../../services/apiService';
+import { getProductGroups, getPosScreens, updateProduct } from '../../../services/apiService'; // استبدال deleteProduct بـ updateProduct
 import { v4 as uuidv4 } from 'uuid';
 import ProductList from './components/ProductList';
 import ProductForm, { ProductFormRef } from './components/ProductForm';
@@ -77,6 +78,7 @@ const ProductsPage: React.FC = () => {
 
   /**
    * Fetch products from the API and update the state.
+   * افترضنا أن الـ API يقوم بإرجاع المنتجات التي لها isDeleted=false فقط
    */
   const fetchProducts = async () => {
     if (!token) {
@@ -119,7 +121,7 @@ const ProductsPage: React.FC = () => {
   };
 
   /**
-   * Handle deleting a product after confirmation.
+   * Handle deleting a product by setting isDeleted=true and using updateProduct API
    */
   const handleDeleteProduct = async (productId?: string) => {
     if (!token) {
@@ -127,19 +129,93 @@ const ProductsPage: React.FC = () => {
       navigate('/login');
       return;
     }
-
+  
     if (!productId) {
       showNotification(t('notifications.productIdMissing'), 'error');
       return;
     }
-
+  
     if (!window.confirm(t('confirmations.deleteProduct') as string)) {
       return;
     }
-
+  
     setLoading(true);
     try {
-      await deleteProduct(baseurl, token, productId);
+      // إيجاد المنتج المراد حذفه
+      const productToDelete = products.find((p) => p.productId === productId);
+      if (!productToDelete) {
+        showNotification(t('notifications.productNotFound'), 'error');
+        return;
+      }
+  
+      // تعيين isDeleted=true
+      const updatedProduct: Product = {
+        ...productToDelete,
+        isDeleted: true,
+      };
+  
+      // بناء FormData لتحديث المنتج
+      const formPayload = new FormData();
+      formPayload.append('productId', updatedProduct.productId);
+      formPayload.append('productName', updatedProduct.productName);
+      formPayload.append('productName2', updatedProduct.productName2 || '');
+      formPayload.append('productGroupId', updatedProduct.productGroupId);
+      formPayload.append('branchId', updatedProduct.branchId);
+      formPayload.append('posScreenId', updatedProduct.posScreenId || '');
+      formPayload.append('discount', updatedProduct.discount?.toString() || '0');
+      formPayload.append('vat', updatedProduct.vat?.toString() || '0');
+      formPayload.append('companyId', updatedProduct.companyId);
+      formPayload.append('status', updatedProduct.status.toString());
+  
+      // **إضافة isDeleted للمنتج نفسه**
+      formPayload.append('isDeleted', updatedProduct.isDeleted ? 'true' : 'false');
+  
+      // إضافة productPrices مع isDeleted=false أو حسب حالتها
+      updatedProduct.productPrices.forEach((entry, priceIndex) => {
+        formPayload.append(`productPrices[${priceIndex}].isDeleted`, entry.isDeleted ? 'true' : 'false');
+        formPayload.append(`productPrices[${priceIndex}].productPriceId`, entry.productPriceId || '');
+        formPayload.append(`productPrices[${priceIndex}].lineType`, entry.lineType.toString());
+  
+        if (entry.lineType === 1) {
+          // Price entry
+          formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName || '');
+          formPayload.append(`productPrices[${priceIndex}].price`, entry.price?.toString() || '0');
+        } else if (entry.lineType === 2) {
+          // Comment Group
+          if (entry.priceComments) {
+            entry.priceComments.forEach((comment, commentIndex) => {
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].commentId`, comment.commentId || '');
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].name`, comment.name);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].productPriceId`, comment.productPriceId || '');
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, comment.branchId);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, comment.companyId);
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].status`, comment.status.toString());
+              formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].isDeleted`, comment.isDeleted ? 'true' : 'false');
+            });
+          }
+        } else if (entry.lineType === 3) {
+          // Group Product
+          formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect?.toString() || '0');
+          formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType?.toString() || '0');
+          formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice?.toString() || '0');
+  
+          if (entry.priceGroups) {
+            entry.priceGroups.forEach((pg, pgIndex) => {
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`, pg.productId);
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`, pg.productPriceId);
+            });
+          }
+        }
+  
+        formPayload.append(`productPrices[${priceIndex}].branchId`, entry.branchId);
+        formPayload.append(`productPrices[${priceIndex}].companyId`, entry.companyId);
+        formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());
+      });
+  
+  
+      // إرسال التعديل باستخدام updateProduct API
+      await updateProduct(baseurl, token, updatedProduct.productId, formPayload);
+  
       showNotification(t('notifications.productDeletedSuccess'), 'success');
       fetchProducts();
     } catch (err) {
@@ -149,6 +225,7 @@ const ProductsPage: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   /**
    * Reset forms and state related to product editing.
@@ -170,20 +247,15 @@ const ProductsPage: React.FC = () => {
     let newEntry: ProductPrice = {
       productPriceId: isEditing ? '' : uuidv4(), // Assign ID based on editing mode
       lineType,
-      branchId: isEditing ? productToEdit?.branchId || '' : '', // Assign branchId from product if editing
-      companyId: isEditing ? productToEdit?.companyId || '' : '', // Assign companyId from product if editing
+      branchId: isEditing ? productToEdit?.branchId || '' : '',
+      companyId: isEditing ? productToEdit?.companyId || '' : '',
       status: true,
-      productId: isEditing ? productToEdit?.productId || '' : '', // Assign productId only in editing mode
+      productId: isEditing ? productToEdit?.productId || '' : '',
+      isDeleted: false, // Set isDeleted=false by default
       productPriceName: '',
-      price: 0.0,
-      priceComments: [],
-      qtyToSelect: 0.0,
-      priceGroups: [],
-      groupPriceType: 0,
-      groupPrice: 0.0,
-      errors: [],
+      priceName: '',
       productName: '',
-      priceName: ''
+      errors: []
     };
 
     switch (lineType) {
@@ -194,12 +266,13 @@ const ProductsPage: React.FC = () => {
       case 2: // Comment Group
         newEntry.priceComments = [
           {
-            commentId: '',
+            commentId: isEditing ? '' : uuidv4(),
             name: '',
-            productPriceId: '',
+            productPriceId: isEditing ? '' : uuidv4(),
             branchId: isEditing ? productToEdit?.branchId || '' : '',
             companyId: isEditing ? productToEdit?.companyId || '' : '',
             status: true,
+            isDeleted: false, // Set isDeleted=false by default
             errors: [],
           },
         ];
@@ -219,9 +292,20 @@ const ProductsPage: React.FC = () => {
 
   /**
    * Remove a product price entry at the specified index.
+   * If editing, set isDeleted=true; else remove it from the list.
    */
   const handleRemoveEntry = (index: number) => {
-    setProductPrices((prev) => prev.filter((_, i) => i !== index));
+    if (productToEdit) {
+      // In editing mode, set isDeleted=true
+      setProductPrices((prev) => {
+        const updated = [...prev];
+        updated[index].isDeleted = true;
+        return updated;
+      });
+    } else {
+      // In add mode, remove the entry directly
+      setProductPrices((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   /**
@@ -243,14 +327,14 @@ const ProductsPage: React.FC = () => {
   const handleAddComment = (priceIndex: number) => {
     const isEditing = !!productToEdit;
 
-    const newComment = {
-      commentId: isEditing ? '' : uuidv4(), // Assign commentId based on editing mode
+    const newComment: PriceComment = {
+      commentId: isEditing ? '' : uuidv4(), // If editing, commentId is empty
       name: '',
-      description: '',
       productPriceId: productPrices[priceIndex].productPriceId || '',
       branchId: productToEdit ? productToEdit.branchId : '',
       companyId: productToEdit ? productToEdit.companyId || '' : '',
       status: true,
+      isDeleted: false, // Set isDeleted=false by default
       errors: [],
     };
 
@@ -264,13 +348,30 @@ const ProductsPage: React.FC = () => {
 
   /**
    * Remove a comment from a comment group.
+   * If editing, set isDeleted=true; else remove it from the list.
    */
   const handleRemoveComment = (priceIndex: number, commentIndex: number) => {
-    const updatedPrices = [...productPrices];
-    updatedPrices[priceIndex].priceComments = updatedPrices[priceIndex].priceComments?.filter(
-      (_, i) => i !== commentIndex
-    );
-    setProductPrices(updatedPrices);
+    if (productToEdit) {
+      // In editing mode, set isDeleted=true for the comment
+      setProductPrices((prev) => {
+        const updated = [...prev];
+        const price = updated[priceIndex];
+        if (price.priceComments && price.priceComments[commentIndex]) {
+          price.priceComments[commentIndex].isDeleted = true;
+        }
+        return updated;
+      });
+    } else {
+      // In add mode, remove the comment directly
+      setProductPrices((prev) => {
+        const updated = [...prev];
+        const price = updated[priceIndex];
+        if (price.priceComments) {
+          price.priceComments = price.priceComments.filter((_, i) => i !== commentIndex);
+        }
+        return updated;
+      });
+    }
   };
 
   /**
@@ -279,8 +380,8 @@ const ProductsPage: React.FC = () => {
   const handleCommentChange = (
     priceIndex: number,
     commentIndex: number,
-    field: keyof any, // Assuming PriceComment type
-    value: any
+    field: keyof PriceComment,
+    value: string
   ) => {
     const updatedPrices = [...productPrices];
     const updatedComments = updatedPrices[priceIndex].priceComments?.map((comment, i) =>
@@ -336,7 +437,7 @@ const ProductsPage: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item>
-          {/* زر حفظ المنتج */}
+          {/* Save Button */}
           <Button
             variant="contained"
             color="primary"
@@ -348,7 +449,7 @@ const ProductsPage: React.FC = () => {
           >
             {productToEdit ? t('buttons.saveChanges') : t('buttons.saveProduct')}
           </Button>
-          {/* زر إعادة الضبط */}
+          {/* Reset Button */}
           <Button
             variant="outlined"
             color="error"
@@ -387,7 +488,7 @@ const ProductsPage: React.FC = () => {
                 productGroups={allProductGroups}
                 posScreens={allPosScreens}
                 onEdit={handleEditProduct}
-                onDelete={handleDeleteProduct}
+                onDelete={handleDeleteProduct} // تعديل دالة onDelete لتستخدم handleDeleteProduct المعدلة
               />
             )}
           </Box>
@@ -396,7 +497,7 @@ const ProductsPage: React.FC = () => {
 
       {/* Main Content */}
       <Grid container spacing={2}>
-        {/* الجانب الأيسر: نموذج إضافة/تعديل المنتج */}
+        {/* Left Side: Add/Edit Product Form */}
         <Grid item xs={12} md={6}>
           <ProductForm
             ref={productFormRef}
@@ -420,15 +521,15 @@ const ProductsPage: React.FC = () => {
           />
         </Grid>
 
-        {/* الجانب الأيمن: عرض الإدخالات */}
+        {/* Right Side: Display Product Price Entries */}
         <Grid item xs={12} md={6}>
-          {/* الأزرار الثلاثة */}
+          {/* Three Buttons */}
           <Grid container spacing={2} mb={2}>
             <Grid item xs={4}>
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={() => handleAddEntry(1)} // lineType 1: سعر
+                onClick={() => handleAddEntry(1)} // lineType 1: Price
                 fullWidth
                 startIcon={<AddIcon />}
               >
@@ -439,7 +540,7 @@ const ProductsPage: React.FC = () => {
               <Button
                 variant="outlined"
                 color="secondary"
-                onClick={() => handleAddEntry(2)} // lineType 2: مجموعة تعليقات
+                onClick={() => handleAddEntry(2)} // lineType 2: Comment Group
                 fullWidth
                 startIcon={<AddIcon />}
               >
@@ -450,7 +551,7 @@ const ProductsPage: React.FC = () => {
               <Button
                 variant="outlined"
                 color="success"
-                onClick={() => handleAddEntry(3)} // lineType 3: مجموعة منتجات
+                onClick={() => handleAddEntry(3)} // lineType 3: Group Products
                 fullWidth
                 startIcon={<AddIcon />}
               >
