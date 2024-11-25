@@ -1,5 +1,3 @@
-// src/views/pages/ProductsPage/components/CategoryTabs.tsx
-
 import React, { useEffect } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
@@ -42,13 +40,13 @@ const CategoryTabs: React.FC = () => {
   return (
     <Box
       display="flex"
-      alignItems="center"
-      gap={1}
+      alignItems="left"
+      gap={2}
       sx={{
         overflowX: 'auto',
         flexGrow: 1,
         padding: 1,
-        bgcolor: 'transparent',
+        bgcolor: '#f5f5f5', // Light background for the entire container
       }}
     >
       {productPosScreens.map((category) => (
@@ -61,40 +59,46 @@ const CategoryTabs: React.FC = () => {
                 ? '#FFF'
                 : theme.palette.text.primary,
             bgcolor:
-              selectedScreenId === category.screenId ? '#1E88E5' : 'transparent',
-            borderRadius: '8px',
+              selectedScreenId === category.screenId ? '#1E88E5' : '#FFF',
+            borderRadius: '5px', // Rounded corners
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            padding: 1,
+            alignItems: 'left',
+            padding: '10px',
             whiteSpace: 'nowrap',
             flexShrink: 0,
             boxShadow:
               selectedScreenId === category.screenId
-                ? '0px 4px 8px rgba(0, 0, 0, 0.2)'
-                : 'none',
-            minWidth: '80px',
+                ? '0px 4px 10px rgba(0, 0, 0, 0.2)' // Box shadow for the selected tab
+                : '0px 2px 5px rgba(0, 0, 0, 0.1)',
+            minWidth: '100px',
+            width: '96px', // Fixed width
+            height: '103px', // Fixed height
             '&:hover': {
               bgcolor:
                 selectedScreenId === category.screenId
                   ? '#1565C0'
-                  : 'rgba(0, 0, 0, 0.05)',
+                  : 'rgba(0, 0, 0, 0.05)', // Subtle hover effect for unselected
             },
           }}
         >
-          <img
-            src={getImageUrl(category.img)}
-            alt={category.screenName}
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '4px',
-              marginBottom: '4px',
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              borderRadius: '5px', // Rounded image
+              backgroundImage: `url(${getImageUrl(category.img)})`, // Set the image as background
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
           />
           <Typography
             variant="caption"
-            sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '16px',
+              textAlign: 'left',
+            }}
           >
             {category.screenName}
           </Typography>
