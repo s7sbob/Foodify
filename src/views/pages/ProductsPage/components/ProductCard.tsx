@@ -1,5 +1,3 @@
-// src/views/pages/ProductsPage/components/ProductCard.tsx
-
 import React from 'react';
 import { Card, Typography, Box } from '@mui/material';
 import { Product } from '../../../../types/product';
@@ -15,9 +13,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
     <Card
       onClick={() => onAddToCart(product)}
       sx={{
-        position: 'relative',
-        width: '120px',
-        height: '140px',
+        width: '140px',
+        height: '161px',
         borderRadius: '10px',
         boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
@@ -27,35 +24,34 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           transform: 'scale(1.03)',
           boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
         },
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 0, // تأكد من عدم وجود فراغات داخل الكارد
       }}
     >
-      {/* صورة الخلفية */}
+      {/* الجزء الخاص بالصورة */}
       <Box
         sx={{
-          width: '100%',
-          height: '65%',
+          flex: 1,
           backgroundImage: `url(${getImageUrl(product.productImage)})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          position: 'absolute',
-          top: 0,
-          left: 0,
+          width: '100%', // الصورة تمتد بعرض الكارد بالكامل
+          height: '67%', // الصورة تغطي الجزء العلوي فقط
         }}
       />
-      {/* تراكب شفاف */}
+      {/* الجزء الأبيض السفلي */}
       <Box
         sx={{
-          position: 'absolute',
-          bottom: 0,
-          width: '100%',
-          height: '35%',
-          bgcolor: 'rgba(255, 255, 255, 0.7)',
+          height: '33%', // الجزء الأبيض يأخذ المساحة المتبقية
+          backgroundColor: '#fff',
           display: 'flex',
           flexDirection: 'column',
-          padding: '4px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '8px 4px',
         }}
       >
-        {/* محتوى التراكب */}
         <Typography
           variant="body2"
           component="div"
