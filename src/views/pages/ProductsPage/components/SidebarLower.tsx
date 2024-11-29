@@ -2,9 +2,18 @@
 
 import React from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
+import { useSelector, useDispatch } from 'react-redux';
+import { AppState } from '../../../../store/Store';
+import { clearCart } from '../../../../store/slices/cartSlice';
 
 const SidebarLower: React.FC = () => {
   const theme = useTheme();
+  const dispatch = useDispatch();
+  const cart = useSelector((state: AppState) => state.cart);
+
+  const handleClearCart = () => {
+    dispatch(clearCart());
+  };
 
   return (
     <Box
@@ -22,12 +31,26 @@ const SidebarLower: React.FC = () => {
     >
       {/* Totals Section */}
       <Box mb={2}>
-        {['Subtotal', 'Discount', 'Vat', 'Service'].map((label) => (
-          <Box display="flex" justifyContent="space-between" mb={0.5} key={label}>
-            <Typography variant="body2">{`${label} :`}</Typography>
-            <Typography variant="body2">120 LE</Typography>
-          </Box>
-        ))}
+        {/* Subtotal */}
+        <Box display="flex" justifyContent="space-between" mb={0.5}>
+          <Typography variant="body2">الإجمالي الفرعي :</Typography>
+          <Typography variant="body2">{cart.subtotal.toFixed(2)} LE</Typography>
+        </Box>
+        {/* Discount */}
+        <Box display="flex" justifyContent="space-between" mb={0.5}>
+          <Typography variant="body2">الخصم :</Typography>
+          <Typography variant="body2">{cart.discount.toFixed(2)} LE</Typography>
+        </Box>
+        {/* VAT */}
+        <Box display="flex" justifyContent="space-between" mb={0.5}>
+          <Typography variant="body2">الضريبة :</Typography>
+          <Typography variant="body2">{cart.vat.toFixed(2)} LE</Typography>
+        </Box>
+        {/* Service */}
+        <Box display="flex" justifyContent="space-between" mb={0.5}>
+          <Typography variant="body2">الخدمة :</Typography>
+          <Typography variant="body2">{cart.service.toFixed(2)} LE</Typography>
+        </Box>
       </Box>
 
       {/* Calculator Buttons */}

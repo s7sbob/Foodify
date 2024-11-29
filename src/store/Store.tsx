@@ -13,8 +13,9 @@ import userProfileReducer from './apps/userProfile/UserProfileSlice';
 import authReducer from './apps/auth/AuthSlice'; // Slice الخاص بالمصادقة
 import productPosScreensReducer from './slices/productPosScreensSlice';
 import productsReducer from './slices/productsSlice';
-
+import cartReducer from './slices/cartSlice';
 import { setupInterceptors } from '../axiosConfig'; // استيراد إعدادات Axios
+import productPricesReducer from './slices/productPricesSlice';
 
 // دمج جميع الـ reducers
 const rootReducer = combineReducers({
@@ -25,6 +26,9 @@ const rootReducer = combineReducers({
   auth: authReducer, // Auth reducer لإدارة التوكن
   productPosScreens: productPosScreensReducer,
   products: productsReducer,
+  cart: cartReducer,
+  productPrices: productPricesReducer,
+
 });
 
 // تكوين الـ store

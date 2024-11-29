@@ -254,13 +254,13 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                               {entry.priceGroups.map((sp: SelectedProduct, spIndex: number) => (
                                 <Grid item xs={12} sm={6} md={4} key={`${sp.productPriceId}-${spIndex}`}>
                                   <Typography>
-                                    <strong>{t('fields.productName')}:</strong> {sp.productName}
+                                    <strong>{t('fields.productName')}:</strong> {sp.productName || 'N/A'}
                                   </Typography>
                                   <Typography>
-                                    <strong>{t('fields.priceName')}:</strong> {sp.priceName}
+                                    <strong>{t('fields.priceName')}:</strong> {sp.priceName || 'N/A'}
                                   </Typography>
                                   <Typography>
-                                    <strong>{t('fields.price')}:</strong> {sp.price.toFixed(2)}
+                                    <strong>{t('fields.price')}:</strong> {sp.price !== undefined && sp.price !== null ? sp.price.toFixed(2) : '0.00'}
                                   </Typography>
                                 </Grid>
                               ))}

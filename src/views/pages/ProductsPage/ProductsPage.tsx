@@ -1,4 +1,4 @@
-// src\views\pages\ProductsPage\ProductsPage.tsx
+// src/views/pages/ProductsPage/ProductsPage.tsx
 
 import React from 'react';
 import TopBar from './components/TopBar';
@@ -7,6 +7,8 @@ import ProductGrid from './components/ProductGrid';
 import ResponsiveSidebar from './components/ResponsiveSidebar';
 import RightActionBarOptions from './components/RightActionBarOptions';
 import RightActionBarActions from './components/RightActionBarActions';
+import SidebarUpper from './components/SidebarUpper';
+import SidebarLower from './components/SidebarLower';
 import {
   Box,
   IconButton,
@@ -144,6 +146,7 @@ const ProductsPage: React.FC = () => {
         >
           <RightActionBarOptions />
           <RightActionBarActions />
+
         </Box>
       )}
     </Box>

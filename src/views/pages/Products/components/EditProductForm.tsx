@@ -114,7 +114,7 @@ const EditProductForm = forwardRef<EditProductFormRef, EditProductFormProps>(
 
         if (entry.lineType === 1) {
           // Price entry validation
-          if (!entry.productPriceName || entry.price === undefined || entry.price <= 0) {
+          if ( entry.price === undefined || entry.price <= 0) {
             showNotification(
               `${t('fields.productName')} ${index + 1}: ${t('notifications.incompleteData')}`,
               'warning'

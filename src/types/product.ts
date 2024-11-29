@@ -1,6 +1,7 @@
 // src/types/product.ts
 
 export interface Product {
+    priceName: any;
     productId: string;
     productName: string;
     productName2: string;
@@ -19,6 +20,8 @@ export interface Product {
   }
   
   export interface ProductPrice {
+    additions: never[];
+    priceName: any;
     productPriceId: string;
     productPriceName: string | null;
     lineType: number;

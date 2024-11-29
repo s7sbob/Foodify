@@ -1,4 +1,4 @@
-// src\views\pages\ProductsPage\components/ResponsiveSidebar.tsx
+// src/views/pages/ProductsPage/components/ResponsiveSidebar.tsx
 
 import React, { useState } from 'react';
 import { Drawer, IconButton, Box, useTheme, useMediaQuery } from '@mui/material';
