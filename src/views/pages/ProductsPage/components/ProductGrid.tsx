@@ -9,7 +9,7 @@ import { Product } from '../../../../types/product';
 
 const ProductGrid: React.FC = () => {
   const theme = useTheme();
-  
+
   // جلب حالة المنتجات من Redux Store
   const { filteredProducts, loading, error } = useSelector(
     (state: AppState) => state.products
@@ -48,7 +48,7 @@ const ProductGrid: React.FC = () => {
       spacing={2}
       sx={{ padding: theme.spacing(1) }}
     >
-      {filteredProducts.map((product) => (
+      {filteredProducts.map((product: Product) => (
         <Grid item key={product.productId} xs={6} sm={4} md={3} lg={2}>
           <ProductCard product={product} />
         </Grid>

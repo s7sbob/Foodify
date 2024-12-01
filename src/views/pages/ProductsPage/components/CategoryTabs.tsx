@@ -1,12 +1,15 @@
+// src/views/pages/ProductsPage/components/CategoryTabs.tsx
+
 import React, { useEffect } from 'react';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProductPosScreens } from '../../../../store/slices/productPosScreensSlice';
 import {
   fetchAllProducts,
-  setSelectedScreenId,
-} from '../../../../store/slices/productsSlice';
-import { AppState } from '../../../../store/Store';
+  setSelectedPosScreenId, 
+} from '../../../../store/slices/productsSlice'; 
+import { AppState } from '../../../../store/Store'; 
+
 import { getImageUrl } from '../../../../utils/getImageUrl';
 
 const CategoryTabs: React.FC = () => {
@@ -16,8 +19,8 @@ const CategoryTabs: React.FC = () => {
   );
   const { productPosScreens, loading, error } = productPosScreensState;
 
-  const selectedScreenId = useSelector(
-    (state: AppState) => state.products.selectedScreenId
+  const selectedPosScreenId = useSelector(
+    (state: AppState) => state.products.selectedPosScreenId 
   );
 
   const theme = useTheme();
@@ -27,8 +30,8 @@ const CategoryTabs: React.FC = () => {
     dispatch(fetchAllProducts());
   }, [dispatch]);
 
-  const handleCategoryClick = (screenId: string) => {
-    dispatch(setSelectedScreenId(screenId));
+  const handleCategoryClick = (screenId: string | null) => { // السماح بـ null للزر "الكل"
+    dispatch(setSelectedPosScreenId(screenId));
   };
 
   if (loading) return <div>جاري التحميل...</div>;
@@ -40,56 +43,60 @@ const CategoryTabs: React.FC = () => {
   return (
     <Box
       display="flex"
-      alignItems="left"
+      alignItems="center" // تحديث المحاذاة من 'left' إلى 'center'
       gap={2}
       sx={{
         overflowX: 'auto',
         flexGrow: 1,
         padding: 1,
-        bgcolor: '#f5f5f5', // Light background for the entire container
+        bgcolor: '#f5f5f5', // خلفية فاتحة  بالكامل
       }}
     >
+
+
+      {/* عرض الفئات الأخرى */}
       {productPosScreens.map((category) => (
         <Button
           key={category.screenId}
           onClick={() => handleCategoryClick(category.screenId)}
           sx={{
             color:
-              selectedScreenId === category.screenId
+              selectedPosScreenId === category.screenId
                 ? '#FFF'
                 : theme.palette.text.primary,
             bgcolor:
-              selectedScreenId === category.screenId ? '#1E88E5' : '#FFF',
-            borderRadius: '5px', // Rounded corners
+              selectedPosScreenId === category.screenId ? '#1E88E5' : '#FFF',
+            borderRadius: '5px', // زوايا مستديرة
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'left',
+            alignItems: 'center', // محاذاة النص والرمز في الوسط
             padding: '10px',
             whiteSpace: 'nowrap',
             flexShrink: 0,
             boxShadow:
-              selectedScreenId === category.screenId
-                ? '0px 4px 10px rgba(0, 0, 0, 0.2)' // Box shadow for the selected tab
+              selectedPosScreenId === category.screenId
+                ? '0px 4px 10px rgba(0, 0, 0, 0.2)' // ظل لصندوق التبويب المحدد
                 : '0px 2px 5px rgba(0, 0, 0, 0.1)',
             minWidth: '100px',
-            width: '96px', // Fixed width
-            height: '103px', // Fixed height
+            width: '96px', // عرض ثابت
+            height: '103px', // ارتفاع ثابت
             '&:hover': {
               bgcolor:
-                selectedScreenId === category.screenId
+                selectedPosScreenId === category.screenId
                   ? '#1565C0'
-                  : 'rgba(0, 0, 0, 0.05)', // Subtle hover effect for unselected
+                  : 'rgba(0, 0, 0, 0.05)', // تأثير hover خفيف للغير محدد
             },
           }}
         >
           <Box
             sx={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '5px', // Rounded image
-              backgroundImage: `url(${getImageUrl(category.img)})`, // Set the image as background
+              width: '50px',
+              height: '50px',
+              borderRadius: '5px', // زوايا مستديرة للصورة
+              backgroundImage: `url(${getImageUrl(category.img)})`, // تعيين الصورة كخلفية
               backgroundSize: 'cover',
               backgroundPosition: 'center',
+              marginBottom: '8px',
             }}
           />
           <Typography
@@ -97,7 +104,7 @@ const CategoryTabs: React.FC = () => {
             sx={{
               fontWeight: 'bold',
               fontSize: '16px',
-              textAlign: 'left',
+              textAlign: 'center',
             }}
           >
             {category.screenName}

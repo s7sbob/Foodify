@@ -1,15 +1,16 @@
 // src/store/slices/productsSlice.ts
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { Product } from '../../types/product';
-import { getAllProducts } from '../../services/apiService';
+import { AppState } from '../Store'; 
 
 interface ProductsState {
   products: Product[];
   filteredProducts: Product[];
   loading: boolean;
   error: string | null;
-  selectedScreenId: string | null;
+  selectedPosScreenId: string | null;
 }
 
 const initialState: ProductsState = {
@@ -17,36 +18,44 @@ const initialState: ProductsState = {
   filteredProducts: [],
   loading: false,
   error: null,
-  selectedScreenId: null,
+  selectedPosScreenId: null,
 };
 
+// Thunk لجلب جميع المنتجات مع أسعارها وتعليقاتها
 export const fetchAllProducts = createAsyncThunk<
   Product[],
   void,
-  { rejectValue: string }
->('products/fetchAllProducts', async (_, { rejectWithValue, getState }) => {
-  try {
-    const baseurl = 'https://erp.ts-egy.com/api'; // استخدم الـ baseurl الصحيح
-    const state: any = getState();
-    const token = state.auth.token; // تأكد من وجود التوكن في حالة الـ auth
-    const products = await getAllProducts(baseurl, token);
-    return products;
-  } catch (error: any) {
-    return rejectWithValue(error.message);
+  { rejectValue: string; state: AppState } // إضافة نوع الحالة هنا
+>(
+  'products/fetchAllProducts',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const baseurl = 'https://erp.ts-egy.com/api'; // تأكد من استخدام الـ baseurl الصحيح
+      const state = getState(); // الآن سيتم تحديد نوعه كـ AppState
+      const token = state.auth.token; // تأكد من وجود التوكن في حالة الـ auth
+
+      const response = await axios.get(`${baseurl}/Product/GetProducts`, {
+        headers: { Authorization: `Bearer ${token}` }, // فقط Authorization header
+      });
+
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'فشل في جلب المنتجات');
+    }
   }
-});
+);
 
 const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
-    setSelectedScreenId(state, action) {
-      state.selectedScreenId = action.payload;
+    setSelectedPosScreenId(state, action: PayloadAction<string | null>) {
+      state.selectedPosScreenId = action.payload;
 
-      // تصفية المنتجات بناءً على selectedScreenId
-      if (state.selectedScreenId) {
+      // تصفية المنتجات بناءً على selectedPosScreenId
+      if (state.selectedPosScreenId) {
         state.filteredProducts = state.products.filter(
-          (product) => product.posScreenId === state.selectedScreenId
+          (product) => product.posScreenId === state.selectedPosScreenId
         );
       } else {
         state.filteredProducts = state.products;
@@ -64,22 +73,21 @@ const productsSlice = createSlice({
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload;
+        state.filteredProducts = action.payload; // عرض جميع المنتجات مبدئيًا
 
-        // تطبيق التصفية بناءً على selectedScreenId
-        if (state.selectedScreenId) {
+        // تطبيق التصفية بناءً على selectedPosScreenId إذا كان محددًا
+        if (state.selectedPosScreenId) {
           state.filteredProducts = state.products.filter(
-            (product) => product.posScreenId === state.selectedScreenId
+            (product) => product.posScreenId === state.selectedPosScreenId
           );
-        } else {
-          state.filteredProducts = state.products;
         }
       })
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch products';
+        state.error = action.payload || 'فشل في جلب المنتجات';
       });
   },
 });
 
-export const { setSelectedScreenId } = productsSlice.actions;
+export const { setSelectedPosScreenId } = productsSlice.actions;
 export default productsSlice.reducer;

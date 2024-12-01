@@ -1,3 +1,5 @@
+// src/store/slices/productPosScreensSlice.ts
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { ProductPosScreen } from '../../types/productPosScreen';
 import { getProductPosScreens } from '../../services/apiService';
@@ -14,6 +16,7 @@ const initialState: ProductPosScreensState = {
   error: null,
 };
 
+// Thunk لجلب جميع الفئات (PosScreens)
 export const fetchProductPosScreens = createAsyncThunk<
   ProductPosScreen[],
   void,
@@ -22,9 +25,9 @@ export const fetchProductPosScreens = createAsyncThunk<
   'productPosScreens/fetchProductPosScreens',
   async (_, { rejectWithValue, getState }) => {
     try {
-      const baseurl = 'https://erp.ts-egy.com/api'; // Replace with your actual base URL
+      const baseurl = 'https://erp.ts-egy.com/api'; // تأكد من استخدام الـ baseurl الصحيح
       const state: any = getState();
-      const token = state.auth.token; // Ensure token is available
+      const token = state.auth.token; // تأكد من وجود التوكن في حالة الـ auth
       const productPosScreens = await getProductPosScreens(baseurl, token);
       console.log('API response - productPosScreens:', productPosScreens);
       return productPosScreens;

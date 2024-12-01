@@ -1,9 +1,9 @@
 // src/store/slices/cartSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ProductPrice } from '../../types/product';
 
 interface CartItem {
+  id: string;
   productId: string;
   productName: string;
   size: string;
@@ -11,7 +11,11 @@ interface CartItem {
   quantity: number;
   total: number;
   vat: number;
-  additions?: string[]; // لإضافة تفاصيل إضافية مثل "+ onions"
+  additions?: string[];
+  groupProducts?: {
+    groupName: string;
+    products: string[];
+  }[];
 }
 
 interface CartState {
@@ -21,7 +25,8 @@ interface CartState {
   vat: number;
   service: number;
   total: number;
-  orderNumber: string; // إضافة رقم الطلب
+  orderNumber: string;
+  selectedItemId: string | null;
 }
 
 const initialState: CartState = {
@@ -31,7 +36,8 @@ const initialState: CartState = {
   vat: 0,
   service: 0,
   total: 0,
-  orderNumber: 'NO16', // يمكنك توليد رقم الطلب بشكل ديناميكي إذا لزم الأمر
+  orderNumber: 'NO16',
+  selectedItemId: null,
 };
 
 const cartSlice = createSlice({
@@ -39,35 +45,18 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addItemToCart(state, action: PayloadAction<CartItem>) {
-      const existingItem = state.items.find(
-        item =>
-          item.productId === action.payload.productId &&
-          item.size === action.payload.size
-      );
-      if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
-        existingItem.total += action.payload.total;
-      } else {
-        state.items.push(action.payload);
-      }
+      state.items.push(action.payload);
       cartSlice.caseReducers.calculateTotals(state);
     },
-    removeItemFromCart(state, action: PayloadAction<{ productId: string; size: string }>) {
-      state.items = state.items.filter(
-        item =>
-          !(item.productId === action.payload.productId && item.size === action.payload.size)
-      );
+    removeItemFromCart(state, action: PayloadAction<{ id: string }>) {
+      state.items = state.items.filter((item) => item.id !== action.payload.id);
       cartSlice.caseReducers.calculateTotals(state);
     },
     updateItemQuantity(
       state,
-      action: PayloadAction<{ productId: string; size: string; quantity: number }>
+      action: PayloadAction<{ id: string; quantity: number }>
     ) {
-      const item = state.items.find(
-        item =>
-          item.productId === action.payload.productId &&
-          item.size === action.payload.size
-      );
+      const item = state.items.find((item) => item.id === action.payload.id);
       if (item) {
         item.quantity = action.payload.quantity;
         item.total = item.price * item.quantity;
@@ -76,11 +65,11 @@ const cartSlice = createSlice({
     },
     calculateTotals(state) {
       state.subtotal = state.items.reduce((acc, item) => acc + item.total, 0);
-      // نفترض أن الخصم ثابت أو يمكن تعديله حسب الحاجة
       state.discount = 0;
-      // نحسب VAT لكل عنصر بناءً على قيمة الـ VAT للمنتج
-      state.vat = state.items.reduce((acc, item) => acc + (item.price * item.vat / 100) * item.quantity, 0);
-      // نفترض أن الخدمة ثابتة أو يمكن تعديلها
+      state.vat = state.items.reduce(
+        (acc, item) => acc + ((item.price * item.vat) / 100) * item.quantity,
+        0
+      );
       state.service = 0;
       state.total = state.subtotal - state.discount + state.vat + state.service;
     },
@@ -91,10 +80,20 @@ const cartSlice = createSlice({
       state.vat = 0;
       state.service = 0;
       state.total = 0;
-      state.orderNumber = 'NO16'; // إعادة تعيين رقم الطلب إذا لزم الأمر
+      state.orderNumber = 'NO16';
+      state.selectedItemId = null;
+    },
+    selectCartItem(state, action: PayloadAction<string | null>) {
+      state.selectedItemId = action.payload;
     },
   },
 });
 
-export const { addItemToCart, removeItemFromCart, updateItemQuantity, clearCart } = cartSlice.actions;
+export const {
+  addItemToCart,
+  removeItemFromCart,
+  updateItemQuantity,
+  clearCart,
+  selectCartItem,
+} = cartSlice.actions;
 export default cartSlice.reducer;

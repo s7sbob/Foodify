@@ -1,18 +1,38 @@
 // src/views/pages/ProductsPage/components/SidebarLower.tsx
 
 import React from 'react';
-import { Box, Button, Typography, useTheme } from '@mui/material';
-import { useSelector, useDispatch } from 'react-redux';
+import { Button, Box, Typography, useTheme } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../../../store/Store';
-import { clearCart } from '../../../../store/slices/cartSlice';
+import { updateItemQuantity } from '../../../../store/slices/cartSlice';
 
 const SidebarLower: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const cart = useSelector((state: AppState) => state.cart);
+  const selectedItemId = cart.selectedItemId;
 
-  const handleClearCart = () => {
-    dispatch(clearCart());
+  // دالة لمعالجة الضغط على الأزرار
+  const handleNumpadClick = (value: string) => {
+    if (!selectedItemId) return;
+
+    const item = cart.items.find(item => item.id === selectedItemId);
+
+    if (!item) return;
+
+    let newQuantity = item.quantity;
+
+    if (value === '.' || value === ',') {
+      // يمكنك تحديد كيفية التعامل مع النقاط والفواصل إذا لزم الأمر
+      return;
+    } else {
+      const num = parseInt(value, 10);
+      if (!isNaN(num)) {
+        newQuantity = newQuantity * 10 + num;
+      }
+    }
+
+    dispatch(updateItemQuantity({ id: item.id, quantity: newQuantity }));
   };
 
   return (
@@ -53,16 +73,13 @@ const SidebarLower: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Calculator Buttons */}
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(3, 1fr)"
-        gap={0.5}
-      >
+      {/* Numpad Buttons */}
+      <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={0.5}>
         {['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '.'].map((value) => (
           <Button
             key={value}
             variant="contained"
+            onClick={() => handleNumpadClick(value)}
             sx={{
               backgroundColor: '#007bff',
               color: 'white',
