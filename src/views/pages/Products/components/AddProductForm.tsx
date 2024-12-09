@@ -1,7 +1,6 @@
 // src/views/pages/Products/components/AddProductForm.tsx
 
 import React, { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
-
 import {
   Typography,
   TextField,
@@ -22,6 +21,7 @@ import {
   createProduct,
 } from '../../../../services/apiService';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
 
 interface AddProductFormProps {
   onProductAdded: () => void;
@@ -117,7 +117,7 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
       for (const [index, entry] of productPrices.entries()) {
         if (entry.lineType === 1) {
           // Price entry validation
-          if ( entry.price === undefined || entry.price <= 0) {
+          if (entry.price === undefined || entry.price <= 0) {
             showNotification(
               `${t('fields.productName')} ${index + 1}: ${t('notifications.incompleteData')}`,
               'warning'
@@ -195,26 +195,34 @@ const AddProductForm = forwardRef<AddProductFormRef, AddProductFormProps>(
                 formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].branchId`, formData.branchId);
                 formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].companyId`, formData.companyId!);
                 formPayload.append(`productPrices[${priceIndex}].priceComments[${commentIndex}].status`, comment.status.toString());
+
+                // لا حاجة لتعيين isDeleted عند إضافة منتج جديد
               });
             }
           } else if (entry.lineType === 3) {
             formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect!.toString());
             formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType!.toString());
             formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice!.toString());
-        
+          
             if (entry.priceGroups && entry.priceGroups.length > 0) {
               entry.priceGroups.forEach((pg, pgIndex) => {
-                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`, pg.productId);
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceGroupId`, pg.productPriceGroupId || '');
                 formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`, pg.productPriceId);
+          
+                // إضافة branchId و companyId
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].branchId`, pg.branchId);
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].companyId`, pg.companyId);
+          
+                // إضافة isDeleted و status
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].isDeleted`, 'false');
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].status`, pg.status.toString());
+                formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].quantity`, pg.quantity.toString());
               });
             }
           }
         
-          // لا تقم بإرسال productId للمنتج الجديد
-          // formPayload.append(`productPrices[${priceIndex}].productId`, formData.productId);
-          
-          formPayload.append(`productPrices[${priceIndex}].branchId`, formData.branchId);
-          formPayload.append(`productPrices[${priceIndex}].companyId`, formData.companyId!);
+          formPayload.append(`productPrices[${priceIndex}].branchId`, entry.branchId);
+          formPayload.append(`productPrices[${priceIndex}].companyId`, entry.companyId);
           formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());
         });
 

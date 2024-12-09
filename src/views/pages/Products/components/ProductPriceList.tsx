@@ -1,6 +1,6 @@
 // src/views/pages/Products/components/ProductPriceList.tsx
 
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import {
   Grid,
   Paper,
@@ -32,12 +32,14 @@ interface ProductPriceListProps {
     value: string
   ) => void;
   handleOpenSelectDialog: (index: number) => void;
+
+  // الدالة الجديدة لمعالجة حذف المنتج المختار
+  handleDeleteSelectedProduct: (priceIndex: number, selectedProductIndex: number) => void;
+
+  // الخريطة التي تحتوي على معلومات المنتجات
+  productPricesMap: Map<string, { productName: string; priceName: string; price: number }>;
 }
 
-/**
- * ProductPriceList component displays the list of product price entries.
- * It handles different lineTypes and renders appropriate UI for each.
- */
 const ProductPriceList: React.FC<ProductPriceListProps> = ({
   productPrices,
   handleEntryChange,
@@ -46,44 +48,29 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
   handleRemoveComment,
   handleCommentChange,
   handleOpenSelectDialog,
+  handleDeleteSelectedProduct,
+  productPricesMap,
 }) => {
   const { t } = useTranslation();
 
-  // Filter out entries with isDeleted=true
+  // تصفية المنتجات التي ليست محذوفة
   const visibleProductPrices = productPrices.filter((pp) => !pp.isDeleted);
+  const [expandedIndex, setExpandedIndex] = React.useState<number | null>(null);
 
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const inputRefs = useRef<{ [key: number]: React.RefObject<HTMLInputElement> }>({});
-
-  // Track previous length to detect additions
-  const prevLengthRef = useRef<number>(visibleProductPrices.length);
-
-  useEffect(() => {
-    if (visibleProductPrices.length > prevLengthRef.current) {
-      const newIndex = visibleProductPrices.length - 1;
-      setExpandedIndex(newIndex);
-    }
-    prevLengthRef.current = visibleProductPrices.length;
-  }, [visibleProductPrices.length]);
-
-  useEffect(() => {
-    if (expandedIndex !== null) {
-      const ref = inputRefs.current[expandedIndex];
-      if (ref && ref.current) {
-        ref.current.focus();
-      }
-    }
-  }, [expandedIndex]);
-
-  const handleAccordionChange = (index: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+  // التعامل مع تغيير حالة الأكوردين (المفتوحة أو المغلقة)
+  const handleAccordionChange = (index: number) => (
+    event: React.SyntheticEvent,
+    isExpanded: boolean
+  ) => {
     setExpandedIndex(isExpanded ? index : null);
   };
 
   return (
-    <>
+    <React.Fragment>
       {visibleProductPrices.map((entry, index) => (
         <React.Fragment key={`${entry.productPriceId}-${index}`}>
           {entry.lineType === 1 ? (
+            // عرض إدخال سعر المنتج
             <ProductPriceEntry
               entry={entry}
               index={index}
@@ -92,7 +79,8 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
               autoFocus={index === visibleProductPrices.length - 1}
             />
           ) : (
-            <>
+            // عرض مجموعة تعليقات أو مجموعة منتجات
+            <React.Fragment>
               <StyledAccordion
                 accordionTitle={
                   <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
@@ -127,14 +115,13 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                 isExpanded={expandedIndex === index}
                 onChange={handleAccordionChange(index)}
               >
-                {/* Content based on lineType */}
                 <Grid container spacing={2}>
                   {entry.lineType === 2 && (
-                    <>
-                      {/* Display Comments */}
+                    // عرض تعليقات المجموعة
+                    <React.Fragment>
                       {entry.priceComments &&
                         entry.priceComments
-                          .filter((pc) => !pc.isDeleted) // Filter out deleted comments
+                          .filter((pc) => !pc.isDeleted)
                           .map((comment, cIndex) => (
                             <Grid item xs={12} key={comment.commentId}>
                               <Paper variant="outlined" sx={{ padding: 2 }}>
@@ -163,12 +150,12 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                               </Paper>
                             </Grid>
                           ))}
-                    </>
+                    </React.Fragment>
                   )}
 
                   {entry.lineType === 3 && (
-                    <>
-                      {/* Quantity to Select */}
+                    // عرض مجموعة المنتجات
+                    <React.Fragment>
                       <Grid item xs={12} sm={4}>
                         <TextField
                           label={t('productPriceList.qtyToSelect')}
@@ -187,7 +174,6 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         />
                       </Grid>
 
-                      {/* Group Price Type */}
                       <Grid item xs={12} sm={4}>
                         <TextField
                           select
@@ -210,7 +196,6 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </TextField>
                       </Grid>
 
-                      {/* Button to Open Select Product Price Dialog */}
                       <Grid item xs={12} sm={4}>
                         <Button
                           variant="outlined"
@@ -222,7 +207,6 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </Button>
                       </Grid>
 
-                      {/* Group Price (if price type is manual) */}
                       {entry.groupPriceType === 3 && (
                         <Grid item xs={12} sm={4}>
                           <TextField
@@ -243,7 +227,6 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                         </Grid>
                       )}
 
-                      {/* Display Selected Products */}
                       {entry.priceGroups && entry.priceGroups.length > 0 && (
                         <Grid item xs={12}>
                           <Typography variant="subtitle2" gutterBottom>
@@ -251,40 +234,55 @@ const ProductPriceList: React.FC<ProductPriceListProps> = ({
                           </Typography>
                           <Paper variant="outlined" sx={{ padding: 2 }}>
                             <Grid container spacing={2}>
-                              {entry.priceGroups.map((sp: SelectedProduct, spIndex: number) => (
-                                <Grid item xs={12} sm={6} md={4} key={`${sp.productPriceId}-${spIndex}`}>
-                                  <Typography>
-                                    <strong>{t('fields.productName')}:</strong> {sp.productName || 'N/A'}
-                                  </Typography>
-                                  <Typography>
-                                    <strong>{t('fields.priceName')}:</strong> {sp.priceName || 'N/A'}
-                                  </Typography>
-                                  <Typography>
-                                    <strong>{t('fields.price')}:</strong> {sp.price !== undefined && sp.price !== null ? sp.price.toFixed(2) : '0.00'}
-                                  </Typography>
-                                </Grid>
-                              ))}
+                              {entry.priceGroups.map((sp: SelectedProduct, spIndex: number) => {
+                                const productInfo = productPricesMap.get(sp.productPriceId);
+                                return (
+                                  <Grid item xs={12} sm={6} md={4} key={`${sp.productPriceId}-${spIndex}`}>
+                                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                                      <Box>
+                                        <Typography>
+                                          <strong>{t('fields.productName')}:</strong> {productInfo?.productName || 'N/A'}
+                                        </Typography>
+                                        <Typography>
+                                          <strong>{t('fields.priceName')}:</strong> {productInfo?.priceName || 'N/A'}
+                                        </Typography>
+                                        <Typography>
+                                          <strong>{t('fields.price')}:</strong> {productInfo ? productInfo.price.toFixed(2) : '0.00'}
+                                        </Typography>
+                                      </Box>
+                                      {/* زر الحذف الصغير */}
+                                      <IconButton
+                                        aria-label={t('buttons.delete') as string}
+                                        onClick={() => handleDeleteSelectedProduct(index, spIndex)}
+                                        size="small"
+                                        color="error"
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </Box>
+                                  </Grid>
+                                );
+                              })}
                             </Grid>
                           </Paper>
                         </Grid>
                       )}
-                    </>
+                    </React.Fragment>
                   )}
                 </Grid>
               </StyledAccordion>
               <Divider />
-            </>
+            </React.Fragment>
           )}
         </React.Fragment>
       ))}
 
-      {/* Display message when there are no product price entries */}
       {visibleProductPrices.length === 0 && (
         <Typography align="center" mt={2}>
           {t('products.noProducts')}
         </Typography>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

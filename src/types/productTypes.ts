@@ -17,6 +17,12 @@ export interface SelectedProduct {
   productName: string;
   priceName: string;
   price: number;
+  productPriceGroupId?: string; // إضافة حقل productPriceGroupId
+  branchId: string; // إضافة حقل branchId
+  companyId: string; // إضافة حقل companyId
+  isDeleted: boolean; // إضافة حقل isDeleted
+  status: boolean;     // إضافة حقل status
+  quantity: number;    // إضافة حقل quantity
 }
 
 export interface ProductPrice {
@@ -28,7 +34,7 @@ export interface ProductPrice {
   qtyToSelect?: number;
   groupPriceType?: number;
   groupPrice?: number;
-  priceGroups?: SelectedProduct[];
+  priceGroups?: SelectedProduct[]; // تم تحديث واجهة SelectedProduct
   branchId: string;
   companyId: string;
   status: boolean;
@@ -52,5 +58,4 @@ export interface Product {
   vat?: number;
   status: boolean;
   isDeleted?: boolean; // إضافة حقل isDeleted
-
 }

@@ -1,4 +1,4 @@
-// src/views/pages/Products/SelectProductPriceDialog.tsx
+// src/views/pages/Products/components/SelectProductPriceDialog.tsx
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -28,6 +28,7 @@ import axios from 'axios';
 import { useNotification } from '../../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { SelectedProduct, ProductPrice } from '../../../types/productTypes';
+import { v4 as uuidv4 } from 'uuid'; // تأكد من الاستيراد الصحيح
 
 interface ProductPriceData {
   productId: string;
@@ -133,6 +134,8 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({
   };
 
   const handleConfirmSelection = () => {
+    console.log('uuidv4:', uuidv4); // تحقق مما إذا كانت الدالة معرفة
+
     const selectedProducts: SelectedProduct[] = Array.from(selectedIds).map((key) => {
       const pp = productPrices.find((pp) => pp.uniqueKey === key);
       return {
@@ -141,6 +144,12 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({
         productName: pp?.productName || '',
         priceName: pp?.priceName || '',
         price: pp?.price || 0,
+        branchId: '', // سيتم ملؤه من الـ context أو props إذا كان متاحًا
+        companyId: '', // سيتم ملؤه من الـ context أو props إذا كان متاحًا
+        isDeleted: false, // جديد: تعيين القيمة حسب الحاجة
+        status: true,    // إضافة حقل status
+        quantity: 1,     // إضافة حقل quantity
+        productPriceGroupId: uuidv4(), // إضافة حقل productPriceGroupId
       };
     });
     onSelect(selectedProducts);
@@ -271,5 +280,5 @@ const SelectProductPriceDialog: React.FC<SelectProductPriceDialogProps> = ({
     </Dialog>
   );
 };
-  export default SelectProductPriceDialog;
 
+export default SelectProductPriceDialog;

@@ -1,6 +1,6 @@
 // src/views/pages/Products/ProductsPage.tsx
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import { AppState } from '../../../store/Store';
 import { PriceComment, Product, ProductPrice, SelectedProduct } from '../../../types/productTypes';
 import axios from 'axios';
-import { getProductGroups, getPosScreens, updateProduct } from '../../../services/apiService'; // استبدال deleteProduct بـ updateProduct
+import { getProductGroups, getPosScreens, updateProduct } from '../../../services/apiService';
 import { v4 as uuidv4 } from 'uuid';
 import ProductList from './components/ProductList';
 import ProductForm, { ProductFormRef } from './components/ProductForm';
@@ -26,14 +26,10 @@ import ProductPriceList from './components/ProductPriceList';
 import SelectProductPriceDialog from './SelectProductPriceDialog';
 import { useTranslation } from 'react-i18next';
 
-/**
- * ProductsPage component is the main page for managing products.
- * It includes product listing, adding, editing, and deleting functionalities.
- */
 const ProductsPage: React.FC = () => {
-  const { t } = useTranslation(); // Initialize the translation hook
+  const { t } = useTranslation(); // تهيئة الـ translation hook
 
-  // State variables and hooks
+  // تعريف الحالة والمتغيرات
   const [products, setProducts] = useState<Product[]>([]);
   const [productPrices, setProductPrices] = useState<ProductPrice[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -44,22 +40,22 @@ const ProductsPage: React.FC = () => {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const navigate = useNavigate();
 
-  // Additional Data
+  // بيانات إضافية مثل مجموعات المنتجات وشاشات POS
   const [allProductGroups, setAllProductGroups] = useState<any[]>([]);
   const [allPosScreens, setAllPosScreens] = useState<any[]>([]);
 
-  // Toggle Products Table visibility
+  // حالة لإظهار أو إخفاء جدول المنتجات
   const [showProductsTable, setShowProductsTable] = useState<boolean>(false);
 
-  // State for SelectProductPriceDialog
+  // حالة لفتح وإغلاق SelectProductPriceDialog
   const [openSelectDialog, setOpenSelectDialog] = useState<boolean>(false);
   const [currentGroupPriceIndex, setCurrentGroupPriceIndex] = useState<number | null>(null);
 
-  // Create a ref to ProductForm to control form actions from this component
+  // إنشاء مرجع لـ ProductForm للتحكم في النموذج من هذا المكون
   const productFormRef = useRef<ProductFormRef>(null);
 
   /**
-   * Fetch additional data required for the page, such as product groups and POS screens.
+   * دالة لجلب البيانات الإضافية مثل مجموعات المنتجات وشاشات POS
    */
   const fetchAdditionalData = async () => {
     if (!token) return;
@@ -77,8 +73,7 @@ const ProductsPage: React.FC = () => {
   };
 
   /**
-   * Fetch products from the API and update the state.
-   * افترضنا أن الـ API يقوم بإرجاع المنتجات التي لها isDeleted=false فقط
+   * دالة لجلب المنتجات من الـ API وتحديث الحالة
    */
   const fetchProducts = async () => {
     if (!token) {
@@ -102,7 +97,7 @@ const ProductsPage: React.FC = () => {
     }
   };
 
-  // Fetch products and additional data on component mount
+  // جلب المنتجات والبيانات الإضافية عند تحميل المكون
   useEffect(() => {
     fetchProducts();
     fetchAdditionalData();
@@ -110,18 +105,18 @@ const ProductsPage: React.FC = () => {
   }, [token]);
 
   /**
-   * Handle editing a product by setting the product to edit and its prices.
+   * دالة للتعامل مع تعديل منتج ما
    */
   const handleEditProduct = (product: Product) => {
     setProductToEdit(product);
-    // Deep clone to avoid mutating original data
+    // نسخ عميق لتجنب تعديل البيانات الأصلية
     const clonedProductPrices = product.productPrices.map((pp) => ({ ...pp }));
     setProductPrices(clonedProductPrices);
     console.log('Editing product:', product);
   };
 
   /**
-   * Handle deleting a product by setting isDeleted=true and using updateProduct API
+   * دالة للتعامل مع حذف منتج ما بتعيين isDeleted=true واستخدام updateProduct API
    */
   const handleDeleteProduct = async (productId?: string) => {
     if (!token) {
@@ -129,32 +124,29 @@ const ProductsPage: React.FC = () => {
       navigate('/login');
       return;
     }
-  
+
     if (!productId) {
       showNotification(t('notifications.productIdMissing'), 'error');
       return;
     }
-  
+
     if (!window.confirm(t('confirmations.deleteProduct') as string)) {
       return;
     }
-  
+
     setLoading(true);
     try {
-      // إيجاد المنتج المراد حذفه
       const productToDelete = products.find((p) => p.productId === productId);
       if (!productToDelete) {
         showNotification(t('notifications.productNotFound'), 'error');
         return;
       }
-  
-      // تعيين isDeleted=true
+
       const updatedProduct: Product = {
         ...productToDelete,
         isDeleted: true,
       };
-  
-      // بناء FormData لتحديث المنتج
+
       const formPayload = new FormData();
       formPayload.append('productId', updatedProduct.productId);
       formPayload.append('productName', updatedProduct.productName);
@@ -166,16 +158,14 @@ const ProductsPage: React.FC = () => {
       formPayload.append('vat', updatedProduct.vat?.toString() || '0');
       formPayload.append('companyId', updatedProduct.companyId);
       formPayload.append('status', updatedProduct.status.toString());
-  
-      // **إضافة isDeleted للمنتج نفسه**
       formPayload.append('isDeleted', updatedProduct.isDeleted ? 'true' : 'false');
-  
-      // إضافة productPrices مع isDeleted=false أو حسب حالتها
+
       updatedProduct.productPrices.forEach((entry, priceIndex) => {
         formPayload.append(`productPrices[${priceIndex}].isDeleted`, entry.isDeleted ? 'true' : 'false');
+
         formPayload.append(`productPrices[${priceIndex}].productPriceId`, entry.productPriceId || '');
         formPayload.append(`productPrices[${priceIndex}].lineType`, entry.lineType.toString());
-  
+
         if (entry.lineType === 1) {
           // Price entry
           formPayload.append(`productPrices[${priceIndex}].productPriceName`, entry.productPriceName || '');
@@ -198,24 +188,27 @@ const ProductsPage: React.FC = () => {
           formPayload.append(`productPrices[${priceIndex}].qtyToSelect`, entry.qtyToSelect?.toString() || '0');
           formPayload.append(`productPrices[${priceIndex}].groupPriceType`, entry.groupPriceType?.toString() || '0');
           formPayload.append(`productPrices[${priceIndex}].groupPrice`, entry.groupPrice?.toString() || '0');
-  
+
           if (entry.priceGroups) {
             entry.priceGroups.forEach((pg, pgIndex) => {
-              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productId`, pg.productId);
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceGroupId`, pg.productPriceGroupId || '');
               formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].productPriceId`, pg.productPriceId);
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].branchId`, pg.branchId);
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].companyId`, pg.companyId);
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].isDeleted`, pg.isDeleted ? 'true' : 'false');
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].status`, pg.status.toString());
+              formPayload.append(`productPrices[${priceIndex}].priceGroups[${pgIndex}].quantity`, pg.quantity.toString());
             });
           }
         }
-  
+
         formPayload.append(`productPrices[${priceIndex}].branchId`, entry.branchId);
         formPayload.append(`productPrices[${priceIndex}].companyId`, entry.companyId);
         formPayload.append(`productPrices[${priceIndex}].status`, entry.status.toString());
       });
-  
-  
-      // إرسال التعديل باستخدام updateProduct API
+
       await updateProduct(baseurl, token, updatedProduct.productId, formPayload);
-  
+
       showNotification(t('notifications.productDeletedSuccess'), 'success');
       fetchProducts();
     } catch (err) {
@@ -225,36 +218,50 @@ const ProductsPage: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
   /**
-   * Reset forms and state related to product editing.
+   * إعادة تعيين النماذج والحالات المتعلقة بتعديل المنتج
    */
   const handleResetForm = () => {
     setProductToEdit(null);
     setProductPrices([]);
   };
 
-  // Handlers for managing productPrices state
+  /**
+   * دالة لمعالجة حذف منتج مختار ضمن مجموعة المنتجات.
+   * @param priceIndex مؤشر المنتج في productPrices
+   * @param selectedProductIndex مؤشر المنتج المختار في priceGroups
+   */
+  const handleDeleteSelectedProduct = (priceIndex: number, selectedProductIndex: number) => {
+    const updatedPrices = [...productPrices];
+    const priceEntry = updatedPrices[priceIndex];
+
+    if (priceEntry.priceGroups && priceEntry.priceGroups[selectedProductIndex]) {
+      // تعيين isDeleted إلى true
+      updatedPrices[priceIndex].priceGroups![selectedProductIndex].isDeleted = true;
+      setProductPrices(updatedPrices);
+      showNotification(t('notifications.productMarkedAsDeleted'), 'info');
+    } else {
+      showNotification(t('notifications.productNotFound'), 'error');
+    }
+  };
 
   /**
-   * Add a new product price entry based on the specified lineType.
-   * If editing, set productPriceId as '', else use uuidv4()
+   * دوال لإدارة حالة productPrices
    */
   const handleAddEntry = (lineType: number) => {
     const isEditing = !!productToEdit;
 
     let newEntry: ProductPrice = {
-      productPriceId: isEditing ? '' : uuidv4(), // Assign ID based on editing mode
+      productPriceId: isEditing ? '' : uuidv4(),
       lineType,
       branchId: isEditing ? productToEdit?.branchId || '' : '',
       companyId: isEditing ? productToEdit?.companyId || '' : '',
       status: true,
       productId: isEditing ? productToEdit?.productId || '' : '',
-      isDeleted: false, // Set isDeleted=false by default
-      productPriceName: '',
-      priceName: '',
       productName: '',
+      priceName: '',
+      isDeleted: false,
       errors: []
     };
 
@@ -272,7 +279,7 @@ const ProductsPage: React.FC = () => {
             branchId: isEditing ? productToEdit?.branchId || '' : '',
             companyId: isEditing ? productToEdit?.companyId || '' : '',
             status: true,
-            isDeleted: false, // Set isDeleted=false by default
+            isDeleted: false,
             errors: [],
           },
         ];
@@ -281,7 +288,7 @@ const ProductsPage: React.FC = () => {
         newEntry.qtyToSelect = 1.0;
         newEntry.groupPriceType = 1;
         newEntry.groupPrice = 0.0;
-        newEntry.priceGroups = []; // Initialize priceGroups
+        newEntry.priceGroups = [];
         break;
       default:
         break;
@@ -290,27 +297,18 @@ const ProductsPage: React.FC = () => {
     setProductPrices((prev) => [...prev, newEntry]);
   };
 
-  /**
-   * Remove a product price entry at the specified index.
-   * If editing, set isDeleted=true; else remove it from the list.
-   */
   const handleRemoveEntry = (index: number) => {
     if (productToEdit) {
-      // In editing mode, set isDeleted=true
       setProductPrices((prev) => {
         const updated = [...prev];
         updated[index].isDeleted = true;
         return updated;
       });
     } else {
-      // In add mode, remove the entry directly
       setProductPrices((prev) => prev.filter((_, i) => i !== index));
     }
   };
 
-  /**
-   * Handle changes to a product price entry.
-   */
   const handleEntryChange = (index: number, field: keyof ProductPrice, value: any) => {
     const updatedPrices = [...productPrices];
     updatedPrices[index] = {
@@ -320,21 +318,16 @@ const ProductsPage: React.FC = () => {
     setProductPrices(updatedPrices);
   };
 
-  /**
-   * Add a comment to a comment group at the specified index.
-   * If editing, set commentId as '', else use uuidv4()
-   */
   const handleAddComment = (priceIndex: number) => {
     const isEditing = !!productToEdit;
-
     const newComment: PriceComment = {
-      commentId: isEditing ? '' : uuidv4(), // If editing, commentId is empty
+      commentId: isEditing ? '' : uuidv4(),
       name: '',
       productPriceId: productPrices[priceIndex].productPriceId || '',
-      branchId: productToEdit ? productToEdit.branchId : '',
-      companyId: productToEdit ? productToEdit.companyId || '' : '',
+      branchId: isEditing ? productToEdit?.branchId || '' : '',
+      companyId: isEditing ? productToEdit?.companyId || '' : '',
       status: true,
-      isDeleted: false, // Set isDeleted=false by default
+      isDeleted: false,
       errors: [],
     };
 
@@ -346,13 +339,8 @@ const ProductsPage: React.FC = () => {
     setProductPrices(updatedPrices);
   };
 
-  /**
-   * Remove a comment from a comment group.
-   * If editing, set isDeleted=true; else remove it from the list.
-   */
   const handleRemoveComment = (priceIndex: number, commentIndex: number) => {
     if (productToEdit) {
-      // In editing mode, set isDeleted=true for the comment
       setProductPrices((prev) => {
         const updated = [...prev];
         const price = updated[priceIndex];
@@ -362,7 +350,6 @@ const ProductsPage: React.FC = () => {
         return updated;
       });
     } else {
-      // In add mode, remove the comment directly
       setProductPrices((prev) => {
         const updated = [...prev];
         const price = updated[priceIndex];
@@ -374,9 +361,6 @@ const ProductsPage: React.FC = () => {
     }
   };
 
-  /**
-   * Handle changes to a comment within a comment group.
-   */
   const handleCommentChange = (
     priceIndex: number,
     commentIndex: number,
@@ -391,41 +375,87 @@ const ProductsPage: React.FC = () => {
     setProductPrices(updatedPrices);
   };
 
-  /**
-   * Open the SelectProductPriceDialog to select products for a group.
-   */
   const handleOpenSelectDialog = (index: number) => {
     setCurrentGroupPriceIndex(index);
     setOpenSelectDialog(true);
   };
 
-  /**
-   * Close the SelectProductPriceDialog.
-   */
   const handleCloseSelectDialog = () => {
     setOpenSelectDialog(false);
     setCurrentGroupPriceIndex(null);
   };
 
-  /**
-   * Handle the selection of product prices in the dialog.
-   */
   const handleSelectProductPrices = (selectedProducts: SelectedProduct[]) => {
     if (currentGroupPriceIndex === null) return;
 
     const updatedPrices = [...productPrices];
-    updatedPrices[currentGroupPriceIndex].priceGroups = selectedProducts.map((product) => ({
-      productId: product.productId,
-      productPriceId: product.productPriceId,
-      productName: product.productName,
-      priceName: product.priceName,
-      price: product.price,
-      quantity: 1, // Default or based on your logic
-    }));
+    const existingPriceGroupEntries = updatedPrices[currentGroupPriceIndex].priceGroups || [];
+
+    // إنشاء خريطة للمنتجات الحالية
+    const existingMap = new Map<string, SelectedProduct>();
+    existingPriceGroupEntries.forEach((pg) => {
+      existingMap.set(pg.productPriceId, pg);
+    });
+
+    // إنشاء خريطة من المنتجات المختارة
+    const selectedMap = new Map<string, SelectedProduct>();
+    selectedProducts.forEach((sp) => {
+      selectedMap.set(sp.productPriceId, sp);
+    });
+
+    // تحديث المنتجات الحالية: تعيين isDeleted=true إذا لم تعد مختارة
+    existingPriceGroupEntries.forEach((pg, pgIndex) => {
+      if (!selectedMap.has(pg.productPriceId)) {
+        updatedPrices[currentGroupPriceIndex].priceGroups![pgIndex].isDeleted = true;
+      }
+    });
+
+    // إضافة المنتجات الجديدة أو تحديث الموجودة
+    selectedProducts.forEach((sp) => {
+      const existingEntry = updatedPrices[currentGroupPriceIndex].priceGroups?.find(
+        (pg) => pg.productPriceId === sp.productPriceId
+      );
+      if (existingEntry) {
+        // إذا كانت موجودة بالفعل، تأكد من أن isDeleted=false
+        existingEntry.isDeleted = false;
+        existingEntry.status = sp.status;       // تحديث الحقل status
+        existingEntry.quantity = sp.quantity;   // تحديث الحقل quantity
+      } else {
+        // إضافة كائن جديد
+        updatedPrices[currentGroupPriceIndex].priceGroups!.push({
+          productId: sp.productId,
+          productPriceId: sp.productPriceId,
+          productName: sp.productName,
+          priceName: sp.priceName,
+          price: sp.price,
+          branchId: productToEdit ? productToEdit.branchId : '',
+          companyId: productToEdit ? productToEdit.companyId : '',
+          isDeleted: false,
+          status: true,   // تعيين قيمة افتراضية أو تحديدها حسب الحاجة
+          quantity: 1,    // تعيين قيمة افتراضية أو تحديدها حسب الحاجة
+          productPriceGroupId: uuidv4(), // توليد معرف فريد
+        });
+      }
+    });
 
     setProductPrices(updatedPrices);
     handleCloseSelectDialog();
   };
+
+  // إنشاء Map لربط productPriceId بالبيانات (productName, priceName, price)
+  const productPricesMap = useMemo(() => {
+    const map = new Map<string, { productName: string; priceName: string; price: number }>();
+    products.forEach((prod) => {
+      prod.productPrices.forEach((pp) => {
+        map.set(pp.productPriceId, {
+          productName: prod.productName,
+          priceName: pp.productPriceName || '',
+          price: pp.price || 0,
+        });
+      });
+    });
+    return map;
+  }, [products]);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -437,7 +467,6 @@ const ProductsPage: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item>
-          {/* Save Button */}
           <Button
             variant="contained"
             color="primary"
@@ -449,7 +478,6 @@ const ProductsPage: React.FC = () => {
           >
             {productToEdit ? t('buttons.saveChanges') : t('buttons.saveProduct')}
           </Button>
-          {/* Reset Button */}
           <Button
             variant="outlined"
             color="error"
@@ -464,7 +492,6 @@ const ProductsPage: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* Toggle Products Table Visibility */}
       <Box mb={2}>
         <Button
           variant="contained"
@@ -474,7 +501,6 @@ const ProductsPage: React.FC = () => {
           {showProductsTable ? t('buttons.hideProducts') : t('buttons.showProducts')}
         </Button>
         <Collapse in={showProductsTable}>
-          {/* Products Table */}
           <Box mt={2}>
             {loading ? (
               <Box display="flex" justifyContent="center" my={4}>
@@ -488,7 +514,7 @@ const ProductsPage: React.FC = () => {
                 productGroups={allProductGroups}
                 posScreens={allPosScreens}
                 onEdit={handleEditProduct}
-                onDelete={handleDeleteProduct} // تعديل دالة onDelete لتستخدم handleDeleteProduct المعدلة
+                onDelete={handleDeleteProduct}
               />
             )}
           </Box>
@@ -523,13 +549,12 @@ const ProductsPage: React.FC = () => {
 
         {/* Right Side: Display Product Price Entries */}
         <Grid item xs={12} md={6}>
-          {/* Three Buttons */}
           <Grid container spacing={2} mb={2}>
             <Grid item xs={4}>
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={() => handleAddEntry(1)} // lineType 1: Price
+                onClick={() => handleAddEntry(1)}
                 fullWidth
                 startIcon={<AddIcon />}
               >
@@ -540,7 +565,7 @@ const ProductsPage: React.FC = () => {
               <Button
                 variant="outlined"
                 color="secondary"
-                onClick={() => handleAddEntry(2)} // lineType 2: Comment Group
+                onClick={() => handleAddEntry(2)}
                 fullWidth
                 startIcon={<AddIcon />}
               >
@@ -551,7 +576,7 @@ const ProductsPage: React.FC = () => {
               <Button
                 variant="outlined"
                 color="success"
-                onClick={() => handleAddEntry(3)} // lineType 3: Group Products
+                onClick={() => handleAddEntry(3)}
                 fullWidth
                 startIcon={<AddIcon />}
               >
@@ -568,9 +593,10 @@ const ProductsPage: React.FC = () => {
             handleRemoveComment={handleRemoveComment}
             handleCommentChange={handleCommentChange}
             handleOpenSelectDialog={handleOpenSelectDialog}
+            handleDeleteSelectedProduct={handleDeleteSelectedProduct} // تمرير الدالة هنا
+            productPricesMap={productPricesMap}
           />
 
-          {/* SelectProductPriceDialog */}
           {currentGroupPriceIndex !== null && (
             <SelectProductPriceDialog
               open={openSelectDialog}
